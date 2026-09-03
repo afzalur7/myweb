@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 22: Customer Retention &amp; Churn Analytics — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-21.html" class="nav-link">&larr; Previous: Advanced Python for Insurance Analytics</a>
+            <a href="session-23.html" class="nav-link next">Next: Looker Studio for Executive Reporting &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 7 &middot; Session 22 &middot; 120 min &middot; Python + KNIME Lab</div>
+            <h1>Session 22: Customer Retention &amp; Churn Analytics</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on &middot; Jupyter + KNIME required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Calculate the economic impact of insurance churn — why improving retention by 5% can increase enterprise value by 25%+</li>
+                <li>Engineer churn prediction features using policy tenure, premium changes, claims history, and customer demographics</li>
+                <li>Train an XGBoost churn classifier and evaluate using precision-recall on a highly imbalanced dataset</li>
+                <li>Design a retention strategy that targets the "persuadable" segment and calculate retention ROI</li>
+                <li>Build a KNIME workflow for automated churn scoring and prioritised retention list generation</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. The Economics of Insurance Churn</h2>
+
+            <p>Churn — policyholders not renewing their insurance policies — is the single most important driver of long-term insurance profitability. The cost of acquiring a new customer is 5–10× the cost of retaining an existing one, and a retained customer's profitability increases over time as acquisition costs are recovered and cross-sell revenue accumulates. In life insurance, where a policy's value is back-loaded (acquisition costs are recovered over 3–5 years), improving retention by even a few percentage points can double the value of new business written.</p>
+
+            <h3>1.1 The Cost of Churn — A Numerical Example</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (classification_report, confusion_matrix, roc_auc_score,
+                             precision_recall_curve, average_precision_score)
+from sklearn.linear_model import LogisticRegression
+import warnings
+warnings.filterwarnings('ignore')
+
+# Churn economics simulation
+acquisition_cost = 2500    # Cost to acquire one new customer (₹)
+annual_premium = 8500      # Average annual premium per customer
+loss_ratio = 0.68          # Loss ratio
+variable_expense_ratio = 0.15  # Variable expenses (claims + commissions + service)
+profit_margin = 1 - loss_ratio - variable_expense_ratio  # ~17%
+annual_profit = annual_premium * profit_margin
+
+retention_rates = [0.50, 0.60, 0.70, 0.75, 0.80, 0.85, 0.90]
+years = 10
+
+print("=" * 75)
+print("CHURN ECONOMICS — IMPACT OF RETENTION ON CUSTOMER VALUE")
+print("=" * 75)
+print(f"Assumptions:")
+print(f"  Annual premium:           ₹{annual_premium:,.0f}")
+print(f"  Profit margin:            {profit_margin*100:.0f}%")
+print(f"  Annual profit/customer:   ₹{annual_profit:,.0f}")
+print(f"  Acquisition cost:         ₹{acquisition_cost:,.0f}")
+print(f"\nCustomer Lifetime Value by Retention Rate:")
+print(f"{'Retention':12s} {'Avg Tenure':12s} {'CLV':15s} {'CLV w/o acq':15s} {'Value Lift':15s}")
+print("-" * 69)
+
+baseline_clv = 0
+for ret in retention_rates:
+    tenure_years = 1 / (1 - ret) if ret < 1 else years
+    # CLV = Σ (profit per year × retention_prob) − acquisition cost
+    clv = 0
+    retention_prob = 1.0
+    for yr in range(1, int(min(tenure_years, years)) + 1):
+        if yr > 1:
+            retention_prob *= ret
+        clv += annual_profit * retention_prob
+    clv -= acquisition_cost
+    clv_w_o_acq = clv + acquisition_cost  # CLV ignoring acquisition cost
+
+    if ret == 0.75:
+        baseline_clv = clw
+
+    value_lift = (clv - baseline_clv) / basseline_clv * 100 if basseline_clv != 0 else 0
+    print(f"{ret*100:>5.0f}%      {tenure_years:>5.1f} years    ₹{clv:>7,.0f}       ₹{clv_w_o_acq:>7,.0f}     {'+' if value_lift > 0 else ''}{value_lift:>5.1f}%")
+
+print(f"\nKey insight: Improving retention from 75% to 85% increases CLV by")
+print(f"approximately 80% — because the customer stays twice as long and")
+print(f"the acquisition cost is amortised over more years.")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A life insurer in India analysed its 13th-month persistency (the percentage of policies still in force 13 months after sale) and found that a 1-percentage-point improvement added approximately ₹35 crore to enterprise value. The calculation: each point of persistency improvement meant 35,000 additional policies renewed, each generating roughly ₹10,000 in present value of future profits above the acquisition cost already sunk. The insurer invested ₹8 crore in retention programmes — proactive renewal callers, SMS reminders, a loyalty discount structure — and achieved a 3.2 percentage point improvement in persistency over 18 months. The net value creation: approximately ₹95 crore. The ROI on retention investment was approximately 12:1 — among the highest-return investments the company has ever made.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Defining and Measuring Churn</h2>
+
+            <p>Before we can predict churn, we must define it precisely. In insurance, "churn" is not a single event — it is the policyholder's failure to renew their policy when it expires. The operational definition of churn depends on the line of business and the policy term. For annual policies (most general insurance), a policy is "churned" if it has not been renewed within 60 days of its expiry date. For multi-year life insurance, churn is measured by "persistency" — the percentage of policies still in force at specific milestones (13 months, 25 months, 37 months, 61 months post-sale).</p>
+
+            <h3>2.1 Churn Metrics Framework</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Metric</th><th>Definition</th><th>Best For</th><th>Typical Values (India)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Churn Rate</strong></td><td>% of policies not renewed at expiry</td><td>General insurance — annual policies</td><td>15–30% motor, 20–35% health, 10–20% term life</td></tr>
+                    <tr><td><strong>Persistency (13th month)</strong></td><td>% of life policies in force at 13 months</td><td>Life insurance — standard regulatory metric</td><td>65–75% LIC, 75–85% private life insurers</td></tr>
+                    <tr><td><strong>Persistency (61st month)</strong></td><td>% of life policies in force at 61 months</td><td>Life insurance — true measure of long-term retention</td><td>40–55% LIC, 50–65% private life insurers</td></tr>
+                    <tr><td><strong>Net Promoter Score (NPS)</strong></td><td>Would you recommend us? (0–10 scale)</td><td>Leading indicator of future churn</td><td>25–60 for Indian insurers</td></tr>
+                    <tr><td><strong>Time-to-churn</strong></td><td>Average tenure of churning customers</td><td>Identifying when churn risk is highest</td><td>Mode: after first year (60% of churn occurs between 1st and 2nd renewal)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>2.2 Creating the Churn Label</h3>
+
+            <pre><code class="language-python"># Load the insurance dataset
+df = pd.read_csv('data/insurance_cleaned.csv')
+
+# Create policy-level data with churn label
+policy_data = df.groupby(['policy_id', 'customer_id']).agg(
+    age=('age', 'first'),
+    income=('income', 'first'),
+    credit_score=('credit_score', 'first'),
+    gender=('gender', 'first'),
+    location=('location', 'first'),
+    occupation=('occupation', 'first'),
+    premium=('premium', 'first'),
+    sum_assured=('sum_assured', 'first'),
+    policy_type=('policy_type', 'first'),
+    channel=('channel', 'first'),
+    tenure_months=('tenure_months', 'first'),
+    start_date=('start_date', 'first'),
+    end_date=('end_date', 'first') if 'end_date' in df.columns else ('start_date', 'first'),
+    claim_count=('claim_id', 'count'),
+    total_claim_amount=('claim_amount', 'sum'),
+    fraud_flag=('fraud_flag', 'max')
+).reset_index()
+
+# Create the churn label
+# For this dataset, we simulate churn based on:
+# 1. Whether the customer has a claim (fewer claims = higher churn)
+# 2. Whether credit score is below a threshold
+# 3. Random variation to create realistic distribution
+
+np.random.seed(42)
+
+# Base churn factors
+no_claim_factor = (policy_data['claim_count'] == 0).astype(float) * 0.15  # 15% baseline churn for non-claimants
+low_credit_factor = (policy_data['credit_score'] < 650).astype(float) * 0.10  # Additional churn risk
+premium_factor = np.clip(policy_data['premium'] / policy_data['premium'].median() - 0.5, 0, 0.10)  # Higher premium = higher churn
+
+# Combined churn probability
+churn_prob = 0.10 + no_claim_factor + low_credit_factor + premium_factor + np.random.uniform(-0.05, 0.05, len(policy_data))
+churn_prob = np.clip(churn_prob, 0.01, 0.60)
+
+policy_data['churn_prob'] = churn_prob
+policy_data['churned'] = (np.random.uniform(0, 1, len(policy_data)) < churn_prob).astype(int)
+
+# Class balance
+churn_rate = policy_data['churned'].mean() * 100
+print(f"Policy-level dataset: {len(policy_data):,} policies")
+print(f"Churn rate: {churn_rate:.1f}%")
+print(f"  Retained (0): {(policy_data['churned']==0).sum():,}")
+print(f"  Churned (1):  {(policy_data['churned']==1).sum():,}")
+print(f"  Imbalance: {1/churn_rate*100:.1f}:1")
+
+# Analyse churn by policy type
+print(f"\nChurn rate by policy type:")
+for ptype in policy_data['policy_type'].unique():
+    subset = policy_data[policy_data['policy_type'] == ptype]
+    rate = subset['churned'].mean() * 100
+    print(f"  {ptype:15s}: {rate:.1f}% churn rate ({len(subset):,} policies)")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> In a real insurance company, the churn label would be created from the actual policy administration system: for each policy that expired in the observation period, did the same customer purchase a new policy (or renew the existing one) within 60 days of expiry? This requires joining policy data across time — which is one of the most common data challenges in insurance analytics. Many insurers' policy systems do not maintain a clean "policy history" table, making churn analysis surprisingly difficult without significant data engineering. If you work at an insurer that cannot generate a reliable churn label from its systems, fixing the data infrastructure is the first priority — before any modelling.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Feature Engineering for Churn</h2>
+
+            <p>Churn prediction features fall into three categories: <strong>policy behaviour</strong> (premium changes, tenure, claims), <strong>customer characteristics</strong> (demographics, credit, channel preference), and <strong>interaction features</strong> (combinations that capture specific risk patterns). The best churn models use features from all three categories.</p>
+
+            <h3>3.1 Creating Churn Features</h3>
+
+            <pre><code class="language-python"># ==========================================
+# CHURN FEATURE ENGINEERING
+# ==========================================
+
+# 1. Policy Behaviour Features
+# ─────────────────────────
+
+# Tenure: how long has the customer been with the insurer?
+policy_data['tenure_years'] = policy_data['tenure_months'] / 12
+
+# Premium change from previous year (simulated: compare premium to mean of same policy type)
+mean_premium = policy_data.groupby('policy_type')['premium'].transform('mean')
+policy_data['premium_vs_mean'] = (policy_data['premium'] - mean_premium) / mean_premium
+
+# Has the customer ever filed a claim?
+policy_data['had_claim'] = (policy_data['claim_count'] > 0).astype(int)
+
+# Claim frequency per year of tenure
+policy_data['claims_per_year'] = policy_data['claim_count'] / (policy_data['tenure_years'] + 0.5)
+
+# Is the claim amount high relative to premium?
+policy_data['claim_to_premium_ratio'] = policy_data['total_claim_amount'] / (policy_data['premium'] + 1)
+
+# 2. Demographics & Customer Profile
+# ────────────────────────────────
+
+# Age group
+policy_data['senior'] = (policy_data['age'] >= 60).astype(int)
+policy_data['young'] = (policy_data['age'] <= 30).astype(int)
+
+# Credit tier
+policy_data['credit_tier'] = pd.cut(policy_data['credit_score'],
+                                     bins=[0, 600, 700, 800, 900],
+                                     labels=['Low', 'Fair', 'Good', 'Excellent'])
+
+# Income relative to peers
+median_income = policy_data['income'].median()
+policy_data['income_above_median'] = (policy_data['income'] > median_income).astype(int)
+
+# 3. Interaction Features
+# ────────────────────
+
+# Interaction: young + no claim (likely to churn — young customers with no claims
+# may feel insurance is unnecessary)
+policy_data['young_no_claim'] = (policy_data['young'] & (policy_data['claim_count'] == 0)).astype(int)
+
+# Interaction: high premium + no claim (dissatisfaction — paying high premium for nothing)
+policy_data['high_prem_no_claim'] = (
+    (policy_data['premium_vs_mean'] > 0.2) & (policy_data['claim_count'] == 0)
+).astype(int)
+
+# Interaction: low credit + senior (most vulnerable segment)
+policy_data['low_credit_senior'] = (
+    (policy_data['credit_tier'] == 'Low') & (policy_data['senior'] == 1)
+).astype(int)
+
+# Interaction: digital channel × tenure < 1 year (early digital segment)
+policy_data['new_digital'] = (
+    (policy_data['channel'].isin(['Online', 'Aggregator'])) &
+    (policy_data['tenure_years'] < 1)
+).astype(int)
+
+new_features = ['tenure_years', 'premium_vs_mean', 'had_claim', 'claims_per_year',
+                'claim_to_premium_ratio', 'senior', 'young', 'credit_tier',
+                'income_above_median', 'young_no_claim', 'high_prem_no_claim',
+                'low_credit_senior', 'new_digital',
+                'churned'  # skip — this is our target
+                ]
+
+print("Featured created — checking for data quality:")
+for feat in new_features:
+    if feat in policy_data.columns:
+        nulls = policy_data[feat].isna().sum()
+        if nulls > 0:
+            policy_data[feat] = policy_data[feat].fillna(policy_data[feat].mode()[0] if
+                policy_data[feat].dtype == 'object' else policy_data[feat].median())
+        print(f"  ✓ {feat:25s} — {nulls} nulls filled")
+
+# Count total features after one-hot encoding
+feature_cols = [c for c in policy_data.columns if c not in ['policy_id', 'customer_id',
+                'start_date', 'end_date', 'churn_prob', 'churned']]
+print(f"\nTotal features: {len(feature_cols)} (including categoricals for encoding)")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The most predictive churn feature in insurance is almost always <strong>premium change at renewal</strong> — specifically, a premium increase of more than 15% without a corresponding claim (which the customer would have experienced as "I'm paying more for no benefit"). The second most predictive is usually <strong>claim denial</strong> in the last 12 months — a single denied claim increases churn probability by 40–60%. The third is <strong>tenure</strong> — customers in their first renewal cycle are 2–3× more likely to churn than customers who have renewed 3+ times. A churn model that uses only these three features can achieve 80% of the performance of a model with 30+ features. Start with the "big three" and add features only if they improve out-of-sample performance.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Churn Prediction Model</h2>
+
+            <p>Churn prediction is a binary classification problem with class imbalance (typically 70–85% retained vs. 15–30% churned). As with fraud detection, accuracy is a misleading metric — a model that predicts "everyone stays" achieves 70–85% accuracy but catches zero churn. We evaluate churn models on precision, recall, and particularly the ability to rank customers by churn probability so that retention efforts target the highest-risk customers first.</p>
+
+            <h3>4.1 Training the Churn Classifier</h3>
+
+            <pre><code class="language-python"># Define features and target
+X = policy_data[feature_cols]
+y = policy_data['churned']
+
+# Identify column types
+cat_cols_churn = X.select_dtypes(include=['object', 'category']).columns.tolist()
+num_cols_churn = X.select_dtypes(include=[np.number]).columns.tolist()
+
+# Preprocessor
+preprocessor_churn = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_cols_churn),
+        ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_cols_churn)
+    ])
+
+# Split
+X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+# XGBoost with scale_pos_weight
+import xgboost as xgb
+churn_ratio = (y_train_c == 0).sum() / (y_train_c == 1).sum()
+
+xgb_churn = xgb.XGBClassifier(
+    n_estimators=200, max_depth=5, learning_rate=0.05,
+    scale_pos_weight=churn_ratio,
+    subsample=0.8, colsample_bytree=0.8,
+    reg_alpha=0.1, reg_lambda=1.0,
+    random_state=42, n_jobs=-1, eval_metric='auc'
+)
+
+churn_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor_churn),
+    ('classifier', xgb_churn)
+])
+
+churn_pipeline.fit(X_train_c, y_train_c)
+
+# Predict
+y_prob_churn = churn_pipeline.predict_proba(X_test_c)[:, 1]
+y_pred_churn = (y_prob_churn >= 0.30).astype(int)  # Lower threshold to catch more churn
+
+# Evaluate
+print("=" * 60)
+print("CHURN PREDICTION MODEL — XGBoost Results")
+print("=" * 60)
+print(f"Churn ratio (class_weight): {churn_ratio:.1f}:1")
+print(f"\nClassification Report (threshold = 0.30):")
+print(classification_report(y_test_c, y_pred_churn, target_names=['Retained', 'Churned']))
+
+roc_auc = roc_auc_score(y_test_c, y_prob_churn)
+pr_auc = average_precision_score(y_test_c, y_prob_churn)
+print(f"ROC-AUC: {roc_auc:.3f}")
+print(f"PR-AUC:  {pr_auc:.3f}")
+
+# At this lower threshold, we catch more churners (higher recall)
+# but at the cost of more false positives (wasted retention effort)
+cm = confusion_matrix(y_test_c, y_pred_churn)
+print(f"\nConfusion Matrix:")
+print(f"                     Predicted Retained  Predicted Churned")
+print(f"Actual Retained          {cm[0,0]:>6,d}          {cm[0,1]:>6,d}")
+print(f"Actual Churned           {cm[1,0]:>6,d}          {cm[1,1]:>6,d}")
+print(f"\nAt threshold = 0.30:")
+print(f"  Recall (churn caught): {cm[1,1]/(cm[1,0]+cm[1,1])*100:.0f}%")
+print(f"  Precision (efficiency): {cm[1,1]/(cm[0,1]+cm[1,1])*100:.0f}%")
+print(f"  Would contact: {cm[0,1]+cm[1,1]:,} customers")</code></pre>
+
+            <h3>4.2 Finding the Optimal Threshold — Cost-Based</h3>
+
+            <pre><code class="language-python"># Cost-benefit analysis for threshold selection
+retention_offer_cost = 200  # Cost of a retention offer (discount, call centre, etc.)
+clv_retained = annual_profit / (1 - 0.75)  # CLV of a retained customer at 75% retention
+clv_saved_if_prevent_churn = clv_retained * 0.30  # Assume 30% of churners can be saved with intervention
+
+thresholds = np.arange(0.05, 0.65, 0.05)
+results = []
+
+for threshold in thresholds:
+    pred = (y_prob_churn >= threshold).astype(int)
+    cm = confusion_matrix(y_test_c, pred)
+    tp = cm[1, 1]  # Correctly identified churners — intervened, some retained
+    fp = cm[0, 1]  # False positives — cost of unnecessary retention offer
+
+    # Value: customers saved × CLV saved per customer
+    customers_saved = tp * 0.30  # 30% of contacted churners are persuaded to stay
+    value_saved = customers_saved * clv_saved_if_prevent_churn
+
+    # Cost: contact everyone predicted to churn
+    total_contact_cost = (tp + fp) * retention_offer_cost
+
+    net_value = value_saved - total_contact_cost
+    results.append({'threshold': threshold, 'net_value': net_value,
+                    'customers_contacted': tp + fp, 'customers_saved': customers_saved})
+
+results_df = pd.DataFrame(results)
+optimal = results_df.loc[results_df['net_value'].idxmax()]
+
+print(f"{'Threshold':12s} {'Contacted':12s} {'Saved':12s} {'Net Value':15s}")
+print("-" * 51)
+for _, row in results_df.iterrows():
+    marker = '← OPTIMAL' if row['threshold'] == optimal['threshold'] else ''
+    print(f"{row['threshold']:.2f}       {row['customers_contacted']:>5,.0f}     {row['customers_saved']:>5,.0f}     ₹{row['net_value']/1e5:.1f}L  {marker}")
+
+print(f"\nOptimal threshold: {optimal['threshold']:.2f}")
+print(f"At this threshold:")
+print(f"  Contact {optimal['customers_contacted']:,} customers with retention offer")
+print(f"  Expected to save {optimal['customers_saved']:.0f} customers")
+print(f"  Net value: ₹{optimal['net_value']:,.0f}")
+print(f"  ROI: {(optimal['net_value'] / (optimal['customers_contacted'] * retention_offer_cost) - 1)*100:.0f}%")</code></pre>
+
+            <h3>4.3 Feature Importance for Churn</h3>
+
+            <pre><code class="language-python"># Extract feature importance
+trained_model = churn_pipeline.named_steps['classifier']
+
+# Get feature names
+preprocessor_trained = churn_pipeline.named_steps['preprocessor']
+cat_encoder = preprocessor_trained.named_transformers_['cat']
+cat_feature_names_churn = cat_encoder.get_feature_names_out(cat_cols_churn).tolist() if len(cat_cols_churn) > 0 else []
+all_features_churn = num_cols_churn + cat_feature_names_churn
+
+importances = trained_model.feature_importances_
+fi_churn = pd.DataFrame({
+    'feature': all_features_churn[:len(importances)],
+    'importance': importances
+}).sort_values('importance', ascending=False)
+
+print("=" * 55)
+print("TOP CHURN PREDICTORS — FEATURE IMPORTANCE")
+print("=" * 55)
+for _, row in fi_churn.head(10).iterrows():
+    pct = row['importance'] / fi_churn['importance'].sum() * 100
+    bar = '█' * int(pct * 0.5)
+    print(f"{row['feature']:30s} {pct:>5.1f}%  {bar}")
+
+print(f"\nInterpretation:")
+print(f"The top 3 features account for approximately ")
+print(f"{fi_churn.head(3)['importance'].sum() / fi_churn['importance'].sum() * 100:.0f}% of")
+print(f"the model's predictive power. These are the drivers of churn that")
+print(f"retention strategies should address first.")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A general insurer in India deployed an XGBoost churn model and discovered that the strongest predictor of churn was not price, claims experience, or demographics — it was <strong>channel.</strong> Customers acquired through aggregators (PolicyBazaar, Coverfox) had a churn rate of 38% vs. 18% for direct customers and 12% for agent-acquired customers. The model revealed that aggregator customers treated insurance as a commodity — they came for the lowest price at renewal and would switch to whichever aggregator gave the best deal. The retention strategy that worked for direct customers (loyalty discounts, relationship calls) was ineffective for aggregator customers. The insurer needed a different strategy for aggregator-acquired customers: faster onboarding, early engagement (not waiting until renewal), and bundled products that increased switching costs. This insight — that churn is not a single problem but a portfolio of channel-specific problems — transformed the insurer's retention programme from a one-size-fits-all approach to a segmented strategy.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Retention Strategy Design</h2>
+
+            <p>A churn prediction model is only useful if it leads to a <strong>retention action</strong>. The model identifies which customers are at risk — but the retention strategy determines what to do about it. The most important concept in retention strategy design is the distinction between <strong>voluntary churn</strong> (the customer actively decides to leave) and <strong>involuntary churn</strong> (the customer forgets to renew, changes their credit card, or their policy inadvertently lapses). Involuntary churn accounts for 20–40% of total churn in many insurance portfolios — and it is often the easiest to fix with operational improvements like automatic renewal and multiple payment reminders.</p>
+
+            <h3>5.1 The Retention Action Framework</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Churn Reason</th><th>% of Churn</th><th>Retention Action</th><th>Cost per Customer</th><th>Expected Success Rate</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Involuntary — forgot to renew</td><td>20–30%</td><td>Automated SMS + email reminders (3: at 30, 14, 3 days before expiry). Auto-renew feature with UPI mandate.</td><td>₹2–₹5</td><td>60–80% (operational fix — most effective)</td></tr>
+                    <tr><td>Price sensitivity — found cheaper elsewhere</td><td>20–35%</td><td>Targeted discount (5–15%) for at-risk customers. Bundle offer (discount for adding another product). Price-match within reason.</td><td>₹200–₹1,000 (discount cost)</td><td>30–50% (discount-dependent)</td></tr>
+                    <tr><td>Poor claims experience</td><td>10–20%</td><td>Customer service call from claims manager. Personalised apology if applicable. Fast-track on future claims. Small goodwill gesture (₹500–₹2,000).</td><td>₹300–₹1,500</td><td>40–60% (if the complaint is genuinely resolved)</td></tr>
+                    <tr><td>No recent claim — feels insurance is unnecessary</td><td>10–15%</td><td>Educational content about why insurance matters even without claims. Product enhancement communication. Cross-sell into a product with more visible value (health insurance, wellness programme).</td><td>₹50–₹200 (content cost only)</td><td>15–25% (hardest to persuade — need to shift mindset, not just price)</td></tr>
+                    <tr><td>Life event — moved, changed job, family change</td><td>5–10%</td><td>Proactive policy adjustment (port to new location, adjust coverage to new needs). Welcome benefit for new stage.</td><td>₹100–₹500</td><td>30–50% (if the insurer can make it easy to adapt instead of replace)</td></tr>
+                    <tr><td>Service complaints — poor experience</td><td>5–10%</td><td>Root cause resolution + service recovery (compensation + assurance of improvement). Escalation to senior management.</td><td>₹500–₹2,000</td><td>50–70% (if complaint is genuinely resolved — highest ROI of all retention actions)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>5.2 The "Persuadable" Segment</h3>
+
+            <p>Not all customers predicted to churn are worth contacting. Some will leave no matter what you offer (the "lost causes"). Some will stay even without intervention (the "loyal" — your model flagged them as at-risk but they were actually not going to churn). The segment worth investing in is the <strong>persuadable</strong> — customers who will stay if given the right incentive but will leave without it. Uplift modelling — which directly predicts the incremental impact of a retention action on a specific customer — is the advanced technique for identifying the persuadable segment. For a simpler approach, segment predicted churners by their estimated CLV and contact only those above a CLV threshold:</p>
+
+            <pre><code class="language-python"># Apply churn probabilities to the portfolio
+all_prob = churn_pipeline.predict_proba(X)[:, 1]
+policy_data['churn_prob_score'] = all_prob
+
+# Estimate CLV for each customer
+policy_data['estimated_clv'] = (
+    annual_profit * (1 / (1 - 0.75)) - acquisition_cost
+) * (1 + 0.05 * policy_data['tenure_years'])  # CLV increases with tenure
+
+# Segment for retention action
+policy_data['retention_priority'] = pd.cut(
+    policy_data['churn_prob_score'],
+    bins=[0, 0.15, 0.30, 0.50, 1.0],
+    labels=['Low Risk', 'Medium Risk', 'High Risk — Persuadable', 'High Risk — Lost Cause']
+)
+
+# Target: High Risk — Persuadable with CLV above threshold
+target_for_retention = policy_data[
+    (policy_data['retention_priority'] == 'High Risk — Persuadable') &
+    (policy_data['estimated_clv'] > acquisition_cost)
+]
+
+print("=" * 60)
+print("RETENTION TARGETING — SEGMENTATION")
+print("=" * 60)
+print(f"{'Segment':30s} {'Customers':>12s} {'CLV (avg)':>15s}")
+print("-" * 57)
+for tier in ['Low Risk', 'Medium Risk', 'High Risk — Persuadable', 'High Risk — Lost Cause']:
+    subset = policy_data[policy_data['retention_priority'] == tier]
+    if len(subset) > 0:
+        print(f"{tier:30s} {len(subset):>8,d}   ₹{subset['estimated_clv'].mean():>8,.0f}")
+
+print(f"\n{'─' * 57}")
+print(f"RETENTION TARGET: '{target_for_retention['retention_priority'].iloc[0]}'")
+print(f"  Customers to contact: {len(target_for_retention):,}")
+print(f"  Average CLV:          ₹{target_for_retention['estimated_clv'].mean():,.0f}")
+print(f"  Retention offer cost: ₹{retention_offer_cost}/customer")
+print(f"  Total programme cost: ₹{len(target_for_retention) * retention_offer_cost:,.0f}")
+print(f"  Estimated ROI: ~₹{(target_for_retention['estimated_clv'].sum() * 0.30 - len(target_for_retention) * retention_offer_cost) / max(len(target_for_retention) * retention_offer_cost, 1) * 100:.0f}%")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The "lost cause" segment — customers with very high churn probability who are unlikely to respond to retention offers — should not be ignored. They are your best source of <strong>churn diagnostic insight.</strong> Call 50 of them. Ask: "We see you're leaving us. Can you tell us why?" The answers will reveal patterns — a specific competitor, a specific complaint, a specific product feature — that your churn model has detected as a statistical signal but cannot interpret as a business reason. Every churn model deployment should include a "lost cause interview" programme as a qualitative complement to the quantitative predictions. The model tells you WHO; the interviews tell you WHY.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. ROI of Retention</h2>
+
+            <p>Retention programmes have a cost — discounts, call centre time, technology, management attention. Every retention rupee spent must be justified by a measurable reduction in churn. The ROI calculation compares the cost of the retention programme to the value of customers retained who would otherwise have churned.</p>
+
+            <h3>6.1 The Retention ROI Model</h3>
+
+            <pre><code class="language-python"># Retention ROI simulation
+customers_targeted = len(target_for_retention)
+avg_clv = target_for_retention['estimated_clv'].mean()
+offer_cost_per_customer = 200  # ₹200 per customer contacted
+expected_save_rate = 0.30      # 30% of targeted customers are persuaded to stay
+
+# Programme costs
+total_programme_cost = customers_targeted * offer_cost_per_customer
+
+# Direct benefit
+customers_saved = customers_targeted * expected_save_rate
+total_value_saved = customers_saved * avg_clv
+
+# Indirect benefit — "do not contact" savings
+# Every customer we correctly identify as low-risk avoids a retention call they don't need
+low_risk_count = len(policy_data[policy_data['retention_priority'] == 'Low Risk'])
+do_not_contact_savings = low_risk_count * offer_cost_per_customer  # Not spending on these
+
+net_roi = (total_value_saved - total_programme_cost) / total_programme_cost
+
+print("=" * 60)
+print("RETENTION PROGRAMME — ROI ANALYSIS")
+print("=" * 60)
+print(f"{'Metric':35s} {'Value':15s}")
+print("-" * 50)
+print(f"{'Customers targeted':35s} {customers_targeted:>8,d}")
+print(f"{'Average CLV per customer':35s} ₹{avg_clv:>8,.0f}")
+print(f"{'Offer cost per customer':35s} ₹{offer_cost_per_customer:>8,.0f}")
+print(f"{'Expected save rate':35s} {expected_save_rate*100:.0f}%")
+print(f"{'Customers expected to save':35s} {customers_saved:>8,.0f}")
+print(f"{'Total programme cost':35s} ₹{total_programme_cost:>8,.0f}")
+print(f"{'Total value saved':35s} ₹{total_value_saved:>8,.0f}")
+print(f"{'Do-not-contact savings':35s} ₹{do_not_contact_savings:>8,.0f}")
+print(f"{'─' * 50}")
+print(f"{'NET ROI':35s} {net_roi*100:.0f}%")
+print(f"{'Net benefit (₹)':35s} ₹{total_value_saved - total_programme_cost:>8,.0f}")
+
+# Sensitivity analysis — varying save rate
+save_rates = np.arange(0.10, 0.55, 0.05)
+print(f"\nSensitivity Analysis — Save Rate → ROI:")
+for sr in save_rates:
+    saved = customers_targeted * sr
+    value = saved * avg_clv
+    cost = customers_targeted * offer_cost_per_customer
+    roi = (value - cost) / cost
+    print(f"  Save rate {sr*100:.0f}% → {saved:.0f} customers saved → ₹{value:,.0f} value → ROI {roi*100:.0f}%")
+
+print(f"\nBreak-even save rate: {total_programme_cost / (avg_clv * customers_targeted) * 100:.1f}%")
+print(f"(If the save rate falls below this, the programme destroys value.)")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The retention ROI calculation above uses an expected save rate of 30% — meaning 30% of customers we contact with a retention offer are persuaded to stay who would otherwise have churned. This is a realistic benchmark for well-designed retention programmes in Indian general insurance. Life insurance retention programmes typically achieve higher save rates (40–60%) because the relationship is longer and the switching cost is higher. But the cost per contact is also higher (life insurance retention often involves a personal call from an agent). The ROI threshold is the same: the value of retained customers must exceed the cost of the programme. A retention programme that cannot demonstrate positive ROI will be cut at the next budget review — regardless of how accurate the churn prediction model is.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-core">
+            <h2>7. KNIME Churn Workflow</h2>
+
+            <p>KNIME Analytics Platform enables the churn scoring workflow to be built and operated by analysts who may not code in Python. The visual workflow is also valuable for auditability — the compliance team can see exactly how churn scores are generated, which features are used, and how the retention list is prioritised.</p>
+
+            <h3>7.1 The KNIME Churn Scoring Workflow</h3>
+
+            <pre><code class="language-text">KNIME WORKFLOW: CHURN_SCORING_V1
+
+┌────────────────────────────┐
+│ CSV Reader                 │
+│ (insurance_cleaned.csv)    │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ GroupBy                    │
+│ (Aggregate to policy level:│
+│  premium, claim_count,     │
+│  tenure_months, etc.)      │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ Rule Engine (Feature       │
+│  Engineering)              │
+│ tenure_years = tenure_m/12 │
+│ had_claim = claim_ct > 0   │
+│ premium_vs_mean = ...      │
+│ young = age ≤ 30           │
+│ senior = age ≥ 60          │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ Partitioning               │
+│ (70% Train / 30% Test)    │
+└─────────────┬──────────────┘
+              │
+    ┌─────────┴─────────┐
+    │                   │
+    ▼                   ▼
+┌──────────────┐  ┌──────────────┐
+│ XGBoost      │  │ (Test data   │
+│ Learner      │  │  — no churn  │
+│ scale_pos =  │  │  label)      │
+│ weight       │  │              │
+└──────┬───────┘  └──────┬───────┘
+       │                  │
+       ▼                  ▼
+┌────────────────────────────┐
+│ XGBoost Predictor          │
+│ (Score test + new data)    │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ Scorer + Confusion Matrix  │
+│ (Precision, Recall, F1,   │
+│  ROC-AUC for validation)   │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ Rule Engine — Threshold    │
+│ (Apply optimal threshold   │
+│  from cost-benefit         │
+│  analysis, e.g., ≥0.30)   │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ Sorter + Top K Selector    │
+│ (Sort by churn_prob DESC, │
+│  keep top 5,000 for        │
+│  retention campaign)       │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ CSV Writer                 │
+│ (Retention list: customer_ │
+│  id, phone, churn_prob,   │
+│  estimated_clv, priority)  │
+└────────────────────────────┘</code></pre>
+
+            <h3>7.2 KNIME vs. Python for Churn — Practical Comparison</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Task</th><th>Python</th><th>KNIME</th><th>Best For</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Feature engineering</td><td>Flexible — any transformation possible</td><td>Rule Engine node for simple arithmetic, Column Expressions for complex logic</td><td>Python wins for complex feature engineering; KNIME sufficient for standard features</td></tr>
+                    <tr><td>Model training</td><td>Full control over hyperparameters, cross-validation, custom metrics</td><td>XGBoost Learner node with standard parameters, limited CV</td><td>Python for experimentation; KNIME for production deployment of fixed model</td></tr>
+                    <tr><td>Threshold optimisation</td><td>Easy — loop over thresholds, calculate net value</td><td>Requires Loops or Java Snippet — more complex</td><td>Python for threshold analysis; KNIME for deploying the chosen threshold</td></tr>
+                    <tr><td>Batch scoring (100K+ records)</td><td>Fast with vectorised operations</td><td>Fast — KNIME scales to large datasets with row-based processing</td><td>Comparable — both handle 100K+ records efficiently</td></tr>
+                    <tr><td>Audit trail / compliance</td><td>Requires code version control + documentation discipline</td><td>Built-in — the visual workflow is the audit trail</td><td>KNIME wins for regulated environments where auditors need to see the logic</td></tr>
+                    <tr><td>Scheduled execution</td><td>Requires cron + script management or MLflow/Airflow</td><td>KNIME Server with scheduled execution — built-in</td><td>KNIME wins for operational teams without DevOps support</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A mid-size Indian life insurer uses a hybrid approach: the data science team develops the churn model in Python (where they need the flexibility of feature engineering and hyperparameter tuning), then exports the trained model as a PMML (Predictive Model Markup Language) file. The operations team imports the PMML file into a KNIME workflow that runs weekly, scoring all policies due for renewal in the next 45 days. The KNIME workflow outputs a prioritised retention list that is automatically emailed to the tele-calling team. The operations team can modify the KNIME workflow — changing the contact threshold or adding a new data source — without touching the Python model code. The model itself is retrained quarterly by the data science team. This hybrid Python-KNIME architecture is used by many Indian insurers because it combines the best of both tools: Python for modeling flexibility, KNIME for operational reliability and auditability.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: End-to-End Churn Prediction and Retention System</h2>
+            <div class="project-brief">
+                <p>You are the customer analytics lead at "RetainSure Insurance," where the annual churn rate is 28% — significantly above the industry benchmark of 20%. The CEO has set a target: reduce churn from 28% to 20% within 12 months. Your task is to build an end-to-end churn prediction system that identifies at-risk customers and designs targeted retention interventions.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Churn economics:</strong> Using the framework from Section 1, calculate the financial impact of reducing churn from 28% to 20% on a portfolio of 100,000 policies with average premium ₹8,500. How much additional profit would the insurer generate annually?</li>
+                    <li><strong>Feature engineering:</strong> Create at least 12 churn prediction features covering policy behaviour, customer characteristics, and interaction effects. Document the rationale for each — which features do you expect to be most predictive and why?</li>
+                    <li><strong>XGBoost churn model:</strong> Train an XGBoost classifier with scale_pos_weight. Tune at least 2 hyperparameters (max_depth, learning_rate, or n_estimators) using 3-fold cross-validation. Report the optimal parameters and evaluate on the test set using ROC-AUC and PR-AUC.</li>
+                    <li><strong>Threshold selection:</strong> Use the cost-based framework (retention offer cost = ₹200, CLV saved per retained customer = calculated from Section 1) to find the optimal threshold. Report the optimal threshold and the expected net value of the retention programme.</li>
+                    <li><strong>Retention strategy:</strong> Design a segmented retention strategy with at least 3 different interventions for different churn segments (involuntary, price-sensitive, poor-claims-experience). For each segment, specify the action, the expected cost per customer, and the expected success rate.</li>
+                    <li><strong>ROI calculation:</strong> Calculate the expected ROI of your retention programme. Sensitivity-test the ROI with save rates of 15%, 25%, and 35%. What is the break-even save rate?</li>
+                    <li><strong>Write a 500-word churn reduction strategy memo</strong> to the CEO covering: (a) Churn economics — the cost of current churn and the value of reduction, (b) Model performance — how accurately can we predict who will churn? (c) Target segment and intervention design, (d) Programme ROI and timeline, (e) Key risks and success metrics.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Churn Reduction Strategy Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> CEO, RetainSure Insurance<br>
+                    <strong>From:</strong> Customer Analytics — Churn Reduction Programme<br>
+                    <strong>Subject:</strong> Churn Reduction Strategy — From 28% to 20% in 12 Months</p>
+
+                    <p><strong>Churn Economics — The Size of the Opportunity:</strong><br>
+                    Our current churn rate of 28% on a portfolio of 100,000 policies means 28,000 customers leave each year. At an average premium of ₹8,500 and acquisition cost of ₹2,500 per new customer, we are spending ₹7 crore annually just to replace customers who left — money that could be profit if we retained them. Reducing churn to 20% would retain 8,000 additional customers per year, generating approximately ₹5.1 crore in additional annual profit (retained customers) plus ₹2 crore in acquisition cost savings — a total value of approximately ₹7 crore per year. This is the financial prize for a successful retention programme.</p>
+
+                    <p><strong>Model Performance and Targeting Capability:</strong><br>
+                    The XGBoost churn model achieves a ROC-AUC of 0.81 and PR-AUC of 0.52, which means we can reliably distinguish customers at high risk of churn from those likely to stay. The top three churn predictors are: premium increase vs. market average (customers who received a renewal premium increase of more than 15% are 2.3× more likely to churn), tenure less than 1 year (first-renewal customers are 2.1× more likely to churn), and aggregator channel (aggregator-acquired customers churn at 38% vs. 18% for direct). The cost-based threshold analysis identifies that contacting the top 18% of at-risk customers (approximately 7,200 customers per quarter) with a targeted retention offer would save an estimated 2,160 customers (30% save rate) and generate a net programme value of approximately ₹2.1 crore per quarter — an ROI of over 200%.</p>
+
+                    <p><strong>Target Segment and Intervention Design:</strong><br>
+                    We recommend three targeted interventions. <strong>Intervention 1 — Involuntary Churn (30% of churn):</strong> Implement automated renewal reminders via SMS and email at T-30, T-14, and T-3 days. Enable auto-renew with UPI mandate for direct customers. Cost: ~₹2/customer contacted. Expected success: 70% of involuntary churners retained. <strong>Intervention 2 — Price-Sensitive Churn (35% of churn):</strong> Targeted discount offer (10% off renewal premium) for customers flagged as high-risk and price-sensitive (aggregator channel, premium increase > 15%). Cost: ~₹500 average discount per customer. Expected success: 40% of targeted customers retained. <strong>Intervention 3 — Claims Experience Churn (15% of churn):</strong> For customers who filed a claim in the last 6 months and have a high churn probability: proactive service call from the claims team within 48 hours of the model flag. Offer a fast-track on any future claims. Cost: ~₹300 per call. Expected success: 50% of contacted customers retained.</p>
+
+                    <p><strong>Programme ROI and Timeline:</strong><br>
+                    The combined programme cost is estimated at ₹3.8 crore annually (including discounts, operations, and technology). The expected benefit is ₹8.5 crore in retained customer value plus reduced acquisition costs. Net annual benefit: ₹4.7 crore. Programme ROI: 124%. Break-even save rate: 17% — meaning we only need to persuade 17% of targeted customers to stay for the programme to pay for itself. We recommend a phased rollout: Phase 1 (Months 1–3): Involuntary churn intervention only — low cost, high impact. Phase 2 (Months 4–6): Add price-sensitive intervention. Phase 3 (Months 7–12): Add claims experience intervention and cross-sell programme for low-risk customers. Target churn rate at Month 12: 20%.</p>
+
+                    <p><strong>Key Risks and Success Metrics:</strong><br>
+                    The primary risk is <strong>retention cannibalisation</strong> — offering discounts to customers who would have renewed anyway. To mitigate this, we only offer discounts to customers with predicted churn probability above 0.30 (the optimal threshold) and we track the "offer acceptance rate" by segment — if customers with low model scores (who should not be churning) are accepting discounts, we are wasting money. The primary success metric is the <strong>cohort-level churn rate</strong> — not overall portfolio churn (which can be affected by many factors), but the churn rate of cohorts targeted vs. not targeted. We will track this monthly with a 3-month moving average. Early target: within 6 months, the targeted cohort shows a churn rate 5 percentage points better than the control (untargeted) cohort with similar risk profiles.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Customer churn is the single most important driver of long-term insurance profitability. Improving retention from 75% to 85% can increase customer lifetime value by approximately 80% — because the acquisition cost is amortised over a much longer relationship.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>The most predictive churn features are: premium increase at renewal (especially >15% without a claim), claim denial in the last 12 months, and channel (aggregator customers churn at 2× the rate of direct customers. A model using only these three features captures 80% of predictive power.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Cost-based threshold optimisation for churn models balances the cost of retention offers against the value of customers saved. The optimal threshold depends on the offer cost, the expected save rate, and the customer CLV — and should be recalculated as these parameters change.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>Churn is not a single problem — it is a portfolio of channel-specific, product-specific, and segment-specific problems. Involuntary churn (20–40% of total) is the cheapest to fix with automated reminders. The "lost cause" segment should be interviewed for churn diagnosis, not contacted with retention offers.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>A Python-KNIME hybrid architecture — Python for model development, KNIME for operational deployment — combines the best of both tools for churn analytics in a regulated environment. The model is developed in Python and exported (PMML) for deployment in a visual, auditable KNIME workflow.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s22-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. The most cost-effective churn reduction strategy for most insurers is typically:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Offer every customer a 20% discount before renewal</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Fix involuntary churn — implement automated renewal reminders (SMS/email at T-30/14/3 days) and auto-renewal with UPI mandate. This addresses 20–40% of churn at near-zero marginal cost</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Increase agent commissions to incentivise retention calls</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Lower all renewal premiums by 10% regardless of risk</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. An XGBoost churn model achieves ROC-AUC of 0.85. This means:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) 85% of churners are correctly identified — the model catches nearly all churn</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) The model can distinguish between a churning and non-churning customer 85% of the time (ranked correctly). The actual precision and recall depend on the threshold chosen — ROC-AUC measures ranking ability, not classification accuracy at a specific threshold</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) The model has 85% accuracy — it correctly predicts whether a customer will churn 85% of the time</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) The model's false positive rate is 15%</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A retention programme costs ₹200 per customer contacted, has a save rate of 25%, and the average CLV of a saved customer is ₹12,000. A contact list of 5,000 customers would generate:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) ₹15,00,000 in net value</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) ₹5,00,000 in net loss — the programme is not viable at this save rate</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) ₹50,00,000 in net value — calculation: 5,000 × 25% = 1,250 customers saved. Value = 1,250 × ₹12,000 = ₹1,50,00,000. Cost = 5,000 × ₹200 = ₹10,00,000. Net = ₹1,40,00,000</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The calculation cannot be done without knowing the retention rate</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. The "lost cause" segment — customers with very high churn probability who will not respond to retention offers — should be:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Contacted with the most expensive retention offer — they need the strongest incentive to stay</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Ignored entirely — there is no point spending money on customers who will not respond</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Interviewed to understand WHY they are leaving — the qualitative insight improves the churn model and retention strategy for future customers, even if this specific customer cannot be saved</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Automatically renewed without their consent — most will not notice</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A KNIME workflow for churn scoring is preferred over a Python script when:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) The analyst building the workflow prefers coding over visual programming</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) The operational team needs a visual, auditable workflow that non-coders can maintain, the compliance team needs to see exactly how churn scores are generated, and the workflow needs to run on a scheduled basis without DevOps support</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) The dataset has more than 1 million rows</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The model needs to be retrained daily</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s22-quiz', ['b','b','c','c','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s22-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-21.html" class="nav-link">&larr; Previous: Advanced Python for Insurance Analytics</a>
+            <a href="session-23.html" class="nav-link next">Next: Looker Studio for Executive Reporting &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

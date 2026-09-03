@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 21: Advanced Python for Insurance Analytics — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-20.html" class="nav-link">&larr; Previous: Catastrophe Modeling</a>
+            <a href="session-22.html" class="nav-link next">Next: Customer Retention &amp; Churn Analytics &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 7 &middot; Session 21 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 21: Advanced Python for Insurance Analytics</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Decompose a monthly insurance claims time series into trend, seasonal, and residual components</li>
+                <li>Fit an ARIMA model to claims data, select appropriate parameters (p, d, q) using ACF/PACF plots, and forecast 12 months ahead with confidence intervals</li>
+                <li>Evaluate forecast accuracy using MAE, RMSE, and MAPE — and compare against a naive seasonal benchmark</li>
+                <li>Build a multiple linear regression model for premium prediction with Ridge and Lasso regularisation</li>
+                <li>Combine time series and regression techniques into an integrated claims forecasting pipeline</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Time Series in Insurance</h2>
+
+            <p>Time series analysis is one of the most important quantitative tools in insurance analytics. Claims volumes and amounts vary systematically over time — driven by seasonality (monsoon claims spike, holiday travel accidents, winter health claims), trends (growing portfolio, medical inflation), and external shocks (regulatory changes, COVID-19). Understanding and forecasting these patterns is essential for reserving, pricing, operational planning, and capital management.</p>
+
+            <h3>1.1 Why Time Series Matters in Insurance</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Application</th><th>Why Time Series</th><th>Business Impact</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Claims reserving</strong></td><td>Forecast future claim payments based on historical patterns to set adequate reserves</td><td>Under-reserving is the leading cause of insurer insolvency; over-reserving depresses RoE</td></tr>
+                    <tr><td><strong>Premium forecasting</strong></td><td>Project premium growth by line of business for financial planning and investor guidance</td><td>Accurate forecasts enable optimal capital allocation and dividend planning</td></tr>
+                    <tr><td><strong>Operational capacity planning</strong></td><td>Predict call centre volume, claims adjuster workload, and IT system demand</td><td>Under-staffing during monsoon claims surge creates customer dissatisfaction; over-staffing wastes cost</td></tr>
+                    <tr><td><strong>Fraud detection</strong></td><td>Detect anomalous deviations from expected claims patterns that may signal fraud ring activity</td><td>Early detection of fraud spikes can save crores before the pattern is visible in aggregate statistics</td></tr>
+                    <tr><td><strong>Pricing adequacy monitoring</strong></td><td>Track loss ratio trends over time to detect emerging pricing inadequacy before it becomes a financial problem</td><td>Rising loss ratio trends signal the need for rate action — the earlier the signal, the smaller the required adjustment</td></tr>
+                </tbody>
+            </table>
+
+            <h3>1.2 Loading and Preparing Time Series Data</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.stattools import adfuller, acf, pacf
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import warnings
+warnings.filterwarnings('ignore')
+
+# Load the claims dataset
+df = pd.read_csv('data/insurance_cleaned.csv')
+df['claim_date'] = pd.to_datetime(df['claim_date'])
+
+# Aggregate claims by month
+monthly_claims = df.set_index('claim_date').resample('M').agg(
+    claim_count=('claim_id', 'count'),
+    total_claim_amount=('claim_amount', 'sum'),
+    avg_claim_amount=('claim_amount', 'mean'),
+    premium_amount=('premium', 'sum')
+).reset_index()
+
+monthly_claims = monthly_claims.sort_values('claim_date')
+monthly_claims = monthly_claims.set_index('claim_date')
+
+print(f"Monthly claims data: {len(monthly_claims):,} months")
+print(f"Date range: {monthly_claims.index.min().date()} to {monthly_claims.index.max().date()}")
+print(f"\nSummary statistics:")
+print(monthly_claims[['claim_count', 'total_claim_amount']].describe())
+
+# Plot the series
+fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+
+axes[0].plot(monthly_claims.index, monthly_claims['claim_count'],
+             color='#6c5ce7', linewidth=1.5, marker='o', markersize=3)
+axes[0].set_title('Monthly Insurance Claims Count — Time Series', fontweight='bold')
+axes[0].set_ylabel('Number of Claims')
+axes[0].spines['top'].set_visible(False)
+axes[0].spines['right'].set_visible(False)
+
+axes[1].plot(monthly_claims.index, monthly_claims['total_claim_amount'] / 1e7,
+             color='#e17055', linewidth=1.5, marker='s', markersize=3)
+axes[1].set_title('Monthly Total Claim Amount (₹ Crores)', fontweight='bold')
+axes[1].set_ylabel('Total Claim Amount (₹ Cr)')
+axes[1].set_xlabel('Date')
+axes[1].spines['top'].set_visible(False)
+axes[1].spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+
+print("Observe: Is there a visible trend? (upward/downward/stable)")
+print("          Is there seasonality? (regular annual pattern)")
+print("          Are there outliers? (one-off spikes or dips)")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Insurance time series have two characteristics that make them more challenging to forecast than many other business time series: <strong>structural breaks</strong> and <strong>long-tail reporting delays.</strong> A structural break — such as a regulatory change, a new competitor entering the market, or a global pandemic — fundamentally changes the relationship between the past and the future. A model trained on pre-COVID claims data could not predict post-COVID claims patterns. Reporting delays mean that claims occurring in month t may not be reported until month t+2 or t+3 — so the "final" claims count for any month is not known for several months. This means the time series you see today is provisional and will be revised upward as late-reported claims arrive. Always work with "claims occurrence date" (not "claims filing date") for reserving applications, and be aware that the most recent data points are the most uncertain.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Time Series Decomposition</h2>
+
+            <p>Decomposition separates a time series into its constituent components — <strong>trend</strong> (long-term direction), <strong>seasonality</strong> (regular periodic patterns), and <strong>residual</strong> (random noise/irregular). Decomposition is the first step in understanding what drives the series, which components are predictable, and where the forecasting challenge lies.</p>
+
+            <h3>2.1 Additive vs. Multiplicative Decomposition</h3>
+
+            <pre><code class="language-python"># Decompose the claims count time series
+# We use the additive model: Y(t) = Trend(t) + Seasonal(t) + Residual(t)
+# For multiplicative: Y(t) = Trend(t) × Seasonal(t) × Residual(t)
+# Multiplicative is appropriate when the seasonal amplitude grows with the trend level
+
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Ensure we have at least 2 full periods of data (24 months for 12-month seasonality)
+result_add = seasonal_decompose(monthly_claims['claim_count'], model='additive', period=12)
+result_mul = seasonal_decompose(monthly_claims['claim_count'], model='multiplicative', period=12)
+
+fig, axes = plt.subplots(4, 2, figsize=(16, 10), sharex=True)
+
+# Original
+axes[0, 0].plot(result_add.observed, color='#6c5ce7', linewidth=1.5)
+axes[0, 0].set_ylabel('Original')
+axes[0, 0].set_title('Additive Decomposition')
+axes[0, 0].spines['top'].set_visible(False)
+axes[0, 0].spines['right'].set_visible(False)
+
+axes[0, 1].plot(result_mul.observed, color='#6c5ce7', linewidth=1.5)
+axes[0, 1].set_ylabel('Original')
+axes[0, 1].set_title('Multiplicative Decomposition')
+axes[0, 1].spines['top'].set_visible(False)
+axes[0, 1].spines['right'].set_visible(False)
+
+# Trend
+axes[1, 0].plot(result_add.trend, color='#e17055', linewidth=2)
+axes[1, 0].set_ylabel('Trend')
+axes[1, 0].spines['top'].set_visible(False)
+axes[1, 0].spines['right'].set_visible(False)
+
+axes[1, 1].plot(result_mul.trend, color='#e17055', linewidth=2)
+axes[1, 1].set_ylabel('Trend')
+axes[1, 1].spines['top'].set_visible(False)
+axes[1, 1].spines['right'].set_visible(False)
+
+# Seasonal
+axes[2, 0].plot(result_add.seasonal, color='#00d2d3', linewidth=1.5)
+axes[2, 0].set_ylabel('Seasonal')
+axes[2, 0].spines['top'].set_visible(False)
+axes[2, 0].spines['right'].set_visible(False)
+
+axes[2, 1].plot(result_mul.seasonal, color='#00d2d3', linewidth=1.5)
+axes[2, 1].set_ylabel('Seasonal')
+axes[2, 1].spines['top'].set_visible(False)
+axes[2, 1].spines['right'].set_visible(False)
+
+# Residual
+axes[3, 0].plot(result_add.resid, color='#74b9ff', linewidth=1, marker='o', markersize=2)
+axes[3, 0].axhline(y=0, color='gray', linestyle='--', linewidth=0.5)
+axes[3, 0].set_ylabel('Residual')
+axes[3, 0].set_xlabel('Date')
+axes[3, 0].spines['top'].set_visible(False)
+axes[3, 0].spines['right'].set_visible(False)
+
+axes[3, 1].plot(result_mul.resid, color='#74b9ff', linewidth=1, marker='o', markersize=2)
+axes[3, 1].axhline(y=1, color='gray', linestyle='--', linewidth=0.5)
+axes[3, 1].set_ylabel('Residual')
+axes[3, 1].set_xlabel('Date')
+axes[3, 1].spines['top'].set_visible(False)
+axes[3, 1].spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+
+# Check which model has more stable residuals (lower variance, fewer extreme values)
+add_resid_var = result_add.resid.var()
+mul_resid_var = result_mul.resid.var()
+
+print(f"Residual variance — Additive: {add_resid_var:.2f}")
+print(f"Residual variance — Multiplicative: {mul_resid_var:.2f}")
+better_model = 'Additive' if add_resid_var < mul_resid_var else 'Multiplicative'
+print(f"✓ The {better_model} model has lower residual variance — better fit.")
+print(f"  (Lower variance in residuals means more of the pattern is captured by trend + seasonality)")
+
+# Extract seasonal pattern
+if result_add.seasonal is not None:
+    seasonal_pattern = result_add.seasonal.groupby(result_add.seasonal.index.month).mean()
+    print(f"\nAverage seasonal impact on claims by month:")
+    for month in range(1, 13):
+        impact = seasonal_pattern[month]
+        print(f"  Month {month:>2d}: {'+' if impact > 0 else ''}{impact:.0f} claims (vs. trend)")
+    peak_month = seasonal_pattern.idxmax()
+    trough_month = seasonal_pattern.idxmin()
+    print(f"\nPeak month:   Month {peak_month} ({seasonal_pattern[peak_month]:.0f} claims above trend)")
+    print(f"Trough month: Month {trough_month} ({seasonal_pattern[trough_month]:.0f} claims below trend)")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> When a major Indian health insurer decomposed its monthly claims time series, it discovered that the "seasonal" component was not driven by weather at all — it was driven by the corporate renewal cycle. Claims spiked in April and October every year — the months corresponding to the two main corporate health insurance renewal dates in India. Employees who knew their coverage was about to change (or who had met their annual deductible) filed claims just before the renewal. This behavioural seasonality was stronger than the monsoon seasonality that the claims team had always assumed was the main driver. The decomposition revealed that the "obvious" explanation (weather → claims) was wrong — and the correct action (align deductible reset dates with service delivery, not calendar dates) was different from what the team would have pursued.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. ARIMA Modelling</h2>
+
+            <p>ARIMA (AutoRegressive Integrated Moving Average) is the most widely used statistical method for time series forecasting. It models the time series as a function of: its own past values (AR — auto-regressive component), past forecast errors (MA — moving average component), and differencing to make the series stationary (I — integrated component). An ARIMA model is specified by three parameters: p (AR order), d (differencing order), and q (MA order).</p>
+
+            <h3>3.1 Testing for Stationarity</h3>
+
+            <p>ARIMA requires the time series to be <strong>stationary</strong> — meaning the statistical properties (mean, variance, autocorrelation) do not change over time. Most insurance time series are not stationary — they have trends (growing portfolio, inflation) and seasonality. Differencing removes these non-stationary components.</p>
+
+            <pre><code class="language-python"># Augmented Dickey-Fuller test for stationarity
+def test_stationarity(series, name):
+    result = adfuller(series.dropna())
+    print(f"ADF Test — {name}")
+    print(f"  ADF Statistic: {result[0]:.4f}")
+    print(f"  p-value:       {result[1]:.4f}")
+    print(f"  Critical values:")
+    for key, val in result[4].items():
+        print(f"    {key}: {val:.4f}")
+    if result[1] < 0.05:
+        print(f"  ✓ p < 0.05 — Series IS stationary. No differencing needed (d=0).")
+        return 0
+    else:
+        print(f"  ✗ p ≥ 0.05 — Series is NOT stationary. Differencing needed (d ≥ 1).")
+        return 1
+
+# Test the original series
+ts = monthly_claims['claim_count'].dropna()
+d_order = test_stationarity(ts, 'Original Claims Count')
+
+# If non-stationary, difference once and test again
+if d_order > 0:
+    ts_diff1 = ts.diff().dropna()
+    d_order = test_stationarity(ts_diff1, 'Claims Count — First Difference')
+    if d_order > 0:
+        ts_diff2 = ts_diff1.diff().dropna()
+        d_order = test_stationarity(ts_diff2, 'Claims Count — Second Difference')
+        final_d = 2
+    else:
+        final_d = 1
+else:
+    final_d = 0
+
+print(f"\nRecommended differencing order (d) for ARIMA: {final_d}")</code></pre>
+
+            <h3>3.2 Selecting p and q — ACF and PACF Plots</h3>
+
+            <pre><code class="language-python">fig, axes = plt.subplots(2, 2, figsize=(14, 8))
+
+# ACF and PACF of original series
+plot_acf(ts.dropna(), lags=24, ax=axes[0, 0])
+axes[0, 0].set_title('ACF — Original Series')
+plot_pacf(ts.dropna(), lags=24, ax=axes[0, 1], method='ywm')
+axes[0, 1].set_title('PACF — Original Series')
+
+# ACF and PACF of differenced series
+differenced = ts.diff().dropna()
+plot_acf(differenced.dropna(), lags=24, ax=axes[1, 0])
+axes[1, 0].set_title(f'ACF — Differenced (d={final_d}) Series')
+plot_pacf(differenced.dropna(), lags=24, ax=axes[1, 1], method='ywm')
+axes[1, 1].set_title(f'PACF — Differenced (d={final_d}) Series')
+
+plt.tight_layout()
+plt.show()
+
+print("How to read ACF/PACF plots for ARIMA parameter selection:")
+print("  p (AR order): Look at the PACF — the number of significant lags before")
+print("                they cut off (become insignificant) is the suggested p.")
+print("  q (MA order): Look at the ACF — the number of significant lags before")
+print("                they cut off is the suggested q.")
+print("  d (differencing): The number of differencing steps needed to achieve stationarity.")
+print()
+print("Suggested starting parameters from visual inspection:")
+print("  Based on the plots above, try ARIMA(p=2, d=1, q=2) as a starting point.")</code></pre>
+
+            <h3>3.3 Fitting the ARIMA Model</h3>
+
+            <pre><code class="language-python"># Split into training and test sets (last 12 months for testing)
+train = ts.iloc[:-12]
+test = ts.iloc[-12:]
+
+print(f"Training data: {train.index[0].date()} to {train.index[-1].date()} ({len(train)} months)")
+print(f"Test data:     {test.index[0].date()} to {test.index[-1].date()} ({len(test)} months)")
+
+# Fit ARIMA model
+# Order = (p, d, q) — starting with p=2, d=1, q=2 based on ACF/PACF analysis
+arima_order = (2, 1, 2)
+model = ARIMA(train, order=arima_order)
+fitted_model = model.fit()
+
+print(f"\nARIMA{arima_order} Model Results:")
+print(f"Log Likelihood: {fitted_model.llf:.2f}")
+print(f"AIC: {fitted_model.aic:.2f}")
+print(f"BIC: {fitted_model.bic:.2f}")
+print(f"\nCoefficients:")
+for param, value, pval in zip(fitted_model.params.index, fitted_model.params.values, fitted_model.pvalues):
+    print(f"  {param:15s}: {value:>8.4f} (p={pval:.4f})")
+
+# Forecast
+forecast_result = fitted_model.get_forecast(steps=12)
+forecast_mean = forecast_result.predicted_mean
+forecast_ci = forecast_result.conf_int()
+
+# Assess accuracy
+if len(test) == 12:
+    mae = mean_absolute_error(test, forecast_mean)
+    rmse = np.sqrt(mean_squared_error(test, forecast_mean))
+    mape = np.mean(np.abs((test.values - forecast_mean.values) / test.values)) * 100
+    print(f"\nForecast Accuracy (next 12 months):")
+    print(f"  MAE:  {mae:.0f} claims")
+    print(f"  RMSE: {rmse:.0f} claims")
+    print(f"  MAPE: {mape:.1f}%")
+    print(f"  Mean monthly claims: {test.mean():.0f}")
+    print(f"  Error as % of mean:  {mae/test.mean()*100:.1f}%")</code></pre>
+
+            <h3>3.4 Visualising the Forecast</h3>
+
+            <pre><code class="language-python"># Plot historical data and forecast
+fig, ax = plt.subplots(figsize=(14, 6))
+
+# Historical
+ax.plot(train.index[-36:], train[-36:], color='#6c5ce7', linewidth=2, label='Training Data (last 36 months)')
+ax.plot(test.index, test.values, color='#00b894', linewidth=2, marker='o',
+        markersize=6, label='Actual (test period)')
+
+# Forecast
+ax.plot(test.index, forecast_mean.values, color='#e17055', linewidth=2, linestyle='--',
+        marker='s', markersize=6, label='ARIMA Forecast')
+ax.fill_between(test.index,
+                forecast_ci.iloc[:, 0].values,
+                forecast_ci.iloc[:, 1].values,
+                alpha=0.2, color='#e17055', label='95% Confidence Interval')
+
+ax.set_xlabel('Date')
+ax.set_ylabel('Monthly Claims Count')
+ax.set_title(f'ARIMA{arima_order} — Claims Forecast (12 Months)', fontweight='bold')
+ax.legend(loc='upper left')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print("Key questions after reviewing the forecast:")
+print("1. Does the forecast capture the seasonal pattern? (Should show peaks and troughs)")
+print("2. Are the confidence intervals widening? (Wider = more uncertainty further out)")
+print("3. Is the forecast systematically over/under predicting? (Bias check)")
+print("4. Does the actual test data fall within the confidence intervals?")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> ARIMA parameter selection is as much art as science. The ACF/PACF plots give you a starting point, but you should <strong>always try multiple (p,d,q) combinations and select the model with the lowest AIC or BIC.</strong> Write a grid search loop that tries all combinations of p=0-5, d=0-2, q=0-5 and selects the best model. This takes 2 minutes to code and can improve forecast accuracy by 10–20% compared to manual selection. Pair this with a manual sanity check — if the grid search selects ARIMA(5,2,4), the model is likely overfitting (too many parameters). A good insurance claims ARIMA model typically has p+q ≤ 4 and d ≤ 1. Simpler models often generalise better to the volatile, regime-changing world of insurance claims.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Model Evaluation — Beyond Basic Metrics</h2>
+
+            <p>Forecast accuracy metrics (MAE, RMSE, MAPE) tell part of the story — but in insurance, we care about more than how close the forecast is to the actual. We also care about whether the forecast is <strong>unbiased</strong>, whether it is <strong>useful</strong> compared to a simple benchmark, and whether the <strong>directional accuracy</strong> is good.</p>
+
+            <h3>4.1 Comparing Against a Naive Benchmark</h3>
+
+            <pre><code class="language-python"># Naive forecast: assume next 12 months = same as last 12 months (seasonal naive)
+naive_forecast = train[-12:].values  # Use last 12 months of training data as forecast
+
+# This is actually a "seasonal naive" model — it uses the most recent complete seasonal cycle
+# as the forecast for the next cycle. It's surprisingly hard to beat for strongly seasonal series.
+
+# Or simpler: last value repeated (flat forecast)
+naive_flat = np.full(12, train[-1])
+
+# Evaluate naive models
+mae_seasonal_naive = mean_absolute_error(test, naive_forecast)
+mae_arima = mean_absolute_error(test, forecast_mean)
+rmse_seasonal_naive = np.sqrt(mean_squared_error(test, naive_forecast))
+rmse_arima = np.sqrt(mean_squared_error(test, forecast_mean))
+
+print("=" * 60)
+print("MODEL COMPARISON — ARIMA vs. NAIVE BENCHMARKS")
+print("=" * 60)
+print(f"{'Model':30s} {'MAE':>12s} {'RMSE':>12s}")
+print("-" * 54)
+print(f"{'Seasonal Naive (last 12 months)':30s} {mae_seasonal_naive:>8.0f}     {rmse_seasonal_naive:>8.0f}")
+print(f"{'ARIMA' + str(arima_order)}{'':30s} {mae_arima:>8.0f}     {rmse_arima:>8.0f}")
+
+if mae_arima < mae_seasonal_naive:
+    improvement = (mae_seasonal_naive - mae_arima) / mae_seasonal_naive * 100
+    print(f"\n✓ ARIMA outperforms seasonal naive by {improvement:.1f}%")
+else:
+    print(f"\n✗ Seasonal naive outperforms ARIMA — the series may be too noisy for ARIMA.")
+    print(f"  Consider SARIMA (Seasonal ARIMA) which explicitly models seasonality.")</code></pre>
+
+            <h3>4.2 Directional Accuracy and Bias</h3>
+
+            <pre><code class="language-python"># Directional accuracy: does the model correctly predict whether claims will go up or down?
+actual_changes = np.sign(np.diff(test.values))
+forecast_changes = np.sign(np.diff(forecast_mean.values))
+directional_accuracy = (actual_changes == forecast_changes[:len(actual_changes)]).mean()
+
+print(f"\nDirectional Accuracy: {directional_accuracy*100:.0f}%")
+print(f"(The model correctly predicts whether claims will increase or decrease")
+print(f" month-over-month {directional_accuracy*100:.0f}% of the time)")
+
+# Bias: is the model systematically over or under forecasting?
+bias = (forecast_mean.values - test.values).mean()
+bias_pct = bias / test.mean() * 100
+print(f"\nForecast Bias: {bias:+.0f} claims per month ({bias_pct:+.1f}% of mean)")
+
+if abs(bias_pct) < 5:
+    print(f"✓ Bias is within acceptable range (< 5%) — model is not systematically over/under forecasting.")
+elif bias_pct > 0:
+    print(f"△ Model systematically OVER-forecasts by {bias_pct:.1f}% — may lead to over-reserving.")
+else:
+    print(f"△ Model systematically UNDER-forecasts by {bias_pct:.1f}% — may lead to under-reserving.")
+
+# Track where the forecast is within the confidence interval
+in_ci = ((test.values >= forecast_ci.iloc[:, 0].values) &
+         (test.values <= forecast_ci.iloc[:, 1].values)).mean()
+print(f"\nActual values within 95% CI: {in_ci*100:.0f}%")
+print(f"(If the model is well-calibrated, ~95% of actual values should be within the CI.)")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A mid-size Indian health insurer used ARIMA to forecast monthly claims for its reserve calculation. The model achieved a MAPE of 7.2%, which the actuarial team considered excellent. But in month 8 of the forecast period, an unexpected regulatory change (a new mandate for cashless treatment at all network hospitals) caused a 23% spike in hospitalisation claims — something no time series model could have predicted because it had never happened before. The forecast's 95% confidence interval was completely violated. The lesson: time series models excel at forecasting <strong>continuation of existing patterns</strong> and fail at forecasting <strong>structural breaks</strong>. The insurer now uses a "forecast + scenario analysis" approach — the ARIMA forecast provides the baseline, and management adds scenario overlays for known upcoming changes (regulatory, competitive, economic). The combined forecast is more accurate than either the statistical model or the management judgement alone.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Premium Prediction with Multiple Regression</h2>
+
+            <p>Beyond time series, insurers need to predict the relationship between policyholder characteristics and premium amounts — for pricing optimisation, underwriting, and customer segmentation. Multiple linear regression with regularisation (Ridge and Lasso) is the standard approach.</p>
+
+            <h3>5.1 Feature Preparation</h3>
+
+            <pre><code class="language-python"># Build a dataset for premium prediction — one row per policy
+policy_df = df.groupby('policy_id').agg(
+    premium=('premium', 'first'),
+    sum_assured=('sum_assured', 'first'),
+    age=('age', 'first'),
+    income=('income', 'first'),
+    credit_score=('credit_score', 'first'),
+    policy_type=('policy_type', 'first'),
+    channel=('channel', 'first'),
+    tenure_months=('tenure_months', 'first'),
+    claim_count=('claim_id', 'count'),
+    total_claim_amount=('claim_amount', 'sum')
+).reset_index()
+
+# Create derived features
+policy_df['claim_flag'] = (policy_df['claim_count'] > 0).astype(int)
+policy_df['age_squared'] = policy_df['age'] ** 2
+policy_df['risk_income_ratio'] = policy_df['sum_assured'] / (policy_df['income'] + 1)
+policy_df['claim_severity'] = policy_df['total_claim_amount'] / (policy_df['claim_count'] + 1)
+
+# Drop missing
+model_data = policy_df.dropna(subset=['premium']).copy()
+
+print(f"Premium prediction dataset: {len(model_data):,} policies, {model_data.shape[1]} features")
+print(f"Premium range: ₹{model_data['premium'].min():,.0f} — ₹{model_data['premium'].max():,.0f}")
+print(f"Average premium: ₹{model_data['premium'].mean():,.0f}")</code></pre>
+
+            <h3>5.2 OLS, Ridge, and Lasso</h3>
+
+            <pre><code class="language-python">from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+
+# Define features
+num_features = ['age', 'income', 'credit_score', 'sum_assured', 'tenure_months',
+                'age_squared', 'risk_income_ratio', 'claim_count']
+cat_features = ['policy_type', 'channel']
+
+# Limit features to available ones
+num_features = [c for c in num_features if c in model_data.columns]
+cat_features = [c for c in cat_features if c in model_data.columns]
+
+X = model_data[num_features + cat_features]
+y = model_data['premium']
+
+# Preprocessor
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_features),
+        ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_features)
+    ])
+
+# Split
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Transform
+X_train_t = preprocessor.fit_transform(X_train)
+X_test_t = preprocessor.transform(X_test)
+
+# OLS (Linear Regression)
+ols = LinearRegression()
+ols.fit(X_train_t, y_train)
+y_pred_ols = ols.predict(X_test_t)
+
+# Ridge
+ridge = Ridge(alpha=10)
+ridge.fit(X_train_t, y_train)
+y_pred_ridge = ridge.predict(X_test_t)
+
+# Lasso
+lasso = Lasso(alpha=1)
+lasso.fit(X_train_t, y_train)
+y_pred_lasso = lasso.predict(X_test_t)
+
+# Compare
+for name, pred in [('OLS', y_pred_ols), ('Ridge', y_pred_ridge), ('Lasso', y_pred_lasso)]:
+    mae = mean_absolute_error(y_test, pred)
+    rmse = np.sqrt(mean_squared_error(y_test, pred))
+    r2 = r2_score(y_test, pred)
+    non_zero = "all" if name != 'Lasso' else f"{np.sum(lasso.coef_ != 0)}"
+    print(f"{'─' * 50}")
+    print(f"{name} Regression:")
+    print(f"  MAE:  ₹{mae:,.0f} ({mae/y_test.mean()*100:.1f}% of mean premium)")
+    print(f"  RMSE: ₹{rmse:,.0f}")
+    print(f"  R²:   {r2:.3f}")
+    print(f"  Features used: {non_zero}")</code></pre>
+
+            <h3>5.3 Cross-Validation for Regularisation Strength</h3>
+
+            <pre><code class="language-python">from sklearn.linear_model import RidgeCV, LassoCV
+
+# Ridge with cross-validated alpha
+ridge_cv = RidgeCV(alist=[0.1, 1, 10, 50, 100], cv=5)
+ridge_cv.fit(X_train_t, y_train)
+print(f"Best Ridge alpha (CV): {ridge_cv.alpha_}")
+print(f"Ridge CV R²: {r2_score(y_test, ridge_cv.predict(X_test_t)):.3f}")
+
+# Lasso with cross-validated alist
+lasso_cv = LassoCV(alphas=[0.1, 0.5, 1, 5, 10], cv=5, max_iter=10000)
+lasso_cv.fit(X_train_t, y_train)
+print(f"Best Lasso alpha (CV): {lasso_cv.alpha_}")
+print(f"Lasso CV R²: {r2_score(y_test, lasso_cv.predict(X_test_t)):.3f}")
+print(f"Features retained by Lasso: {np.sum(lasso_cv.coef_ != 0)} of {X_train_t.shape[1]}")
+
+# Which features survived Lasso regularisation?
+feature_names = num_features + list(
+    preprocessor.named_transformers_['cat']
+    .get_feature_names_out(cat_features)
+) if len(cat_features) > 0 else num_features
+
+retained_features = [fn for fn, coef in zip(feature_names, lasso_cv.coef_)
+                     if abs(coef) > 0]
+print(f"\nFeatures retained by Lasso ({len(retained_features)} of {len(feature_names)}):")
+for fn in retained_features:
+    print(f"  ✓ {fn}")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> In premium prediction, Lasso regression is often preferred over OLS or Ridge because it performs <strong>feature selection</strong> — setting the coefficients of irrelevant features to exactly zero. This produces a simpler, more interpretable model that is easier to explain to underwriters and regulators. The features that survive Lasso regularisation are genuinely predictive of premium. Those that are zeroed out were adding noise, not signal. For a mid-size general insurer, a Lasso model with 8–12 features is typically just as accurate as an OLS model with 20+ features — and much easier to deploy and maintain. Start with Lasso, and only use Ridge if you have strong domain reasons to believe that all features are relevant.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Integrated Claims Forecasting Pipeline</h2>
+
+            <p>The most powerful approach combines time series and regression techniques into an integrated forecasting pipeline. The time series model captures the temporal dynamics (trend, seasonality), while the regression model captures the relationship between claims and external drivers (policy growth, economic indicators, weather). The combined forecast is more accurate and more interpretable than either model alone.</p>
+
+            <h3>6.1 Building the Combined Pipeline</h3>
+
+            <pre><code class="language-python"># Create additional features for the time series model
+ts_data = monthly_claims[['claim_count']].copy()
+ts_data['month'] = ts_data.index.month
+ts_data['quarter'] = ts_data.index.quarter
+ts_data['year'] = ts_data.index.year
+ts_data['t'] = np.arange(len(ts_data))
+
+# Add lag features
+ts_data['lag_1'] = ts_data['claim_count'].shift(1)
+ts_data['lag_12'] = ts_data['claim_count'].shift(12)
+ts_data['rolling_3m_mean'] = ts_data['claim_count'].rolling(3).mean()
+ts_data['rolling_12m_mean'] = ts_data['claim_count'].rolling(12).mean()
+
+# Drop NaN from lags
+ts_data = ts_data.dropna()
+
+# Define features for the regression-on-time-series model
+X_ts = ts_data[['month', 'quarter', 't', 'lag_1', 'lag_12', 'rolling_3m_mean']]
+y_ts = ts_data['claim_count']
+
+# Re-split by time
+split_idx = len(X_ts) - 12
+X_train_ts = X_ts.iloc[:split_idx]
+X_test_ts = X_ts.iloc[split_idx:]
+y_train_ts = y_ts.iloc[:split_idx]
+y_test_ts = y_ts.iloc[split_idx:]
+
+# Train Ridge on the time series features
+ts_reg = Ridge(alpha=1)
+ts_reg.fit(X_train_ts, y_train_ts)
+y_pred_ts = ts_reg.predict(X_test_ts)
+
+# Compare with ARIMA
+mae_ts_reg = mean_absolute_error(y_test_ts, y_pred_ts)
+print("=" * 55)
+print("INTEGRATED FORECASTING PIPELINE — COMPARISON")
+print("=" * 55)
+print(f"{'Method':35s} {'MAE':>10s} {'RMSE':>10s}")
+print("-" * 55)
+print(f"{'ARIMA' + str(arima_order):35s} {mae_arima:>8.0f}   {rmse_arima:>8.0f}")
+print(f"{'Seasonal Naive':35s} {mae_seasonal_naive:>8.0f}   {rmse_seasonal_naive:>8.0f}")
+print(f"{'Ridge on Lag Features':35s} {mae_ts_reg:>8.0f}   {np.sqrt(mean_squared_error(y_test_ts, y_pred_ts)):>8.0f}")
+
+# Final recommendation
+best_model = min([
+    ('ARIMA', mae_arima),
+    ('Seasonal Naive', mae_seasonal_naive),
+    ('Ridge on Lags', mae_ts_reg)
+], key=lambda x: x[1])
+
+print(f"\nBest model: {best_model[0]} (MAE = {best_model[1]:.0f})")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The integrated pipeline demonstrates a general principle in insurance forecasting: <strong>combine domain knowledge with statistical methods.</strong> The pure ARIMA model captures trend and seasonality. The Ridge-on-lags model captures the relationship with recent history (lag_1, lag_12) and the overall trend (rolling averages). The best forecast often comes from combining multiple models — either by averaging their predictions (ensemble) or by using one model's output as input to another. In production, a state-of-the-art insurance forecasting system might combine: ARIMA (for trend/seasonality), XGBoost (for external drivers), and a management overlay (for known upcoming events). No single method is always best — and the forecasting team that masters multiple techniques will outperform the team that swears by one.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch21-advanced">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Advanced Use Cases — Beyond Basic Forecasting</h2>
+
+            <p>Once you have mastered time series and regression for insurance, three advanced use cases build directly on these foundations and are widely used in the insurance industry.</p>
+
+            <h3>7.1 Reserve Estimation Using the Chain-Ladder Method</h3>
+
+            <p>The chain-ladder method is the actuarial standard for estimating claims reserves. It constructs a "run-off triangle" — claims paid by accident year and development year — and uses the pattern of how claims develop over time to estimate future payments. The method implicitly assumes that the development pattern observed in past accident years will continue into the future. Python implementations are available in the `chainladder` library:</p>
+
+            <pre><code class="language-python"># Conceptual illustration of the chain-ladder method
+# Actual implementation uses the chainladder package
+#
+# Run-off Triangle Example:
+# Accident Year | Dev Year 0 | Dev Year 1 | Dev Year 2 | Dev Year 3
+# 2021          | ₹100 Cr    | ₹175 Cr    | ₹200 Cr    | ₹210 Cr
+# 2022          | ₹110 Cr    | ₹185 Cr    | ₹215 Cr    | ?
+# 2023          | ₹105 Cr    | ₹190 Cr    | ?          | ?
+# 2024          | ₹115 Cr    | ?          | ?          | ?
+#
+# Development factors (link ratios):
+# 0→1 average: (175+185+190)/(100+110+105) = 1.68
+# 1→2 average: (200+215)/(175+185) = 1.14
+# 2→3 average: 210/200 = 1.05
+
+print("Chain-Ladder Method — Conceptual Overview:")
+print("─" * 55)
+print("Step 1: Organise claims into a run-off triangle")
+print("  (Cumulative paid claims by accident year × development year)")
+print("Step 2: Calculate development factors (link ratios)")
+print("  Average factor from year Y to Y+1 across all accident years")
+print("Step 3: Project future development")
+print("  Apply factors to each accident year's latest known value")
+print("Step 4: Calculate IBNR reserve")
+print("  Ultimate claims = Latest known × cumulative product of remaining factors")
+print("  IBNR = Ultimate − Cumulative paid to date")
+print()
+print("The chain-ladder method is the industry standard for reserve estimation")
+print("and is required by IRDAI for statutory reserving. Understanding it is")
+print("essential for any insurance analytics professional.")</code></pre>
+
+            <h3>7.2 Premium Elasticity Modelling</h3>
+
+            <p>Premium elasticity — how does demand for insurance change when the premium changes? — is one of the most valuable applications of regression in insurance pricing. A log-log regression model (ln(demand) = α + β·ln(premium) + γ·X) estimates the price elasticity coefficient β. An elasticity of −1.2 means that a 10% increase in premium leads to a 12% decrease in demand (quantity purchased). Elasticity varies by product (motor insurance is more elastic than health), by customer segment (price-sensitive younger customers vs. loyal older customers), and by channel (aggregator customers are more elastic than direct customers).</p>
+
+            <h3>7.3 Seasonality-Adjusted Performance Benchmarking</h3>
+
+            <p>A simple but powerful application of the decomposition techniques from Section 2: remove the seasonal component from your claims or premium time series to produce a "seasonally adjusted" series that shows the underlying trend without the noise of regular annual patterns. A month-over-month comparison of raw claims is misleading (because July is always higher than June due to monsoon). A comparison of seasonally adjusted claims reveals whether the current month is genuinely better or worse than expected — after accounting for the normal seasonal pattern. This is the same technique that government statistical agencies use to report "seasonally adjusted" GDP, employment, and retail sales data.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> An Indian general insurer implemented a seasonally-adjusted claims monitoring dashboard after discovering that its monthly management reporting was consistently wrong about claims trends. The pattern: every June (start of monsoon), claims would spike 20–30%. The management team would panic and call emergency meetings. Every September (end of monsoon), claims would drop back down. The team would relax — and miss the fact that the underlying trend (seasonally adjusted) had been deteriorating for months because the monsoon noise was masking it. The simple fix — adding a "seasonally adjusted" line to the claims chart — transformed the management conversation from "reacting to the monsoon" to "managing the underlying trend." The technique cost nothing to implement (a few lines of Python in the reporting pipeline) and prevented multiple bad decisions.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build an Integrated Forecasting System</h2>
+            <div class="project-brief">
+                <p>You are the actuarial analytics lead at "ForecastSure Insurance." The CFO needs a reliable claims forecasting system for monthly financial planning and reserve estimation. Your task: build an integrated system that combines time series decomposition, ARIMA forecasting, and premium regression to produce a comprehensive claims forecast.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Decomposition:</strong> Decompose the monthly claims time series into trend, seasonal, and residual components using both additive and multiplicative models. Determine which model fits better. Identify the seasonal pattern — which months have the highest and lowest claims? Explain why in insurance terms.</li>
+                    <li><strong>ARIMA model:</strong> Test for stationarity (ADF test). Select p, d, q using ACF/PACF plots plus a grid search of at least 6 parameter combinations. Select the model with the lowest AIC. Fit the model, forecast 12 months, and evaluate against a seasonal naive benchmark.</li>
+                    <li><strong>Premium regression:</strong> Build a Lasso regression model to predict premium from policyholder features. Identify which 5 features have the strongest relationship with premium. Evaluate R² and MAE. Interpret the Lasso coefficients — what do they reveal about pricing?</li>
+                    <li><strong>Combined forecast:</strong> Create a feature-augmented time series model (Ridge on lag features + month/quarter dummies). Compare its performance to ARIMA. Which model would you recommend for production and why?</li>
+                    <li><strong>Write a 400-word forecasting methodology note</strong> to the CFO explaining: (a) The selected approach and why it was chosen over alternatives, (b) Forecast accuracy (MAE, MAPE) and limitations, (c) How the forecast should be used (and not used) for financial planning, (d) Recommended forecast update frequency and monitoring triggers.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Forecasting Methodology Note (Sample)</h4>
+
+                    <p><strong>To:</strong> CFO, ForecastSure Insurance<br>
+                    <strong>From:</strong> Actuarial Analytics — Forecasting<br>
+                    <strong>Subject:</strong> Claims Forecasting System — Methodology and Recommendations</p>
+
+                    <p><strong>Selected Approach and Rationale:</strong><br>
+                    After evaluating multiple approaches, we selected an ARIMA(2,1,2) model as the primary forecasting method, supplemented by a Ridge-on-lag-features model for scenario analysis. The ARIMA model was chosen because it achieves the lowest MAE (1,148 claims/month, 8.2% MAPE) and provides well-calibrated confidence intervals that the board's risk appetite can be measured against. The ARIMA model outperforms the seasonal naive benchmark by approximately 15%, confirming that it captures meaningful structure beyond simple seasonality. The Ridge model is retained for scenario analysis because it allows us to stress-test assumptions about policy growth, claims frequency, and economic conditions — by adjusting the input features rather than re-estimating the ARIMA parameters.</p>
+
+                    <p><strong>Forecast Accuracy and Limitations:</strong><br>
+                    The model's MAPE of 8.2% means that the typical forecast error is approximately ±8% of the monthly claims volume. This is within the expected range for this line of business (industry benchmarks for general insurance claims forecasting range from 5–12% MAPE for monthly forecasts at 12-month horizon). The confidence intervals widen appropriately with the forecast horizon: the 95% CI for month+1 is ±12% of the point forecast, expanding to ±24% by month+12. This correctly communicates increasing uncertainty over time. The most important limitation is that the ARIMA model cannot predict structural breaks — regulatory changes, new competitor entries, or economic shocks. A model based on historical patterns will fail precisely when the future diverges most from the past. We recommend: (a) monthly forecast reviews that overlay management judgment on the statistical baseline, and (b) quarterly model retraining to capture evolving patterns.</p>
+
+                    <p><strong>How the Forecast Should Be Used:</strong><br>
+                    Primary use: monthly financial planning and operational capacity management. The point forecast provides the baseline for claims adjuster staffing, call centre scheduling, and cash flow planning. Secondary use: reserve adequacy monitoring. The forecast's upper confidence bound (95th percentile) represents a plausible "worst case" scenario that should be stress-tested against the company's IBNR reserve adequacy. The forecast should NOT be used for: individual large-claim reserving (it is a portfolio-level tool), pricing decisions (it does not model premium elasticity), or fraud detection (it aggregates too much to detect individual anomalies).</p>
+
+                    <p><strong>Update Frequency and Monitoring Triggers:</strong><br>
+                    The model is retrained quarterly with the latest 6 months of data. Between retraining cycles, the model is monitored weekly using a "forecast tracking" dashboard. A monitoring alert is triggered if: any monthly actual exceeds the 95% confidence interval (possible structural break), the 4-week rolling average deviation from forecast exceeds ±10% (possible model drift), or the claim count in any month exceeds the same month last year by more than 20% (potential shock event). When an alert is triggered, the data science team performs a root cause analysis within 48 hours. If the root cause is a permanent change (new regulation, new product, new distribution channel), the model is retrained immediately outside the regular cycle. If the root cause is a one-off event (cyclone, flood, pandemic wave), the forecast is adjusted manually for the affected period and the model is not retrained — because retraining on a shock event would embed the shock into the forecast for future periods where it is unlikely to recur.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Insurance time series have trend, seasonality, and residual components. Decomposition separates them — revealing the underlying pattern from the seasonal noise. Multiplicative decomposition works when the seasonal amplitude grows with the trend level.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>ARIMA models forecast future values as a linear combination of past values (AR) and past errors (MA), applied to a differenced (stationary) series. Parameter selection (p,d,q) uses ACF/PACF plots plus grid search with AIC minimisation. Simpler models (p+q ≤ 4) generalise better for insurance data.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Forecast evaluation goes beyond MAE and RMSE. Compare against a seasonal naive benchmark (does your model beat "same month last year"?), track directional accuracy, and check confidence interval calibration. A model that is 15% better than seasonal naive is adding real value.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>Lasso regression for premium prediction performs automatic feature selection — zeroing out irrelevant features and retaining only the predictive ones. An 8–12 feature Lasso model is typically as accurate as an OLS model with 20+ features, and easier to deploy and explain to regulators and underwriters.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>No single forecasting method is always best. The integrated pipeline — combining ARIMA (temporal dynamics), regression (external drivers), and management overlay (known events) — outperforms any single approach. The key skill is knowing which method to apply to which part of the problem, not being an expert in any single method.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s21-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. An insurance claims time series has a seasonal amplitude that increases as the overall claims volume grows. The best decomposition model is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Additive — because it is simpler and works for all insurance data</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Multiplicative — because the seasonal amplitude is proportional to the trend level (multiplicative seasonality: Y = T × S × R)</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Neither — insurance data cannot be decomposed meaningfully</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Logarithmic transformation before additive decomposition</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. The ADF test on a claims time series yields a p-value of 0.32. The correct interpretation is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) The series is stationary — no differencing needed</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) The series is NOT stationary (p ≥ 0.05) — differencing is needed before fitting an ARIMA model. The recommended d (differencing order) is at least 1</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) The ADF test is not applicable to insurance data</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) The series has no seasonality</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A Lasso regression for premium prediction sets 12 of 20 feature coefficients to exactly zero. This means:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The model is broken — Lasso should never zero out more than half the features</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) Lasso has identified that 12 features have negligible predictive power and set them to zero, performing automatic feature selection. The remaining 8 features are the ones that genuinely matter for predicting premium. This is a feature, not a bug — it produces a simpler, more interpretable model</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The regularisation strength (alpha) is too low — increase alpha to keep more features</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The data must be standardised before Lasso can work properly</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. An ARIMA forecast achieves MAPE of 7.5%. The seasonal naive forecast achieves MAPE of 9.2%. A new regulatory change is announced that will take effect in 3 months. The best approach for producing the forecast for the CFO is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Use only the ARIMA forecast — it has the lowest MAPE</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Ignore the regulatory change — ARIMA will capture it in the forecast when it happens</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Use the ARIMA forecast as the baseline, but overlay a management adjustment for the expected impact of the regulatory change. The combined forecast (statistical + management judgment) should be presented with a clear explanation of the adjustment</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Retrain the ARIMA model on data that includes the regulatory change period</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A claims forecasting model consistently produces forecast errors that are within the 95% CI for the first 6 months but all 6 of the second 6 months fall outside the CI. The most likely explanation is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) The model's confidence intervals are too narrow — the uncertainty should grow as the forecast horizon extends</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) A structural break or regime change occurred around month+6 — something changed in the claims environment that the model (trained on pre-change data) could not predict. The model needs retraining with the new regime data</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) The model doesn't have enough data — increase the training window</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The ADF test was incorrectly interpreted and d is wrong</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s21-quiz', ['b','b','b','c','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s21-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-20.html" class="nav-link">&larr; Previous: Catastrophe Modeling</a>
+            <a href="session-22.html" class="nav-link next">Next: Customer Retention &amp; Churn Analytics &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

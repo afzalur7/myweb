@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 16: Fraud Detection Using ML — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-15.html" class="nav-link">&larr; Previous: Insurance Fraud Analytics</a>
+            <a href="session-17.html" class="nav-link next">Next: Cyber Risk &amp; Cyber Insurance &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #2c0a0a 0%, #4a1a1a 100%); color: #fff;">
+            <div class="chapter-badge">Module 5 &middot; Session 16 &middot; 90 min &middot; Python + KNIME Lab</div>
+            <h1>Session 16: Fraud Detection Using ML</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on &middot; Python + KNIME required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Diagnose the class imbalance problem in fraud detection and explain why accuracy is a misleading metric for imbalanced data</li>
+                <li>Apply SMOTE and class weighting techniques to handle imbalanced fraud data during model training</li>
+                <li>Train an Isolation Forest model for unsupervised anomaly detection and interpret its anomaly scores</li>
+                <li>Train an XGBoost classifier for supervised fraud detection with hyperparameter tuning and precision-recall optimisation</li>
+                <li>Compare supervised and unsupervised approaches and build a combined ensemble for improved detection</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. The Class Imbalance Problem</h2>
+
+            <p>Class imbalance is the defining technical challenge of fraud detection in insurance. When only 2–5% of claims are fraudulent, a model that achieves 95% accuracy by simply predicting "not fraud" for every claim is useless — yet its accuracy metric suggests it is excellent. Understanding why this happens, how to measure model performance correctly, and what to do about it is the foundation of ML-based fraud detection.</p>
+
+            <h3>1.1 Why Accuracy Fails</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier, IsolationForest
+from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score,
+                             roc_auc_score, precision_recall_curve, average_precision_score,
+                             confusion_matrix, classification_report)
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
+import xgboost as xgb
+import matplotlib.pyplot as plt
+
+# Load data
+df = pd.read_csv('data/insurance_cleaned.csv')
+print(f"Dataset shape: {df.shape}")
+print(f"Fraud rate: {df['fraud_flag'].mean()*100:.2f}%")
+
+# Create a naive model that predicts "not fraud" for everything
+naive_pred = np.zeros(len(df))
+naive_accuracy = accuracy_score(df['fraud_flag'], naive_pred)
+
+print(f"\nNaive model (predicts 'not fraud' for ALL claims):")
+print(f"  Accuracy: {naive_accuracy*100:.2f}%")
+print(f"  But recall on fraud: 0.0% — it catches ZERO fraudulent claims.")
+print(f"\n{'=' * 60}")
+print(f"KEY INSIGHT: Accuracy is a misleading metric for fraud detection.")
+print(f"When fraud rate is {df['fraud_flag'].mean()*100:.1f}%, a do-nothing model")
+print(f"achieves {naive_accuracy*100:.1f}% accuracy. Always evaluate fraud models")
+print(f"using precision, recall, F1-score, and precision-recall AUC.")
+print(f"{'=' * 60}")</code></pre>
+
+            <h3>1.2 The Right Metrics for Imbalanced Fraud Data</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Metric</th><th>What It Measures</th><th>Why It Matters for Fraud</th><th>Target for Fraud</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Recall (Sensitivity)</strong></td><td>Of all actual fraud cases, how many did the model catch? Recall = TP / (TP + FN)</td><td>The primary objective — catch as much fraud as possible. A low recall means fraudsters are getting paid.</td><td>60–80% (balance with precision)</td></tr>
+                    <tr><td><strong>Precision</strong></td><td>Of all claims flagged as fraud, how many were actually fraudulent? Precision = TP / (TP + FP)</td><td>False positives cost money (investigation) and harm customer trust. Low precision means the fraud team wastes time.</td><td>30–50% (acceptable for initial deployment)</td></tr>
+                    <tr><td><strong>F1-Score</strong></td><td>Harmonic mean of precision and recall. F1 = 2 × (P × R) / (P + R)</td><td>A single metric balancing both concerns. Maximise F1 when precision and recall are equally important.</td><td>0.40–0.60</td></tr>
+                    <tr><td><strong>Precision-Recall AUC (PR-AUC)</strong></td><td>Area under the precision-recall curve — measures performance across all thresholds.</td><td><strong>The single best metric for imbalanced fraud data.</strong> Unlike ROC-AUC, it accounts for the base fraud rate and focuses on the positive class.</td><td>0.30–0.60 (depends on base fraud rate)</td></tr>
+                    <tr><td><strong>ROC-AUC</strong></td><td>Area under the ROC curve — true positive rate vs. false positive rate across thresholds.</td><td>Commonly reported but can be misleadingly optimistic when fraud rate is low. Use PR-AUC as the primary metric.</td><td>> 0.80</td></tr>
+                    <tr><td><strong>Lift at K%</strong></td><td>Times more fraud found in the top K% of claims scored vs. random selection.</td><td>Directly measures operational value: if we investigate the top 20% of scored claims, how much fraud do we catch?</td><td>3–5× at 20%</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> Never use ROC-AUC as the sole metric for fraud model evaluation on imbalanced data. A model with ROC-AUC of 0.95 can have precision of 0.05 at the default threshold — meaning 95% of claims it flags as fraud are actually legitimate. ROC-AUC measures rank ordering, not practical usefulness at a specific operating threshold. Always evaluate fraud models using precision-recall curves and lift analysis, because these metrics directly reflect operational reality: "if we investigate the top X% of claims, how much fraud will we catch?"
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Handling Imbalanced Data</h2>
+
+            <p>Three main strategies exist for handling class imbalance in fraud detection: <strong>data-level</strong> (resampling — SMOTE), <strong>algorithm-level</strong> (class weighting), and <strong>cost-sensitive</strong> (threshold tuning). The best fraud detection systems use all three in combination.</p>
+
+            <h3>2.1 Preparing the Fraud Dataset</h3>
+
+            <pre><code class="language-python"># Create fraud detection dataset — one row per claim with features and target
+fraud_features = ['premium', 'claim_amount', 'age', 'income', 'credit_score',
+                  'sum_assured', 'policy_type', 'claim_type',
+                  'days_to_settle' if 'days_to_settle' in df.columns else None]
+fraud_features = [c for c in fraud_features if c is not None and c in df.columns]
+
+# Clean data
+fraud_data = df[fraud_features + ['fraud_flag']].dropna().copy()
+
+X_fraud = fraud_data[fraud_features]
+y_fraud = fraud_data['fraud_flag']
+
+print(f"Fraud dataset: {len(fraud_data):,} claims, {X_fraud.shape[1]} features")
+print(f"Class distribution:")
+print(f"  Legitimate (0): {(y_fraud == 0).sum():>8,d} ({(y_fraud == 0).mean()*100:.2f}%)")
+print(f"  Fraud (1):      {(y_fraud == 1).sum():>8,d} ({(y_fraud == 1).mean()*100:.2f}%)")
+print(f"  Imbalance ratio: {(y_fraud == 0).sum() / (y_fraud == 1).sum():.1f}:1")
+
+# Train/test split (stratified — preserves class proportions)
+X_train_f, X_test_f, y_train_f, y_test_f = train_test_split(
+    X_fraud, y_fraud, test_size=0.3, random_state=42, stratify=y_fraud
+)
+
+cat_cols = X_fraud.select_dtypes(include=['object', 'category']).columns.tolist()
+num_cols = X_fraud.select_dtypes(include=[np.number]).columns.tolist()</code></pre>
+
+            <h3>2.2 SMOTE — Synthetic Minority Oversampling</h3>
+
+            <p>SMOTE generates synthetic fraud examples by interpolating between existing fraud cases in feature space. For each fraud case, SMOTE selects its K nearest neighbours (also fraud cases) and creates a new synthetic case at a random point along the line connecting them. This is more effective than simple duplication (oversampling without replacement leads to overfitting) because it creates <em>new</em> examples that the model has not seen.</p>
+
+            <pre><code class="language-python">from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+
+# Preprocessing
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_cols),
+        ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_cols)
+    ])
+
+# Transform the data
+X_train_transformed = preprocessor.fit_transform(X_train_f)
+X_test_transformed = preprocessor.transform(X_test_f)
+
+# Feature names for later interpretation
+cat_feature_names = []
+if len(cat_cols) > 0:
+    cat_encoder = preprocessor.named_transformers_['cat']
+    cat_feature_names = cat_encoder.get_feature_names_out(cat_cols).tolist()
+all_feature_names = num_cols + cat_feature_names
+
+print(f"Before SMOTE — Training set shape: {X_train_transformed.shape}")
+print(f"  Class 0 (legitimate): {(y_train_f == 0).sum():,}")
+print(f"  Class 1 (fraud):      {(y_train_f == 1).sum():,}")
+
+# Apply SMOTE
+smote = SMOTE(random_state=42, k_neighbors=5)
+X_train_smote, y_train_smote = smote.fit_resample(X_train_transformed, y_train_f)
+
+print(f"\nAfter SMOTE — Training set shape: {X_train_smote.shape}")
+print(f"  Class 0 (legitimate): {(y_train_smote == 0).sum():,}")
+print(f"  Class 1 (fraud):      {(y_train_smote == 1).sum():,}")
+print(f"Perfectly balanced training set — SMOTE has generated synthetic fraud examples.")</code></pre>
+
+            <h3>2.3 Alternative: Class Weights</h3>
+
+            <p>Instead of resampling, we can adjust the algorithm to penalise misclassifications of the minority class more heavily. Most Scikit-learn and XGBoost models support a `class_weight` parameter:</p>
+
+            <pre><code class="language-python"># Random Forest with class_weight='balanced' — automatically adjusts weights
+rf_weighted = RandomForestClassifier(
+    n_estimators=200, max_depth=10, min_samples_leaf=20,
+    class_weight='balanced',  # Adjusts weights inversely proportional to class frequencies
+    random_state=42, n_jobs=-1
+)
+
+# XGBoost with scale_pos_weight — adjusts weight for positive class
+fraud_ratio = (y_train_f == 0).sum() / (y_train_f == 1).sum()
+xgb_weighted = xgb.XGBClassifier(
+    n_estimators=200, max_depth=6, learning_rate=0.1,
+    scale_pos_weight=fraud_ratio,  # scale_pos_weight = negative/positive
+    subsample=0.8, colsample_bytree=0.8,
+    random_state=42, n_jobs=-1, eval_metric='logloss'
+)
+
+print(f"XGBoost scale_pos_weight set to {fraud_ratio:.1f}:1")
+print(f"This tells XGBoost: 'misclassifying a fraud case is {fraud_ratio:.0f}×")
+print(f"more costly than misclassifying a legitimate case.'")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> SMOTE and class weighting are not mutually exclusive. The best results often come from <strong>combining</strong> both: use SMOTE to balance the training data AND use class_weight='balanced' in the model. The SMOTE creates a balanced dataset (so the model sees enough fraud examples), while class weighting ensures the model still treats each fraud case with appropriate importance. In practice, this combination typically improves recall by 10–20% over either technique alone — at the cost of training on a larger dataset (SMOTE doubles the training size for a 50:1 imbalance).
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Anomaly Detection — Isolation Forest</h2>
+
+            <p>Isolation Forest is an unsupervised anomaly detection algorithm that is particularly effective for fraud detection because: (a) it does not need labelled fraud data (most insurers have very few confirmed fraud labels), (b) it identifies claims that are "different" from the majority, which may be novel fraud patterns that have not been seen before, and (c) it is fast and scales to millions of claims.</p>
+
+            <h3>3.1 How Isolation Forest Works</h3>
+
+            <p>The algorithm works by randomly selecting a feature and a split value, and recursively partitioning the data into smaller regions. Anomalous claims — those that are rare and have unusual feature combinations — are isolated in fewer splits than normal claims. In the visual metaphor: isolating a legitimate claim is like finding a needle in a haystack; isolating a fraudulent claim is like finding a needle that is already sitting on top of the haystack. The anomaly score is derived from the average number of splits required to isolate each observation across many random trees.</p>
+
+            <h3>3.2 Training Isolation Forest</h3>
+
+            <pre><code class="language-python"># Isolation Forest for unsupervised fraud detection
+# Uses ONLY legitimate claims for training (or the full dataset — it's unsupervised)
+from sklearn.ensemble import IsolationForest
+
+# Set contamination = expected fraud rate (or a conservative estimate)
+isolation_forest = IsolationForest(
+    n_estimators=200,
+    max_samples=0.8,        # Use 80% of data per tree
+    contamination=0.05,     # Expected fraud rate — affects threshold
+    random_state=42,
+    n_jobs=-1
+)
+
+# Train on the full training data (unsupervised — does not use labels)
+isolation_forest.fit(X_train_transformed)
+
+# Predict anomaly scores and labels
+# predict(): 1 = normal, -1 = anomaly
+if_pred = isolation_forest.predict(X_test_transformed)
+if_scores = isolation_forest.score_samples(X_test_transformed)  # Higher = more normal
+
+# Convert to fraud-like format: higher score = more anomalous
+if_anomaly_score = -if_scores  # Flip so higher = more suspicious
+
+# Normalise to 0-100
+if_fraud_score = (if_anomaly_score - if_anomaly_score.min()) / (if_anomaly_score.max() - if_anomaly_score.min()) * 100
+
+# Convert predictions: -1 (anomaly) → 1 (fraud), 1 (normal) → 0 (legit)
+if_pred_binary = (if_pred == -1).astype(int)
+
+# Evaluate
+if_precision = precision_score(y_test_f, if_pred_binary, zero_division=0)
+if_recall = recall_score(y_test_f, if_pred_binary, zero_division=0)
+if_f1 = f1_score(y_test_f, if_pred_binary, zero_division=0)
+if_pr_auc = average_precision_score(y_test_f, if_scores)  # Note: IF scores are inverted
+
+print("=" * 60)
+print("ISOLATION FOREST — UNSUPERVISED FRAUD DETECTION")
+print("=" * 60)
+print(f"Precision: {if_precision:.3f}")
+print(f"Recall:    {if_recall:.3f}")
+print(f"F1 Score:  {if_f1:.3f}")
+print(f"\nInterpretation:")
+print(f"  Precision = {if_precision:.1%} — {'Good. Most flagged claims are legitimate only if this is below fraud rate.' if if_precision > 0.3 else 'Low — many false positives.'}")
+print(f"  Recall = {if_recall:.1%} — {'Catches a significant portion of fraud.' if if_recall > 0.5 else 'Misses most fraud cases. May need tighter contamination parameter.'}")
+
+# Decile analysis for IF
+if_score_df = pd.DataFrame({'score': if_fraud_score, 'actual': y_test_f.values})
+if_score_df['decile'] = pd.qcut(if_score_df['score'], q=10, labels=False, duplicates='drop')
+if_decile = if_score_df.groupby('decile').agg(
+    count=('score', 'count'),
+    fraud=('actual', 'sum'),
+    fraud_rate=('actual', 'mean'),
+    avg_score=('score', 'mean')
+)
+
+total_fraud_if = if_decile['fraud'].sum()
+print(f"\nDecile Analysis (top decile = highest anomaly score):")
+print(f"{'Decile':8s} {'Claims':>10s} {'Fraud':>8s} {'Rate':>8s} {'Cum. Fraud':>15s}")
+cum_fraud = 0
+for idx in reversed(range(len(if_decile))):
+    r = if_decile.loc[idx]
+    cum_fraud += r['fraud']
+    cum_pct = cum_fraud / total_fraud_if * 100
+    print(f"Top {10-idx*10 if idx < 9 else idx*10}-{10-idx*10-10 if idx < 9 else 100}%  {r['count']:>6,.0f}  {r['fraud']:>4,.0f}  {r['fraud_rate']*100:>4.1f}%  {cum_fraud:>4,.0f} ({cum_pct:.0f}%)")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A European insurer deployed Isolation Forest as its primary fraud detection tool for motor claims — not because it was the most accurate model, but because it was the <strong>fastest to deploy</strong>. The insurer had only 2 years of labelled fraud data (not enough for a robust supervised model) but had 10 years of claims data. Isolation Forest on 10 years of unlabelled data detected a fraud ring that had been operating for 18 months — a pattern that no rule-based system had caught because <em>each individual claim looked normal</em>. It was the combination of claims from the same set of vehicles, garages, and addresses — visible only as an anomalous cluster in the feature space — that Isolation Forest identified. The ring was processing approximately ₹2 crore per year through the insurer. Without anomaly detection, it might have continued for years.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Supervised Fraud Classification — XGBoost</h2>
+
+            <p>XGBoost is the most widely used supervised algorithm for fraud detection in insurance. Its combination of handling missing values, class weighting, regularisation, and scalability makes it the default choice when labelled fraud data is available.</p>
+
+            <h3>4.1 Training XGBoost for Fraud Detection</h3>
+
+            <pre><code class="language-python"># XGBoost with SMOTE-balanced training data
+xgb_model = xgb.XGBClassifier(
+    n_estimators=300,
+    max_depth=5,
+    learning_rate=0.05,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    reg_alpha=0.1,
+    reg_lambda=1.0,
+    random_state=42,
+    n_jobs=-1,
+    eval_metric='logloss'
+)
+
+# Train on SMOTE-balanced data
+xgb_model.fit(
+    X_train_smote, y_train_smote,
+    eval_set=[(X_test_transformed, y_test_f)],
+    verbose=False
+)
+
+# Predict
+xgb_prob = xgb_model.predict_proba(X_test_transformed)[:, 1]
+xgb_pred = (xgb_prob >= 0.5).astype(int)
+
+# Evaluate
+xgb_precision = precision_score(y_test_f, xgb_pred)
+xgb_recall = recall_score(y_test_f, xgb_pred)
+xgb_f1 = f1_score(y_test_f, xgb_pred)
+xgb_roc_auc = roc_auc_score(y_test_f, xgb_prob)
+xgb_pr_auc = average_precision_score(y_test_f, xgb_prob)
+
+print("=" * 60)
+print("XGBoost — SUPERVISED FRAUD DETECTION (SMOTE + Default Threshold)")
+print("=" * 60)
+print(f"Precision: {xgb_precision:.3f}")
+print(f"Recall:    {xgb_recall:.3f}")
+print(f"F1 Score:  {xgb_f1:.3f}")
+print(f"ROC-AUC:   {xgb_roc_auc:.3f}")
+print(f"PR-AUC:    {xgb_pr_auc:.3f}")
+
+# Confusion matrix
+cm = confusion_matrix(y_test_f, xgb_pred)
+print(f"\nConfusion Matrix (threshold = 0.5):")
+print(f"{'':25s} {'Pred Legit':12s} {'Pred Fraud':12s}")
+print(f"{'Actual Legit':25s} {cm[0,0]:>6,d}        {cm[0,1]:>6,d}")
+print(f"{'Actual Fraud':25s} {cm[1,0]:>6,d}        {cm[1,1]:>6,d}")
+print(f"\nAt threshold 0.5:")
+print(f"  False positives: {cm[0,1]:,} legitimate claims flagged for investigation")
+print(f"  Missed fraud:    {cm[1,0]:,} fraudulent claims paid (no investigation)")</code></pre>
+
+            <h3>4.2 Threshold Optimisation for Fraud</h3>
+
+            <p>The default threshold of 0.5 is almost never optimal for fraud detection. We want to find the threshold that maximises business value — which depends on the relative cost of a false positive (investigation cost) vs. a false negative (fraud paid).</p>
+
+            <pre><code class="language-python"># Find the optimal threshold using precision-recall tradeoff
+precisions, recalls, thresholds = precision_recall_curve(y_test_f, xgb_prob)
+
+# Cost-based threshold optimisation
+fp_cost = 500    # Cost of investigating a false positive (₹)
+fn_cost = 75000  # Average cost of a paid fraudulent claim (₹)
+# Average fraud claim is typically higher than legitimate
+
+# Calculate total cost at each threshold
+total_costs = []
+valid_thresholds = []
+
+for i in range(len(thresholds)):
+    pred = (xgb_prob >= thresholds[i]).astype(int)
+    cm = confusion_matrix(y_test_f, pred)
+    fp = cm[0, 1]  # False positives
+    fn = cm[1, 0]  # False negatives
+    total_cost = fp * fp_cost + fn * fn_cost
+    total_costs.append(total_cost)
+    valid_thresholds.append(thresholds[i])
+
+optimal_idx = np.argmin(total_costs)
+optimal_threshold = valid_thresholds[optimal_idx]
+optimal_cost = total_costs[optimal_idx]
+
+# Calculate cost at default threshold
+pred_default = (xgb_prob >= 0.5).astype(int)
+cm_default = confusion_matrix(y_test_f, pred_default)
+cost_default = cm_default[0, 1] * fp_cost + cm_default[1, 0] * fn_cost
+
+print("=" * 65)
+print("THRESHOLD OPTIMISATION — COST-BASED ANALYSIS")
+print("=" * 65)
+print(f"False positive cost (investigation): ₹{fp_cost:,}")
+print(f"False negative cost (fraud paid):    ₹{fn_cost:,}")
+print(f""
+      f"")
+print(f"Default threshold (0.5):")
+print(f"  FP = {cm_default[0,1]:,} @ ₹{fp_cost:,} = ₹{cm_default[0,1]*fp_cost:,.0f}")
+print(f"  FN = {cm_default[1,0]:,} @ ₹{fn_cost:,} = ₹{cm_default[1,0]*fn_cost:,.0f}")
+print(f"  Total cost: ₹{cost_default:,.0f}")
+print(f"")
+print(f"Optimal threshold ({optimal_threshold:.3f}):")
+pred_opt = (xgb_prob >= optimal_threshold).astype(int)
+cm_opt = confusion_matrix(y_test_f, pred_opt)
+fp_opt = cm_opt[0, 1]
+fn_opt = cm_opt[1, 0]
+print(f"  FP = {fp_opt:,} @ ₹{fp_cost:,} = ₹{fp_opt*fp_cost:,.0f}")
+print(f"  FN = {fn_opt:,} @ ₹{fn_cost:,} = ₹{fn_opt*fn_cost:,.0f}")
+print(f"  Total cost: ₹{optimal_cost:,.0f}")
+print(f"  Savings vs. default: ₹{cost_default - optimal_cost:,.0f}")</code></pre>
+
+            <h3>4.3 Feature Importance for Fraud</h3>
+
+            <pre><code class="language-python">importances = xgb_model.feature_importances_
+fi_df = pd.DataFrame({
+    'feature': all_feature_names[:len(importances)],
+    'importance': importances
+}).sort_values('importance', ascending=True)
+
+fig, ax = plt.subplots(figsize=(10, max(5, len(fi_df.tail(10))*0.35)))
+ax.barh(fi_df.tail(10)['feature'], fi_df.tail(10)['importance'],
+        color='#e17055', edgecolor='white')
+ax.set_xlabel('Feature Importance (XGBoost)')
+ax.set_title('Top 10 Fraud Detection Features', fontweight='bold')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print("\nTop fraud indicators from ML model:")
+for _, row in fi_df.sort_values('importance', ascending=False).head(5).iterrows():
+    print(f"  {row['feature']:30s}: {row['importance']:.4f}")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The optimal threshold for fraud detection is determined by the <strong>cost ratio</strong> of false negatives to false positives, not by a statistical rule. In motor insurance, where a false negative (paying a fraudulent claim) can cost ₹50,000–₹2,00,000 and a false positive (investigating a legitimate claim) costs ₹300–₹800, the cost ratio is approximately 100:1 to 500:1 — favouring a <em>lower</em> threshold (catch more fraud at the cost of more false positives). In health insurance, where false positives can delay critical medical treatment, the cost ratio may be much lower — favouring a <em>higher</em> threshold (fewer false positives even at the cost of missing some fraud). The threshold must be calibrated to the specific business context of each product line.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Model Comparison &amp; Ensemble</h2>
+
+            <p>No single model is best for all fraud detection scenarios. Supervised models (XGBoost, Random Forest) are excellent at catching known fraud patterns but cannot detect novel patterns they have not been trained on. Unsupervised models (Isolation Forest) can detect novel anomalies but have higher false positive rates. The best approach is to combine them into an ensemble that leverages the strengths of both.</p>
+
+            <h3>5.1 Direct Comparison</h3>
+
+            <pre><code class="language-python"># Train Random Forest for comparison
+rf_fraud = RandomForestClassifier(
+    n_estimators=200, max_depth=10, min_samples_leaf=20,
+    class_weight='balanced', random_state=42, n_jobs=-1
+)
+rf_fraud.fit(X_train_smote, y_train_smote)
+rf_prob = rf_fraud.predict_proba(X_test_transformed)[:, 1]
+
+rf_pr_auc = average_precision_score(y_test_f, rf_prob)
+rf_roc_auc = roc_auc_score(y_test_f, rf_prob)
+
+print("=" * 60)
+print("MODEL COMPARISON — FRAUD DETECTION")
+print("=" * 60)
+print(f"{'Model':25s} {'PR-AUC':>10s} {'ROC-AUC':>10s} {'Precision':>10s} {'Recall':>8s} {'F1':>8s}")
+print("-" * 71)
+
+models = {
+    'Isolation Forest (Unsupervised)': if_pr_auc,
+    'Random Forest + SMOTE': rf_pr_auc,
+    'XGBoost + SMOTE (Optimal)': xgb_pr_auc
+}
+
+# Get metrics for each
+for name, metric in models.items():
+    if 'Isolation' in name:
+        p, r, f = if_precision, if_recall, if_f1
+        roc = 0
+    elif 'Random' in name:
+        p = precision_score(y_test_f, (rf_prob >= 0.5).astype(int))
+        r = recall_score(y_test_f, (rf_prob >= 0.5).astype(int))
+        f = f1_score(y_test_f, (rf_prob >= 0.5).astype(int))
+        roc = rf_roc_auc
+    else:
+        p = precision_score(y_test_f, (xgb_prob >= optimal_threshold).astype(int))
+        r = recall_score(y_test_f, (xgb_prob >= optimal_threshold).astype(int))
+        f = f1_score(y_test_f, (xgb_prob >= optimal_threshold).astype(int))
+        roc = xgb_roc_auc
+
+    print(f"{name:25s} {metric:>8.3f}   {roc:>7.3f}   {p:>7.3f}   {r:>7.3f}  {f:>7.3f}")
+
+print(f"\n{'─' * 71}")
+print(f"Best model: {'XGBoost' if xgb_pr_auc >= rf_pr_auc else 'Random Forest'} based on PR-AUC.")
+print(f"Isolation Forest is {'competitive' if if_pr_auc > 0.15 else 'useful as a complement but not standalone'}.")
+print(f"\nRecommendation: {'Use XGBoost as primary + IF as secondary for novel fraud detection.' if xgb_pr_auc > 0.20 else 'Need more labelled data for supervised models to be effective.'}")</code></pre>
+
+            <h3>5.2 Building the Ensemble — Combined Fraud Score</h3>
+
+            <pre><code class="language-python"># Combine XGBoost and Isolation Forest into an ensemble score
+# Weight: 70% XGBoost, 30% Isolation Forest (weights can be tuned)
+
+# Normalise both scores to 0-100
+xgb_score_norm = xgb_prob * 100
+if_score_norm = if_fraud_score  # Already 0-100
+
+# Weighted ensemble
+ensemble_weight_xgb = 0.7
+ensemble_weight_if = 0.3
+
+ensemble_score = (xgb_score_norm * ensemble_weight_xgb +
+                  if_score_norm * ensemble_weight_if)
+
+# Cap at 100
+ensemble_score = np.clip(ensemble_score, 0, 100)
+
+# Evaluate ensemble
+ensemble_pr_auc = average_precision_score(y_test_f, ensemble_score / 100)
+
+# Decile analysis
+ens_df = pd.DataFrame({'score': ensemble_score, 'actual': y_test_f.values})
+ens_df['decile'] = pd.qcut(ens_df['score'], q=10, labels=False, duplicates='drop')
+
+ens_decile = ens_df.groupby('decile').agg(
+    count=('score', 'count'),
+    fraud=('actual', 'sum'),
+    fraud_rate=('actual', 'mean')
+)
+
+total_fraud_ens = ens_decile['fraud'].sum()
+print(f"ENSEMBLE MODEL (XGBoost {ensemble_weight_xgb*100:.0f}% + Isolation Forest {ensemble_weight_if*100:.0f}%)")
+print(f"Ensemble PR-AUC: {ensemble_pr_auc:.3f} {'(Improved)' if ensemble_pr_auc > max(xgb_pr_auc, if_pr_auc) else '(Similar to best individual model)'}")
+print(f"\nDecile Analysis:")
+print(f"{'Decile':8s} {'Claims':>10s} {'Fraud':>8s} {'Rate':>8s} {'Cum. Fraud Catch':>15s}")
+cum = 0
+for idx in reversed(range(len(ens_decile))):
+    r = ens_decile.loc[idx]
+    cum += r['fraud']
+    cum_pct = cum / total_fraud_ens * 100
+    print(f"Top {10 - idx*10 if idx < 9 else idx*10}%   {r['count']:>5,.0f}  {r['fraud']:>4,.0f}  {r['fraud_rate']*100:>4.1f}%  {cum:>4,.0f} ({cum_pct:.0f}%)")
+
+print(f"\nThe top 20% of claims by ensemble score capture approximately")
+print(f"{ens_decile.iloc[9]['fraud'] + ens_decile.iloc[8]['fraud']} of {total_fraud_ens:.0f} total fraud cases.")
+print(f"This means investigating 20% of claims catches ~{(ens_decile.iloc[9]['fraud'] + ens_decile.iloc[8]['fraud'])/total_fraud_ens*100:.0f}% of fraud.")</code></pre>
+
+            <h3>5.3 Precision-Recall Curves — Visual Comparison</h3>
+
+            <pre><code class="language-python">from sklearn.metrics import precision_recall_curve
+
+# Get PR curves for all models
+rf_prec, rf_rec, _ = precision_recall_curve(y_test_f, rf_prob)
+xgb_prec, xgb_rec, _ = precision_recall_curve(y_test_f, xgb_prob)
+if_prec_values, if_rec_values, _ = precision_recall_curve(y_test_f, -if_scores)
+ens_prec, ens_rec, _ = precision_recall_curve(y_test_f, ensemble_score / 100)
+
+fig, ax = plt.subplots(figsize=(10, 7))
+ax.plot(rf_rec, rf_prec, linewidth=2, label=f'Random Forest (PR-AUC: {rf_pr_auc:.3f})')
+ax.plot(xgb_rec, xgb_prec, linewidth=2, label=f'XGBoost (PR-AUC: {xgb_pr_auc:.3f})')
+ax.plot(if_rec_values, if_prec_values, linewidth=2, label=f'Isolation Forest')
+ax.plot(ens_rec, ens_prec, linewidth=2, linestyle='--', label=f'Ensemble (PR-AUC: {ensemble_pr_auc:.3f})')
+ax.set_xlabel('Recall (True Positive Rate)')
+ax.set_ylabel('Precision')
+ax.set_title('Precision-Recall Curves — Fraud Detection Models', fontweight='bold')
+ax.legend(loc='lower left')
+ax.grid(True, alpha=0.3)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print("Interpretation:")
+print("- Upper-right curves are better (high precision AND high recall)")
+print("- The Ensemble curve should dominate (be above) individual model curves")
+print("- The area under each curve is the PR-AUC — the single best metric for fraud")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The ensemble score is not just a better fraud metric — it is also more <strong>stable</strong> over time. Fraudsters adapt to supervised models (they change their behaviour to avoid the patterns the model learned). But they cannot easily adapt to both the supervised patterns AND the general "unusualness" that Isolation Forest captures. The ensemble approach creates a moving target that fraudsters find harder to game. In practice, insurers using ensemble models report 10–20% less performance degradation over 12 months compared to those using a single supervised model — because the unsupervised component continues to detect novel fraud even as the supervised patterns become stale.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. KNIME for Fraud Analytics</h2>
+
+            <p>KNIME Analytics Platform is a visual, no-code/low-code environment for data science that is widely used in insurance fraud analytics. In many Indian insurers, the fraud analytics team may include analysts who are proficient in KNIME but not Python. Building a fraud detection workflow in KNIME serves two purposes: (a) it makes fraud analytics accessible to a broader team, and (b) it provides a visual audit trail that is valuable for compliance — every step from data loading to model scoring is visible and documented.</p>
+
+            <h3>6.1 The KNIME Fraud Detection Workflow</h3>
+
+            <pre><code class="language-text">KNIME WORKFLOW: FRAUD_DETECTION_V1
+
+┌────────────────────────────┐
+│  CSV Reader                │
+│  (insurance_cleaned.csv)   │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Column Filter             │
+│  (Select features for      │
+│   fraud detection)         │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Partitioning              │
+│  (70% Train / 30% Test)   │
+│  Stratified by fraud_flag  │
+└─────────────┬──────────────┘
+              │
+    ┌─────────┴─────────┐
+    │                   │
+    ▼                   ▼
+┌──────────────┐  ┌──────────────┐
+│ SMOTE        │  │ (Test data   │
+│ (Balance     │  │  — no SMOTE) │
+│  training)   │  │              │
+└──────┬───────┘  └──────┬───────┘
+       │                  │
+       ▼                  │
+┌──────────────┐          │
+│ XGBoost      │          │
+│ Learner      │          │
+│ (scale_pos = │          │
+│  weight)     │          │
+└──────┬───────┘          │
+       │                  │
+       ▼                  ▼
+┌────────────────────────────┐
+│  XGBoost Predictor         │
+│  (Score test data)         │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Scorer                    │
+│  (Accuracy, Precision,    │
+│   Recall, F1, Confusion   │
+│   Matrix, Cohen's Kappa)  │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  CSV Writer                │
+│  (Scored claims with      │
+│   fraud probability)       │
+└────────────────────────────┘
+
+ADDITIONAL BRANCH (parallel):
+┌────────────────────────────┐
+│  Isolation Forest          │
+│  (on same partitioned     │
+│   training data)           │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Predictor                 │
+│  (Anomaly scores)          │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Joiner                    │
+│  (Merge XGBoost + IF      │
+│   scores)                  │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Math Formula              │
+│  Ensemble = 0.7×XGB +     │
+│  0.3×IF                    │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│  Interactive Table         │
+│  (View scored claims,     │
+│   filter by threshold)    │
+└────────────────────────────┘</code></pre>
+
+            <h3>6.2 KNIME vs. Python for Fraud — When to Use Which</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Factor</th><th>Python</th><th>KNIME</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Best for</strong></td><td>Custom analysis, production pipelines, complex modelling, integration with other systems</td><td>Rapid prototyping, visual audit, team collaboration, non-coders on the team</td></tr>
+                    <tr><td><strong>Learning curve</strong></td><td>Steep — requires coding proficiency</td><td>Moderate — drag-drop-connect nodes, no code required</td></tr>
+                    <tr><td><strong>Audit trail</strong></td><td>Requires discipline (version-control notebooks)</td><td>Built-in — the visual workflow IS the audit trail</td></tr>
+                    <tr><td><strong>Customisation</strong></td><td>Unlimited — any algorithm, any data source, any integration</td><td>Limited to available nodes (though Python node exists for custom code)</td></tr>
+                    <tr><td><strong>Production deployment</strong></td><td>Strong — REST APIs, containerisation, MLOps frameworks</td><td>Moderate — KNIME Server required for scheduled execution, limited API support</td></tr>
+                    <tr><td><strong>Best use in fraud</strong></td><td>ML model development, custom feature engineering, real-time scoring</td><td>Rule-based fraud scoring, dashboard integration, team-accessible analytics, model monitoring</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A mid-size Indian general insurer uses a hybrid approach for fraud detection. The data science team builds XGBoost models in Python (where they need the flexibility of custom feature engineering and hyperparameter tuning). The fraud operations team then imports the trained model into a KNIME workflow where they combine the XGBoost score with business rules (automated fraud score ≥ 75 AND days_to_settle ≤ 3 AND claim_amount ≥ ₹25,000 → immediate investigation) and a dashboard that updates automatically when new claims are entered. The fraud analysts, who do not code, maintain the business rules in KNIME. The data scientists maintain the ML models in Python. The two systems are connected by exporting the trained model as a PMML or ONNX file that KNIME can load. This hybrid architecture leverages the strengths of both tools.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch16-model-ops">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. From Model to Operations</h2>
+
+            <p>A fraud detection model that is never deployed is worth nothing. But deployment is not the end — it is the beginning of a continuous cycle of monitoring, feedback, retraining, and improvement. The operationalisation of fraud ML models — often called "Fraud MLOps" — is where most insurers struggle, not with the model building itself.</p>
+
+            <h3>7.1 The Deployment Architecture</h3>
+
+            <p>A production fraud detection system has three tiers:</p>
+            <ul>
+                <li><strong>Batch scoring (daily):</strong> All claims filed in the last 24 hours are scored by the ensemble model overnight. Claims with fraud scores above the investigation threshold are flagged and added to the investigator queue at the start of the next business day. Batch scoring is computationally efficient and fits naturally into the daily claims operations workflow.</li>
+                <li><strong>Real-time scoring (at FNOL):</strong> When a claim is filed through the app, website, or WhatsApp, the fraud score is computed in real-time (less than 1 second). If the score exceeds the immediate action threshold (e.g., 90+), the claim is automatically routed to a senior investigator with an explanation of why it was flagged. Real-time scoring requires a model-serving infrastructure (REST API) that can handle high throughput with low latency.</li>
+                <li><strong>Post-payment audit (monthly):</strong> All claims that were paid without investigation are re-scored with any new data (including claims from other insurers from the FMS). Claims that now exceed the audit threshold are pulled for post-payment review — too late to stop the payment, but the information feeds back into model improvement and may support recovery actions.</li>
+            </ul>
+
+            <h3>7.2 The Feedback Loop</h3>
+
+            <p>The quality of a fraud model is determined not by its initial accuracy but by how quickly it improves through feedback. Every investigated claim — whether confirmed as fraud or cleared — generates a labelled data point that can be used for retraining. The feedback loop should operate on a monthly cadence: export all investigated claims from the past month, combine confirmed fraud cases (new positive labels) with the cleared claims (new negative labels), retrain the model, validate on the most recent month's data, and deploy the updated model.</p>
+
+            <p>Key monitoring metrics for the feedback loop:</p>
+            <ul>
+                <li><strong>Score drift:</strong> Is the distribution of fraud scores shifting? A shift toward lower scores may indicate that fraudsters have adapted to the model and are deliberately staying below the threshold. A shift toward higher scores may indicate model degradation or a change in the claimant population.</li>
+                <li><strong>Detection rate:</strong> Are we catching more or less fraud month-over-month? A declining detection rate despite constant fraud rate suggests model degradation.</li>
+                <li><strong>False positive rate:</strong> Are investigators seeing more false positives? This may indicate that the model is reacting to a data pattern that is not actually predictive of fraud — or that fraudsters have changed their methods.</li>
+                <li><strong>Investigator feedback:</strong> Are investigators confirming model flags at the expected rate? If not, the model may need recalibration. Investigator override rate (claims the investigator cleared despite the model's fraud flag) should be tracked and investigated when it deviates from the expected range.</li>
+            </ul>
+
+            <h3>7.3 Common Failure Modes</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Failure Mode</th><th>Symptom</th><th>Root Cause</th><th>Solution</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Concept drift</strong></td><td>Model accuracy declines over time; fraud rate in top decile drops</td><td>Fraudsters adapt their methods; the patterns the model learned are no longer the patterns being used</td><td>Retrain model monthly with latest confirmed fraud labels. Monitor PR-AUC trend. If continuous decline, investigate whether fundamentally new fraud types have emerged that require new features</td></tr>
+                    <tr><td><strong>Population drift</strong></td><td>Score distribution shifts; more claims are flagged as high-scoring</td><td>The claimant population has changed (new product, new distribution channel, new geography) and the model was trained on a different population</td><td>Stratify monitoring by product/channel/geography. If specific segments show drift, retrain with more recent data from those segments, or build segment-specific models</td></tr>
+                    <tr><td><strong>Feedback loop broken</strong></td><td>Model never improves despite months of production use</td><td>Investigation outcomes are not being recorded systematically; no one is feeding the labels back into training</td><td>Make investigator outcome recording mandatory in the claims system. Auto-generate a monthly retraining dataset from investigation records. Automated retraining pipeline</td></tr>
+                    <tr><td><strong>Investigator over-reliance</strong></td><td>Investigators don't investigate — they just approve whatever the model flags</td><td>Investigators have learned that most of the model's flags are correct and have stopped critically evaluating each case</td><td>Introduce random "probe" cases — known legitimate claims that are injected into the investigation queue. If investigators routinely flag these as suspicious, they have lost critical judgment</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The single most important operational metric for a fraud detection system is not the model's AUC or PR-AUC — it is the <strong>investigator confirmation rate</strong>. If investigators confirm 40% of the claims the model flags as fraud, the model is doing its job (investigators find fraud in 40% of the cases they review because of the model's prioritisation). If the confirmation rate drops below 20%, either the model is producing too many false positives or investigators have lost trust in the model and are not investigating thoroughly. Track this metric weekly, and investigate any significant deviation immediately. A fraud model that investigators do not trust — regardless of its technical performance — is a fraud model that is not being used.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build and Deploy a Fraud Detection ML System</h2>
+            <div class="project-brief">
+                <p>You are a data scientist at "VigilSure Insurance," where the fraud detection system currently consists of 12 static business rules. Your task is to build a complete ML-based fraud detection system — including data preparation, model training, ensemble scoring, and an operations plan — that will replace the rule-based system.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Data preparation:</strong> Create a fraud detection dataset from the cleaned insurance data. Select at least 8 relevant features. Split into train/test (70/30) with stratification. Check class imbalance ratio.</li>
+                    <li><strong>Unsupervised model:</strong> Train an Isolation Forest model on the training data (unsupervised — do not use fraud labels). Score the test set. Report precision, recall, and F1 at the default contamination level. Vary contamination from 0.02 to 0.10 and observe the effect on precision-recall.</li>
+                    <li><strong>SMOTE + XGBoost:</strong> Apply SMOTE to the training data. Train an XGBoost classifier with scale_pos_weight. Optimise the decision threshold using cost-based analysis (fp_cost = ₹500, fn_cost = ₹75,000). Report the optimal threshold and the cost savings vs. the default 0.5 threshold.</li>
+                    <li><strong>Ensemble:</strong> Build a weighted ensemble (70% XGBoost, 30% Isolation Forest). Create a decile analysis showing fraud capture rate. How much fraud would be caught by investigating only the top 20% of claims?</li>
+                    <li><strong>Operations plan:</strong> Design a 3-tier scoring architecture (batch, real-time, post-payment audit). Define the monthly retraining feedback loop. Identify the 2 most likely failure modes for your system and specify the monitoring metric that would detect each one.</li>
+                    <li><strong>Write a 500-word deployment memo</strong> to the Head of Claims covering: (a) Model performance summary, (b) Expected fraud detection improvement over the rule-based system, (c) Deployment approach (scoring tiers, threshold decisions), (d) Monitoring and retraining plan, (e) Key risks and mitigation strategies.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Deployment Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> Head of Claims, VigilSure Insurance<br>
+                    <strong>From:</strong> Data Science — Fraud ML Project<br>
+                    <strong>Subject:</strong> ML-Based Fraud Detection System — Deployment Recommendation</p>
+
+                    <p><strong>Model Performance Summary:</strong><br>
+                    The fraud detection ML system comprises three components: a supervised XGBoost model trained on SMOTE-balanced data, an unsupervised Isolation Forest anomaly detector, and a weighted ensemble (70:30) that combines both. The ensemble achieves a PR-AUC of 0.52 and, at the optimal cost-based threshold of 0.28, delivers 63% recall at 34% precision. This means: of every 100 fraudulent claims, the model catches 63 before payment; of every 100 claims flagged for investigation, 34 are confirmed fraudulent. The decile analysis shows that investigating the top 20% of claims by ensemble score captures approximately 72% of all fraud — a 3.6× lift over random investigation. This compares to the current rule-based system which achieves an estimated 18% recall at 22% precision — meaning the ML system represents a 3.5× improvement in fraud detection rate with a 1.5× improvement in investigator efficiency.</p>
+
+                    <p><strong>Expected ROI:</strong> At the current fraud rate of 5% and average fraud claim of ₹75,000, the current rule-based system catches approximately 18% of fraud (avoiding ₹1.35 Cr quarterly). The ML system at 63% recall would catch approximately ₹4.73 Cr quarterly — an additional ₹3.38 Cr per quarter in fraud savings. After accounting for the cost of additional investigations (false positives: estimated ₹8.2 L per quarter) and the cost of the ML infrastructure (₹10 L set-up, ₹3.5 L/month), the net benefit is approximately ₹11.5 Cr annually in additional fraud savings. The one-time investment of ₹10 L for the ML system delivers a first-year ROI of approximately 30:1.</p>
+
+                    <p><strong>Deployment Approach — Phased:</strong><br>
+                    We recommend a three-phase deployment. <strong>Phase 1 (Month 1): Batch scoring.</strong> The model scores all new claims daily. Claims with ensemble score > 75 (immediate investigation threshold) are added to the investigator queue. Claims with score 55–75 (monitoring threshold) are flagged for post-payment audit. This phase runs in parallel with the existing rule-based system — both sets of flags are visible to investigators, but the rule-based system remains the primary decision tool. <strong>Phase 2 (Month 2): Real-time scoring at FNOL.</strong> The model is deployed as a REST API that scores every claim within 1 second of submission. Claims with score > 85 are immediately routed to a senior investigator. This phase also switches the primary triage from rule-based to ML-based — the rule-based system becomes the backup. <strong>Phase 3 (Month 3+): Ensemble-weighted scoring with automated retraining.</strong> The full ensemble is deployed. A monthly retraining pipeline is automated: export investigated claims → combine with fraud labels → retrain → validate → deploy. The investigator confirmation rate is tracked weekly.</p>
+
+                    <p><strong>Monitoring Plan:</strong> Weekly: fraud score distribution, flag rate, investigator confirmation rate. Monthly: PR-AUC on the latest month's data, detection rate, false positive rate, retraining trigger check. Quarterly: full model audit including fairness analysis across segments. A retraining is triggered automatically if: PR-AUC drops by > 0.05 from the previous month, or investigator confirmation rate drops below 25% for two consecutive weeks, or score distribution shifts by > 1 standard deviation from the training distribution.</p>
+
+                    <p><strong>Key Risks:</strong> (1) Concept drift — fraudsters adapt to the model. Mitigation: monthly retraining and the unsupervised Isolation Forest component that catches novel patterns. (2) Investigator resistance — investigators may not trust the ML scores initially. Mitigation: Phase 1 parallel running lets them see the ML flags alongside the existing rules — they will quickly see that the ML is catching fraud the rules miss. (3) False positive customer impact — legitimate customers delayed by investigation. Mitigation: any claim held for investigation > 48 hours without a decision is automatically escalated to a senior manager who can override the hold. A monthly audit of false positive cases with customer apology protocol ready.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Class imbalance makes accuracy a misleading metric for fraud detection. With 2–5% fraud rate, a "predict-all-clean" model achieves 95%+ accuracy while catching zero fraud. Always use precision, recall, F1, and PR-AUC — never accuracy alone.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Three strategies address imbalance: SMOTE (synthetic over-sampling), class weighting (algorithm-level penalty adjustment), and threshold tuning (cost-based threshold selection). The best results come from combining all three.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Isolation Forest detects anomalies without labelled data — catching novel fraud patterns that supervised models would miss. Its limitation is higher false positive rates. Use it as a complement to supervised models, not a standalone solution.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>An ensemble combining supervised (XGBoost) and unsupervised (Isolation Forest) models typically outperforms either alone — with 10–20% less performance degradation over time because fraudsters cannot easily adapt to both detection methods simultaneously.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>The most important operational metric is the investigator confirmation rate — what % of flagged claims are confirmed as fraud. A model producing 1,000 flags that investigators confirm 40% of the time is more valuable than a model producing 100 flags confirmed 80% of the time. Track this weekly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s16-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. A fraud detection model achieves 97% accuracy on a dataset with 3% fraud rate. The most likely explanation is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) The model is excellent — 97% accuracy means it is catching almost all fraud</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) The model is likely predicting "not fraud" for nearly all claims — achieving 97% accuracy by doing nothing. Accuracy is a misleading metric when class imbalance is severe</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) The model was trained on test data, inflating its performance</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) The dataset has no fraud cases, making accuracy meaningless</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. SMOTE (Synthetic Minority Oversampling Technique) works by:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Duplicating existing fraud cases multiple times to create a balanced dataset</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Generating new synthetic fraud examples by interpolating between existing fraud cases and their nearest neighbours — creating novel but realistic examples</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Randomly deleting legitimate claims until the fraud rate reaches 50%</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Assigning higher weights to fraud cases during model training without changing the data</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. An Isolation Forest model can detect fraudulent claims that a supervised XGBoost model misses because:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) Isolation Forest is more accurate than XGBoost on all fraud types</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) Isolation Forest detects anomalies based on how "different" a claim is from the majority of claims, without needing labelled fraud data — it can catch novel fraud patterns that have never been seen before and therefore were not present in the XGBoost training data</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Isolation Forest uses a different type of data (unstructured text) that XGBoost cannot process</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) Isolation Forest produces scores from 0–1000 while XGBoost only produces binary predictions</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. The optimal decision threshold for a fraud detection model should be determined by:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Always using 0.5 — it is the standard default and works well in most cases</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) The cost ratio of false negatives (fraud paid) to false positives (investigation cost). The threshold is set where the total cost of FP + FN is minimised for the specific business context</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Setting it at the fraud rate — if fraud rate is 5%, threshold is 0.05</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) The threshold should maximise accuracy, regardless of cost</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. An insurer's fraud model has been in production for 6 months. The investigator confirmation rate has declined from 38% to 22%, but the model's PR-AUC on a static holdout test set has not changed. The most likely cause is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) The model has become more accurate — investigators are better at confirming fraud</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Concept drift — the fraud patterns in production have changed from the training data, but the static test set does not reflect current fraud patterns. The model needs retraining with recent data and the test set should be refreshed monthly</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Investigators are not working hard enough — they need more training</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The model's PR-AUC must be miscalculated since it hasn't changed while the confirmation rate dropped</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s16-quiz', ['b','b','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s16-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-15.html" class="nav-link">&larr; Previous: Insurance Fraud Analytics</a>
+            <a href="session-17.html" class="nav-link next">Next: Cyber Risk &amp; Cyber Insurance &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

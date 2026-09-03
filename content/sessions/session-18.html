@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 18: Climate Risk in Insurance — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-17.html" class="nav-link">&larr; Previous: Cyber Risk &amp; Cyber Insurance</a>
+            <a href="session-19.html" class="nav-link next">Next: Parametric Insurance Design &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 100%); color: #fff;">
+            <div class="chapter-badge">Module 6 &middot; Session 18 &middot; 90 min &middot; Python + Looker Studio</div>
+            <h1>Session 18: Climate Risk in Insurance</h1>
+            <div class="chapter-meta">
+                CILO-1, CILO-2 &middot; Domain Knowledge &amp; Analytics &middot; Lecture &amp; Lab (Python/Looker Studio) &middot; Jupyter + Looker Studio required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Distinguish between physical climate risks and transition risks, and explain how each affects different lines of insurance business</li>
+                <li>Analyse India's climate vulnerability profile — floods, cyclones, heatwaves, and glacial melt — and their impact on insurance portfolios</li>
+                <li>Merge weather data with claims data in Python and analyse the correlation between extreme weather events and claims frequency</li>
+                <li>Build a Looker Studio dashboard visualising portfolio climate risk exposure by region and peril type</li>
+                <li>Explain the "protection gap" — the difference between economic and insured losses — and describe how insurers can address it</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Climate Change and Insurance — The Connection</h2>
+
+            <p>Climate change affects insurance in ways that are simultaneously straightforward and profound. The straightforward part: extreme weather events are becoming more frequent and severe, which increases claims costs for property, crop, motor, and health insurance. The profound part: climate change calls into question the fundamental insurability of certain risks — if an insurer cannot predict the frequency and severity of future losses because the climate is changing faster than the actuarial models, the mechanism of insurance itself is stressed.</p>
+
+            <h3>1.1 Physical Risks vs. Transition Risks</h3>
+
+            <p>Climate risks are classified into two categories that affect insurance differently:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Risk Type</th><th>Definition</th><th>Insurance Impact</th><th>Examples</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Physical Risks</strong></td>
+                        <td>Risks arising from the direct physical impacts of climate change — extreme weather events, changing precipitation patterns, temperature shifts, sea-level rise.</td>
+                        <td><strong>Direct claims impact.</strong> More frequent and severe floods, cyclones, heatwaves, and wildfires increase claims frequency and severity. Property insurance faces the largest impact, followed by crop, motor, and health insurance.</td>
+                        <td>Cyclone Amphan (2020, India-Bangladesh, $13B economic loss), Kerala floods (2018, $4B+ economic loss), recurrent Chennai floods (2015, 2021, 2023)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transition Risks</strong></td>
+                        <td>Risks arising from the transition to a low-carbon economy — policy changes (carbon pricing, emissions regulations), technological disruption (renewable energy replacing fossil fuels), market shifts (changing consumer preferences), and legal liability (climate-related lawsuits).</td>
+                        <td><strong>Investment portfolio and underwriting impact.</strong> Insurers are large institutional investors — their portfolios are exposed to fossil fuel assets that may become stranded. Underwriting fossil fuel-related risks (coal mines, oil refineries) becomes increasingly difficult as litigation and regulatory risks grow.</td>
+                        <td>Carbon pricing mechanisms, phase-out of internal combustion engine vehicles, climate liability lawsuits against fossil fuel companies, stranded asset risk in investment portfolios</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>1.2 The Challenge to Insurability</h3>
+
+            <p>For insurance to work — as established in Session 01 — losses must be predictable at the portfolio level. Climate change undermines this predictability in two ways. First, <strong>non-stationarity</strong>: the statistical distribution of weather events is shifting. The 100-year flood of 1980 may be the 25-year flood of 2025. Actuarial models calibrated on historical data are systematically underestimating current risk. Second, <strong>correlated risk escalation</strong>: climate change is not increasing all risks equally; it is increasing them in a correlated way. A region that becomes more prone to cyclones also becomes more prone to flooding, and the two perils often coincide in a single event (cyclone storm surge), creating losses that exceed what either single-peril model would predict.</p>
+
+            <p>When an insurer's ability to predict and price risk breaks down, the product ceases to function. Some regions — coastal Florida, parts of California, specific cyclone-prone zones in India — are approaching or past the point where private insurers can profitably offer coverage. When insurers exit, the state often becomes the "insurer of last resort," meaning taxpayers bear the growing cost of climate-related disasters. This is not a future scenario — it is already happening.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> In 2023–24, two of India's largest general insurers quietly reduced their property insurance exposure in coastal Gujarat and Odisha — the states most exposed to cyclone risk. They did this not by cancelling policies (which would have been noticed and regulated) but by increasing premiums by 100–200% in high-risk postal codes, effectively pricing themselves out of the market. The policyholders had three options: pay the higher premium (most could not), accept reduced coverage (lower sum insured, higher deductibles), or go to the public-sector insurers (which are required to provide coverage but may face solvency pressure over time). This is the quiet unravelling of insurability — not a dramatic "insurers are leaving" announcement, but a slow, data-driven repricing that makes coverage unaffordable for those who need it most.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch18-india-climate">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>2. Climate Impact on Indian Insurance</h2>
+
+            <p>India is one of the most climate-vulnerable countries in the world. Its 7,500 km coastline, dependence on monsoon agriculture, high population density, and limited insurance penetration create a unique risk profile that poses both enormous challenges and significant opportunities for the insurance industry.</p>
+
+            <h3>2.1 India's Climate Vulnerability Profile</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Climate Peril</th><th>Affected Regions</th><th>Insurance Lines Impacted</th><th>Trend</th><th>Loss Context</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cyclones</strong></td>
+                        <td>Coastal Odisha, Andhra Pradesh, Tamil Nadu, Gujarat, West Bengal</td>
+                        <td>Property (buildings, contents), motor (vehicle damage), crop (salination, wind damage), marine (cargo, hull)</td>
+                        <td>⬆ Increasing intensity. Frequency stable but proportion of severe cyclones (Category 4-5) increasing.</td>
+                        <td>Cyclone Amphan (2020): $13B economic loss, ~$3B insured. Cyclone Fani (2019): $8B economic loss, ~$1.5B insured.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Floods</strong></td>
+                        <td>Assam, Bihar, Uttar Pradesh, Kerala, Maharashtra (Mumbai), Chennai, Gujarat, Odisha</td>
+                        <td>Property (highest impact — flood is India's costliest natural peril), motor (water damage), crop (submergence), health (waterborne diseases post-flood)</td>
+                        <td>⬆ Increasing frequency and severity. Urban flooding (Chennai, Mumbai, Bengaluru) growing fastest — driven by climate change + urbanisation.</td>
+                        <td>Kerala floods (2018): $4B+ economic loss, ~$500M insured. Urban flood events (2021–24): multiple events exceeding $1B each.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Heatwaves</strong></td>
+                        <td>Northwest, Central, and parts of South India. Urban heat island effects in all major cities.</td>
+                        <td>Health (heatstroke, cardiovascular stress), life (mortality increase), property (infrastructure damage — roads, power lines), crop (yield reduction)</td>
+                        <td>⬆ Rising rapidly. Number of heatwave days has increased 3× since 2000. 2024 was India's hottest year on record.</td>
+                        <td>Heatwaves cause 10,000+ excess deaths annually (official — likely undercounted). Increased health insurance claims during heatwave months.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Glacial Melt / Water Stress</strong></td>
+                        <td>Himalayan region (Uttarakhand, Himachal, Jammu &amp; Kashmir). Water stress affects all of India.</td>
+                        <td>Property (glacial lake outburst floods — GLOFs), crop (water availability), hydro-power (business interruption)</td>
+                        <td>⬆ Accelerating. Himalayan glaciers are melting at an accelerating rate. Glacial lake outburst flood events are increasing.</td>
+                        <td>Uttarakhand flood (2021, glacial outburst): $500M+ economic loss. Growing risk to downstream hydropower and agriculture.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The 2015 Chennai floods — which caused an estimated $3B in economic losses and $500M+ in insured losses — were a watershed moment for Indian climate risk awareness. Chennai had not experienced severe flooding in decades. Many property insurance policies in force did not include flood cover (it was an optional add-on that few had purchased). The result: hundreds of thousands of underinsured households and businesses. After 2015, flood cover uptake in Chennai increased from approximately 10% of property policies to over 60% within 2 years — but at significantly higher premiums. The city then experienced major floods again in 2021 and 2023, each causing billions in losses. Insurers that had modelled Chennai flood risk on historical data (1950–2010) were unprepared for the new pattern of annual or biennial severe floods. Those that updated their models to incorporate climate projections were able to price coverage accurately — and capture significant premium growth as demand surged.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Portfolio Climate Risk Exposure Analysis</h2>
+
+            <p>The first step in managing climate risk in an insurance portfolio is understanding the exposure: how many policies are in climate-vulnerable zones, what is the total sum insured at risk, and how does the risk concentration align with the insurer's risk appetite and reinsurance programme?</p>
+
+            <h3>3.1 The Exposure Analysis Framework</h3>
+
+            <p>A portfolio-level climate risk assessment follows a four-step process:</p>
+            <ol>
+                <li><strong>Geographic mapping:</strong> Geocode all property, motor, and crop policies to location (address, zip code, district, state). This step is the foundation — without geographic data, climate risk analysis is impossible.</li>
+                <li><strong>Peril overlay:</strong> Overlay each policy's location with climate peril maps — flood zones, cyclone wind-speed zones, earthquake zones, heatwave frequency maps, sea-level rise projections. Each policy is assigned a peril score for each relevant peril.</li>
+                <li><strong>Exposure aggregation:</strong> Aggregate the total sum insured by peril × region × line of business. Identify concentrations: do any single postal code, district, or region account for more than 5% of the total portfolio exposure?</li>
+                <li><strong>Capital impact:</strong> Estimate the probable maximum loss (PML) for each peril at standard return periods (1-in-100 year, 1-in-250 year). Compare to the insurer's risk appetite and available reinsurance capacity. If the PML exceeds the risk appetite, the insurer must: reduce exposure (non-renew high-risk policies), increase premiums for high-risk zones, purchase additional reinsurance, or a combination of all three.</li>
+            </ol>
+
+            <h3>3.2 Exposure Report in Python</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the policy dataset with location data
+policies = pd.read_csv('data/insurance_cleaned.csv')
+
+# For this analysis, we need location information
+# If not available, we use policy_type as a proxy for climate exposure
+# (Property insurance is most exposed, followed by crop and motor)
+
+# Create climate-exposure-relevant features
+# Assign regional exposure scores based on policy characteristics
+
+# 1. Simple exposure proxy: policy type × region vulnerability
+region_vulnerability = {
+    'Coastal': {'cyclone': 0.8, 'flood': 0.7, 'heatwave': 0.3},
+    'Inland': {'cyclone': 0.1, 'flood': 0.4, 'heatwave': 0.6},
+    'Mountain': {'cyclone': 0.0, 'flood': 0.5, 'heatwave': 0.1},
+    'Urban': {'cyclone': 0.3, 'flood': 0.6, 'heatwave': 0.8}
+}
+
+# Assign random regions for analysis (in real life these would come from the data)
+np.random.seed(42)
+locations = ['Coastal', 'Inland', 'Mountain', 'Urban']
+if 'location' not in policies.columns:
+    policies['climate_region'] = np.random.choice(locations, size=len(policies), p=[0.3, 0.4, 0.1, 0.2])
+else:
+    policies['climate_region'] = policies['location']
+
+# Calculate exposure by region and product
+exposure = policies.groupby(['climate_region', 'policy_type']).agg(
+    policy_count=('policy_id', 'nunique') if 'policy_id' in policies.columns else ('claim_id', 'count'),
+    total_premium=('premium', 'sum'),
+    total_sum_assured=('sum_assured', 'sum') if 'sum_assured' in policies.columns else ('claim_amount', 'sum')
+).reset_index()
+
+print("=" * 75)
+print("PORTFOLIO CLIMATE EXPOSURE — Geographic × Product")
+print("=" * 75)
+for region in locations:
+    region_data = exposure[exposure['climate_region'] == region]
+    total_prem = region_data['total_premium'].sum()
+    print(f"\n{region.upper()} (Total Premium: ₹{total_prem/1e7:.1f} Cr)")
+    print(f"{'Product':15s} {'Policies':>10s} {'Premium (₹ Cr)':>15s}")
+    for _, row in region_data.iterrows():
+        print(f"  {row['policy_type']:15s} {row['policy_count']:>6,.0f}       ₹{row['total_premium']/1e7:>5.1f}")
+
+# Climate risk concentration — % of total portfolio in high-risk zones
+# Assume Coastal = high cyclone/flood, Mountain = high flood/GLOF
+high_risk_zones = ['Coastal', 'Mountain']
+high_risk_exposure = policies[policies['climate_region'].isin(high_risk_zones)]
+high_risk_pct = len(high_risk_exposure) / len(policies) * 100
+
+print(f"\n{'=' * 75}")
+print(f"CLIMATE RISK CONCENTRATION")
+print(f"{'=' * 75}")
+print(f"Portfolio in high-risk zones: {high_risk_pct:.1f}%")
+print(f"  Coastal (cyclone + flood): {len(policies[policies['climate_region']=='Coastal'])/len(policies)*100:.1f}%")
+print(f"  Mountain (flood + GLOF):   {len(policies[policies['climate_region']=='Mountain'])/len(policies)*100:.1f}%")
+print(f"Remaining portfolio:        {100-high_risk_pct:.1f}%")
+print(f"\nIf concentration exceeds 30% in a single high-risk region,")
+print(f"the insurer has a significant accumulation risk that must be")
+print(f"addressed through reinsurance or exposure reduction.")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The single most important climate risk metric for an insurance portfolio is the <strong>Herfindahl-Hirschman Index (HHI) by natural peril zone</strong>. Calculate it as: HHI = Σ(Exposure_in_zone_i / Total_Portfolio)². If HHI > 0.15, the portfolio has a dangerous concentration in one or a few zones — a single severe weather event in that zone could generate losses that threaten the insurer's solvency. Most reinsurers require their cedents to report per-zone HHI and may decline to offer catastrophe reinsurance if the index exceeds their threshold. Every insurer should know its HHI by peril (flood, cyclone, earthquake) and manage it actively — not just calculate it after a disaster.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Climate Data Analysis in Python</h2>
+
+            <p>The core analytical task in climate risk insurance is understanding the relationship between weather events and claims. This requires merging weather data (from the India Meteorological Department, satellite data, or global climate datasets) with claims data and analysing the statistical relationship.</p>
+
+            <h3>4.1 Loading and Merging Weather and Claims Data</h3>
+
+            <pre><code class="language-python"># Load weather data (synthetic)
+weather = pd.read_csv('data/weather_data.csv')
+print(f"Weather data loaded: {len(weather):,} records")
+print(f"Columns: {weather.columns.tolist()}")
+print(f"Date range: {weather['date'].min()} to {weather['date'].max()}")
+print(f"Regions: {weather['region'].unique()}")
+print(f"Weather data summary:\n{weather.describe()}")
+
+# Load claims data and merge with weather
+claims = pd.read_csv('data/insurance_cleaned.csv')
+claims['claim_date'] = pd.to_datetime(claims['claim_date'])
+weather['date'] = pd.to_datetime(weather['date'])
+
+# Merge claims with weather by date and region (simplified)
+# In production, this would use a spatial-temporal join on coordinates and date
+if 'region' in claims.columns:
+    merged = claims.merge(weather, left_on=['claim_date', 'region'],
+                          right_on=['date', 'region'], how='left')
+else:
+    # Create a proxy region column from location or distribution
+    np.random.seed(42)
+    regions_available = weather['region'].unique()
+    claims['region'] = np.random.choice(regions_available, size=len(claims))
+    merged = claims.merge(weather, left_on=['claim_date', 'region'],
+                          right_on=['date', 'region'], how='left')
+
+print(f"\nMerged dataset: {len(merged):,} claims with weather data")
+print(f"Match rate: {merged['rainfall_mm'].notna().mean()*100:.1f}%")</code></pre>
+
+            <h3>4.2 Extreme Weather Event Analysis</h3>
+
+            <pre><code class="language-python"># Define extreme weather thresholds (top 10% of each metric)
+rain_threshold = weather['rainfall_mm'].quantile(0.90)
+temp_threshold = weather['max_temp'].quantile(0.95)
+wind_threshold = weather['wind_speed_kmph'].quantile(0.90) if 'wind_speed_kmph' in weather.columns else 0
+
+print(f"Extreme Weather Thresholds:")
+print(f"  Heavy rainfall: > {rain_threshold:.1f} mm/day (90th percentile)")
+print(f"  Extreme heat:   > {temp_threshold:.1f}°C (95th percentile)")
+print(f"  High wind:      > {wind_threshold:.0f} km/h (90th percentile)")
+
+# Flag extreme weather days
+merged['extreme_rain'] = (merged['rainfall_mm'] > rain_threshold).astype(int)
+merged['extreme_heat'] = (merged['max_temp'] > temp_threshold).astype(int)
+merged['extreme_wind'] = (merged['wind_speed_kmph'] > wind_threshold).astype(int) if 'wind_speed_kmph' in merged.columns else 0
+
+# Compare claims on extreme weather days vs. normal days
+print(f"\n{'=' * 65}")
+print(f"CLAIMS ANALYSIS: Extreme Weather vs. Normal Days")
+print(f"{'=' * 65}")
+
+extreme_rain_claims = merged[merged['extreme_rain'] == 1]
+normal_claims = merged[merged['extreme_rain'] == 0]
+
+if len(extreme_rain_claims) > 50 and len(normal_claims) > 50:
+    rain_freq_extreme = len(extreme_rain_claims)
+    rain_freq_normal = len(normal_claims)
+    print(f"\nHeavy Rain Analysis:")
+    print(f"  Claims on extreme rain days:     {rain_freq_extreme:>6,.0f}")
+    print(f"  Claims on normal days:           {rain_freq_normal:>6,.0f}")
+    print(f"  Ratio:                           {rain_freq_extreme / max(rain_freq_normal, 1):.2f}x")
+    print(f"  Avg claim amount (extreme rain):  ₹{extreme_rain_claims['claim_amount'].mean():>8,.0f}")
+    print(f"  Avg claim amount (normal):        ₹{normal_claims['claim_amount'].mean():>8,.0f}")
+
+# Monthly aggregation for trend analysis
+merged['month'] = merged['claim_date'].dt.month
+merged['year'] = merged['claim_date'].dt.year
+
+monthly_claims_weather = merged.groupby(['year', 'month']).agg(
+    claim_count=('claim_id', 'count'),
+    avg_claim=('claim_amount', 'mean'),
+    total_claim_amount=('claim_amount', 'sum'),
+    avg_rainfall=('rainfall_mm', 'mean'),
+    max_temp=('max_temp', 'max')
+).reset_index()
+
+monthly_claims_weather['date'] = pd.to_datetime(
+    monthly_claims_weather['year'].astype(str) + '-' +
+    monthly_claims_weather['month'].astype(str) + '-01'
+)
+
+# Plot: claims vs. rainfall over time
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 8))
+
+ax1.plot(monthly_claims_weather['date'], monthly_claims_weather['claim_count'],
+         color='#6c5ce7', linewidth=2, marker='o', markersize=4)
+ax1.set_ylabel('Monthly Claim Count', fontsize=11)
+ax1.set_title('Claims Volume vs. Rainfall — Climate Correlation Analysis', fontweight='bold')
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+ax2.bar(monthly_claims_weather['date'], monthly_claims_weather['avg_rainfall'],
+        color='#00d2d3', alpha=0.7, width=15)
+ax2.set_ylabel('Average Rainfall (mm)', fontsize=11)
+ax2.set_xlabel('Date')
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+
+# Correlation analysis
+corr_rain_claims = monthly_claims_weather['avg_rainfall'].corr(monthly_claims_weather['claim_count'])
+corr_temp_claims = monthly_claims_weather['max_temp'].corr(monthly_claims_weather['claim_count'])
+
+print(f"\nCorrelation Analysis:")
+print(f"  Rainfall vs. Claim Count:     {corr_rain_claims:+.3f}")
+print(f"  Max Temperature vs. Claims:    {corr_temp_claims:+.3f}")
+print(f"\nInterpretation:")
+if corr_rain_claims > 0.3:
+    print(f"  Positive correlation between rainfall and claims — consistent with flood damage.")
+if corr_rain_claims > 0.5:
+    print(f"  STRONG correlation — rainfall is a significant driver of claims in this portfolio.")
+if corr_temp_claims > 0.3:
+    print(f"  Heat is associated with higher claims — consistent with health and property impacts.")</code></pre>
+
+            <h3>4.3 Lag Analysis — Do Weather Events Predict Future Claims?</h3>
+
+            <pre><code class="language-python"># Lag analysis: does heavy rainfall predict higher claims in the following week/month?
+merged['claim_month'] = merged['claim_date'].dt.month
+merged['claim_year'] = merged['claim_date'].dt.year
+
+# Aggregate to monthly — current month rainfall vs. next month claims
+monthly_rain = merged.groupby(['claim_year', 'claim_month']).agg(
+    rainfall=('rainfall_mm', 'mean'),
+    claims=('claim_id', 'count')
+).reset_index()
+
+# Create lagged variables
+monthly_rain['rainfall_lag1'] = monthly_rain['rainfall'].shift(1)
+monthly_rain['claims_lead1'] = monthly_rain['claims'].shift(-1)
+
+current_monthly = monthly_rain.dropna()
+
+if len(current_monthly) > 10:
+    lag_corr = current_monthly['rainfall'].corr(current_monthly['claims_lead1'])
+    print(f"\n{'=' * 55}")
+    print(f"LAG ANALYSIS: Does this month's rainfall predict next month's claims?")
+    print(f"{'=' * 55}")
+    print(f"  Correlation (rainfall_t → claims_t+1): {lag_corr:+.3f}")
+
+    if abs(lag_corr) > 0.2:
+        print(f"  {'↗ A lag effect of ~1 month exists — heavy rainfall predicts higher claims in the following month.' if lag_corr > 0 else '↘ Negative lag correlation — unusual pattern, may indicate data issue or seasonal effect.'}")
+        print(f"  This is consistent with the delay between a flood event and the filing of")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The correlation and lag analyses above use a simplified synthetic dataset. In a real-world analysis, several additional complexities arise: (a) weather data comes from weather stations that may be far from the claim location — spatial interpolation (Kriging, inverse-distance weighting) is needed, (b) the relationship between rainfall and claims is non-linear — a moderate rain event may cause zero claims while a similar moderate event in a different location causes thousands (depends on drainage infrastructure, building quality, warning systems), and (c) the claims response to weather events has a distributed lag — heavy rain in week 1 causes some claims immediately (flood damage) and more claims in weeks 2–8 (mould, subsidence, delayed reporting). A simple correlation analysis is a starting point, not a conclusion.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Climate Risk Visualization in Looker Studio</h2>
+
+            <p>Climate risk dashboards are essential for both internal risk management (monitoring portfolio exposure) and external reporting (regulatory disclosure, investor communication, and reinsurance submissions). Looker Studio's integration with Google Maps, its free access model, and its ease of sharing make it a practical choice for smaller insurers and InsurTechs that cannot afford enterprise BI tools.</p>
+
+            <h3>5.1 Dashboard Structure</h3>
+
+            <pre><code class="language-text">LOOKER STUDIO DASHBOARD: CLIMATE RISK MONITOR
+
+Page 1 — Portfolio Exposure Overview:
+┌─────────────────────────────────────────────────────────────────────┐
+│ CLIMATE RISK MONITOR  [Slicers: Time Period ▼] [Product ▼] [Region ▼]
+├──────────────────┬──────────────────┬──────────────────┬─────────────┤
+│ Total Policies   │ Total Sum Insured│ Highest Risk     │ Protection  │
+│ at Risk          │ at Risk (₹ Cr)   │ Region           │ Gap (%)    │
+│ XX,XXX           │ ₹X,XXX Cr        │ XXXX             │ XX%        │
+├──────────────────┴──────────────────┴──────────────────┴─────────────┤
+│ Portfolio Exposure Map (Google Maps / Geo Chart)                     │
+│ • Heatmap overlay: Sum insured by district/state                    │
+│ • Layer toggle: Cyclone zones, Flood zones, EQ zones                │
+│ • Drill-down: Click state → district → policy detail                │
+├──────────────────────────┬──────────────────────────────────────────┤
+│ Exposure by Peril (Donut)│ Top 10 High-Risk Districts (Table)      │
+│ • Flood:        XX%     │ District │ Pols │ SI (Cr) │ PML100 │    │
+│ • Cyclone:      XX%     │ ──────────────────────────────────── │    │
+│ • Heatwave:     XX%     │ XXXX     │ XXXX  │ XXXX    │ XXXX   │    │
+│ • Earthquake:   XX%     │ XXXX     │ XXXX  │ XXXX    │ XXXX   │    │
+└──────────────────────────┴──────────────────────────────────────────┘
+
+Page 2 — Claims × Weather Trend Analysis:
+┌─────────────────────────────────────────────────────────────────────┐
+│ Time series: Claims per Month vs. Rainfall (dual-axis line chart)  │
+│ • Claims volume (bar) + Rainfall (line, secondary axis)            │
+│ • Reference lines for extreme weather thresholds                   │
+│ • Annotations for major weather events (cyclones, floods)          │
+├──────────────────────────┬──────────────────────────────────────────┤
+│ Correlation Matrix       │ Claims Impact by Event Type             │
+│ (Peril × Claims Increase)│ (Bar chart: % change in claims during   │
+│                          │  extreme weather events vs. normal)     │
+└──────────────────────────┴──────────────────────────────────────────┘</code></pre>
+
+            <h3>5.2 Building the Dashboard</h3>
+
+            <p><strong>Step 1 — Data source:</strong> Upload the merged weather + claims dataset (from Section 4) to Google Sheets. In Looker Studio, connect to this Google Sheet as the data source. Ensure date fields are recognised as dates and numeric fields as numbers.</p>
+
+            <p><strong>Step 2 — Page 1 — Portfolio Exposure:</strong> Add a Google Map chart with "region" as the location field and "total_sum_assured" as the metric. Add a second layer showing cyclone zones (if shapefile is available as a data source). Add a donut chart showing sum insured by peril type. Add a table with the top 10 high-risk districts sorted by PML estimate.</p>
+
+            <p><strong>Step 3 — Page 2 — Claims × Weather:</strong> Add a time series chart with monthly claim count as the metric and month as the date dimension. Add a second series: average rainfall (right Y-axis). Configure these chart settings: legend at bottom, connect null values (on), missing data as line gaps. Add reference lines at the 90th percentile rainfall threshold. Add annotations for known extreme weather events (cyclone dates, flood events).</p>
+
+            <p><strong>Step 4 — Interactivity:</strong> Add date range control. Add a product-type filter dropdown. Add a region filter. Ensure all charts update when filters change. Test: selecting "Cyclone" in the peril filter should update the map, the donut chart, and the claims trend simultaneously.</p>
+
+            <p><strong>Step 5 — Sharing:</strong> Share the dashboard with view-only permissions to the underwriting team and the risk committee. Set up scheduled email delivery (PDF snapshot) to the CRO weekly during monsoon season (June–September) and monthly during the rest of the year.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The most important visual on a climate risk dashboard is the <strong>extreme weather event annotations on the claims trend chart</strong>. When a board member or regulator asks "what happened in September that caused a claims spike?", having the exact cyclone name, date, and affected region as an annotation on the chart turns a confusing spike into an immediately understandable data point. In Looker Studio, you can add these annotations by creating a separate data table with event dates, names, and descriptions, and joining it to your main chart data source. This is a simple step that transforms the dashboard from "interesting" to "actionable."
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch18-insurer-response">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>6. Insurer Response to Climate Risk</h2>
+
+            <p>Insurers have four levers to respond to climate risk: price, product, portfolio, and advocacy. The most sophisticated insurers pull all four simultaneously — but the industry as a whole is still at an early stage of this transition.</p>
+
+            <h3>6.1 The Four Levers</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Lever</th><th>Description</th><th>Examples</th><th>Constraints</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Price</strong></td>
+                        <td>Use climate risk models to price coverage more accurately — higher premiums in high-risk zones, lower in low-risk zones. Dynamic pricing that updates annually as risk changes.</td>
+                        <td>Coastal property premiums increasing 50–200% in cyclone-prone areas. Flood cover as a separately priced add-on rather than bundled. Deductibles that vary by zone (higher deductible = lower premium in high-risk areas).</td>
+                        <td>Regulatory constraints — some state insurance regulators limit premium increases regardless of risk. Customer affordability — if climate risk pricing is "accurate," many high-risk customers cannot afford coverage.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Product</strong></td>
+                        <td>Design new products that address climate risk more effectively than traditional indemnity insurance. Parametric products (see Session 19), micro-insurance, resilience bonds, and risk-pooling mechanisms.</td>
+                        <td>Parametric cyclone insurance for coastal businesses — payout triggered by wind speed, not damage assessment. Crop insurance based on rainfall index. Resilience bonds that fund pre-disaster mitigation.</td>
+                        <td>Parametric products require a reliable index and data source — not all climate perils have good indices. New products require regulatory approval. Customer education needed — customers may not understand parametric triggers.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Portfolio</strong></td>
+                        <td>Actively manage the geographic and peril concentration of the insurance portfolio. Reduce exposure in high-risk zones, increase diversification in low-risk zones, and purchase reinsurance to match the risk appetite.</td>
+                        <td>Reducing property insurance exposure in coastal Gujarat and Odisha. Geographic diversification into inland states. Catastrophe bonds and ILS (insurance-linked securities) to transfer peak risk to capital markets.</td>
+                        <td>Geographic diversification is constrained by distribution — an insurer's agents and brand presence are in specific regions. Exiting a market is politically and reputationally difficult.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Advocacy</strong></td>
+                        <td>Use the insurer's voice as a trusted institution to advocate for climate adaptation policies — better building codes, flood defences, early warning systems, and land-use planning that reduce the economic and insured impact of climate events.</td>
+                        <td>Insurers advocating for stronger building codes in cyclone-prone areas. Funding flood defence infrastructure. Partnering with the IMD and NDMA on early warning systems. Supporting research on climate risk modelling.</td>
+                        <td>Advocacy is a long-term play — no immediate financial return. Some insurers are reluctant to be publicly vocal on climate policy for fear of alienating stakeholders.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> One of the most innovative Indian insurer responses to climate risk comes not from a traditional insurer but from the government: the Pradhan Mantri Fasal Bima Yojana (PMFBY), India's flagship crop insurance scheme. PMFBY uses a combination of yield-based assessment (Crop Cutting Experiments — CCEs) and weather-based indices (Rainfall, temperature, wind speed) to trigger payouts to farmers. The scheme is not a traditional insurance product — it is a climate risk-pooling mechanism that combines government subsidy, insurer participation, and technology (satellite data, weather stations, mobile-based claim filing). While PMFBY has faced significant implementation challenges (delays in claim payments, inadequate sum insured for some crops, varying state government participation), it represents the largest climate risk insurance programme in the world by number of beneficiaries — covering over 30 million farmers annually. For insurers participating in PMFBY, the lessons learned from climate data integration, index-based triggers, and large-scale claims processing are directly applicable to the commercial climate risk products they are developing for non-agricultural customers.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-core">
+            <h2>7. The Protection Gap</h2>
+
+            <p>The protection gap — the difference between total economic losses from a disaster and the portion covered by insurance — is the most important climate-finance metric for the insurance industry. It measures the proportion of economic loss that is uninsured — meaning the loss is absorbed by individuals, businesses, or the government (ultimately, taxpayers). In India, the protection gap for natural catastrophes exceeds 90% — meaning less than 10% of climate-related economic losses are insured.</p>
+
+            <h3>7.1 The Numbers</h3>
+
+            <pre><code class="language-python"># Protection gap simulation for Indian natural catastrophes
+events = pd.DataFrame({
+    'event': ['Cyclone Amphan (2020)', 'Kerala Floods (2018)',
+              'Cyclone Fani (2019)', 'Uttarakhand Flood (2021)',
+              'Chennai Floods (2021)', 'Heatwave (2024, estimated)'],
+    'economic_loss_cr': [97200, 33600, 58560, 3640, 14550, 21800],
+    'insured_loss_cr': [9750, 1680, 4380, 240, 900, 520]  # Estimated
+})
+
+events['protection_gap_pct'] = ((events['economic_loss_cr'] - events['insured_loss_cr']) /
+                                  events['economic_loss_cr'] * 100)
+events['gap_amount_cr'] = events['economic_loss_cr'] - events['insured_loss_cr']
+
+print("=" * 80)
+print("INDIA'S NATURAL CATASTROPHE PROTECTION GAP")
+print("=" * 80)
+print(f"{'Event':30s} {'Economic':>10s} {'Insured':>10s} {'Gap %':>8s} {'Uninsured':>12s}")
+print("-" * 70)
+for _, row in events.iterrows():
+    print(f"{row['event']:30s} ₹{row['economic_loss_cr']:>7,.0f}Cr ₹{row['insured_loss_cr']:>5,.0f}Cr {row['protection_gap_pct']:>6.1f}% ₹{row['gap_amount_cr']:>6,.0f}Cr")
+
+total_economic = events['economic_loss_cr'].sum()
+total_insured = events['insured_loss_cr'].sum()
+total_gap_pct = (total_economic - total_insured) / total_economic * 100
+
+print("-" * 70)
+print(f"{'TOTAL':30s} ₹{total_economic:>7,.0f}Cr ₹{total_insured:>5,.0f}Cr {total_gap_pct:>5.1f}%  ₹{total_economic - total_insured:>6,.0f}Cr")
+print(f"\nThe protection gap for these major events averages {total_gap_pct:.1f}%.")
+print(f"For every ₹100 of economic loss from natural catastrophes in India,")
+print(f"approximately ₹{100 - total_gap_pct:.0f} is insured — the rest is absorbed")
+print(f"by individuals, businesses, and the government (taxpayers).")</code></pre>
+
+            <h3>7.2 Why the Protection Gap Matters</h3>
+
+            <p>The protection gap is not just an insurance metric — it is a development metric. When a flood destroys a village and 90% of the losses are uninsured, the consequences are severe: families fall into poverty (the World Bank estimates that 26 million people globally are pushed into poverty each year by natural disasters), businesses cannot rebuild because they lack the capital, and the government must redirect budget from other priorities (education, health, infrastructure) to disaster relief. Insurance — particularly climate risk insurance — is a climate adaptation tool, not just a financial product. Closing the protection gap is one of the most important contributions the insurance industry can make to sustainable development.</p>
+
+            <h3>7.3 How to Close the Gap</h3>
+
+            <p>Closing the Indian climate protection gap requires action on multiple fronts simultaneously:</p>
+            <ul>
+                <li><strong>Product innovation:</strong> Traditional indemnity insurance is too expensive to distribute and administer for low-premium, high-volume climate-exposed populations. Parametric insurance (Session 19), micro-insurance, and mobile-first products can reach customers that traditional products cannot. The goal is not "cheaper insurance" but "different insurance" — products with lower distribution costs, faster claims, and simpler terms that match the needs of climate-exposed populations.</li>
+                <li><strong>Data infrastructure:</strong> Better weather data, flood mapping, cyclone trajectory models, and exposure data enable better pricing — which enables insurers to offer coverage in areas they currently avoid because the risk is unquantifiable. The India Meteorological Department's expanding weather station network, satellite data from ISRO, and the government's PMFBY data infrastructure are reducing this barrier.</li>
+                <li><strong>Public-private partnerships:</strong> The protection gap cannot be closed by private insurers alone — the risks are too large and the premiums too low for purely commercial solutions. The government must play a role as: (a) reinsurer of last resort for catastrophic events, (b) premium subsidiser for low-income populations, and (c) data provider and standard-setter for climate risk modelling. PMFBY is India's largest example of this PPP model.</li>
+                <li><strong>Financial literacy and trust:</strong> Many climate-exposed households in India have never purchased insurance and do not trust insurance companies. Building trust through fast, fair claims (the most important marketing investment for climate risk insurance), simple product terms (one-page policies in the local language), and distribution through trusted local institutions (cooperatives, banks, microfinance institutions) is essential.</li>
+            </ul>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The 90%+ protection gap for natural catastrophes in India represents an enormous business opportunity. If the gap were closed by even 10 percentage points (from 90% to 80% uninsured), it would represent approximately ₹5,000–10,000 crore in additional annual premium for the Indian insurance industry — roughly 5–10% of the current general insurance market. Unlike motor insurance (where penetration is already high) or health insurance (growing fast but competitive), climate risk insurance in India is a <strong>blue ocean</strong> — a market with almost unlimited room for growth, driven by a combination of climate change (more events, more awareness), regulation (potential mandatory disaster insurance for properties in high-risk zones), and technology (parametric products, mobile distribution, AI-based claims). The insurer that cracks the climate protection gap will not just be doing good — it will be building a business that could dominate Indian general insurance for a generation.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Climate Risk Portfolio Analysis</h2>
+            <div class="project-brief">
+                <p>You are the Chief Risk Officer's analytics lead at "CoastalGuard Insurance," a general insurer with significant exposure in India's coastal regions. Your CEO has asked for a quantitative assessment of the portfolio's climate risk exposure and a strategy to manage it. You have access to the company's policy data and a weather dataset.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Portfolio climate exposure assessment:</strong> Using the policy data, categorise all policies into climate risk zones (use location/proxy data). Calculate the percentage of the portfolio in high-risk zones (cyclone, flood, heatwave). Identify which product lines have the highest climate risk concentration.</li>
+                    <li><strong>Weather-claims correlation:</strong> Merge the weather data with claims data by date and region. Analyse the correlation between extreme weather events (rainfall above 90th percentile, temperatures above 95th percentile) and claims frequency/severity. Create a dual-axis plot showing monthly claims vs. rainfall.</li>
+                    <li><strong>Lag analysis:</strong> Test whether heavy rainfall predicts higher claims in the following month. Calculate the correlation between rainfall in month t and claims in month t+1. Interpret the result.</li>
+                    <li><strong>Protection gap report:</strong> Using the event data from Section 7 (or real data on recent Indian disasters that you research), calculate the protection gap for at least 3 major events. Write a paragraph explaining what this gap means for affected communities.</li>
+                    <li><strong>Strategy memo:</strong> Recommend a climate risk management strategy for the CEO addressing: (a) Portfolio actions — which regions/products need exposure reduction v. diversification? (b) Pricing actions — how should climate risk be incorporated into premiums? (c) Product innovation — what new climate risk products could the insurer develop? (d) Reinsurance — how will the protection gap affect the insurer's reinsurance programme?</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Strategy Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> CEO, CoastalGuard Insurance<br>
+                    <strong>From:</strong> CRO Analytics — Climate Risk Assessment<br>
+                    <strong>Subject:</strong> Portfolio Climate Risk Exposure — Assessment and Recommended Strategy</p>
+
+                    <p><strong>Executive Summary:</strong><br>
+                    Our portfolio has a 34% concentration in coastal high-risk zones (cyclone and flood prone), concentrated in the property (48% of coastal exposure) and motor (38%) lines. The weather-claims correlation analysis confirms that extreme rainfall days (>90th percentile) are associated with a 2.3× increase in claim frequency and a 1.6× increase in average claim severity. Lag analysis shows a 0.42 correlation between monthly rainfall and the following month's claims, consistent with delayed reporting of weather-related damage. The unmodelled climate risk — losses from events more severe than our current 1-in-100 year model — is estimated at ₹45–₹75 crore, which would consume 60%+ of our current catastrophe reinsurance limit. The protection gap for Indian natural catastrophes exceeds 90%, representing both a societal challenge and a significant market opportunity for appropriately priced and designed climate risk products.</p>
+
+                    <p><strong>Recommended Actions — Immediate (0–12 months):</strong><br>
+                    (1) <strong>Portfolio rebalancing:</strong> Reduce property insurance exposure in the highest-risk coastal zones (cyclone wind speed zones D &amp; E) by 15% over 12 months through non-renewal of policies in specific high-risk postal codes. Correspondingly, increase geographic diversification into inland states (Madhya Pradesh, Rajasthan, Jharkhand) where climate risk is lower and competition for property insurance is less intense. Estimated impact: 8% reduction in peak cyclone PML. (2) <strong>Pricing revision:</strong> Introduce climate-risk adjusted pricing for property insurance in all coastal zones, with a phased 20–40% increase over 18 months for highest-risk policies. Implement a "flood cover add-on" structure where flood coverage is separately priced and itemised, replacing the current bundled approach. Communicate these changes clearly — frame them as "risk-reflective pricing" not "rate increases." (3) <strong>Reinsurance renewal:</strong> Increase the catastrophe reinsurance limit by 25% at the next renewal to reflect the updated climate risk assessment. Explore parametric catastrophe swap for cyclone risk — a fixed payout if a Category 4+ cyclone makes landfall within 100 km of our highest-exposure region, providing immediate liquidity without the claims adjustment delay.</p>
+
+                    <p><strong>Recommended Actions — Medium-term (12–36 months):</strong><br>
+                    (1) <strong>Product innovation — Parametric micro-insurance:</strong> Develop a parametric cyclone insurance product for households and small businesses in coastal zones. Payout triggered by wind speed (IMD data at the nearest weather station) rather than damage assessment. Premium: ₹200–₹1,000 per year. Payout: ₹25,000–₹2,00,000. Distribution through local banks and cooperative societies. This product targets the ~90% of coastal households that currently have no insurance — directly addressing the protection gap. (2) <strong>Investment in climate data:</strong> Partner with IMD and ISRO for high-resolution weather data and satellite-based damage assessment. Build an internal climate risk model that downscales global climate models to the postal-code level. This data capability is a competitive advantage that cannot be easily replicated. (3) <strong>Advocacy:</strong> Join the Insurance Association's climate risk working group. Advocate for: mandatory flood risk disclosure in property transactions (so buyers know the risk before they purchase), stronger building codes in cyclone zones, and government-backed flood defence investment in high-risk urban areas.</p>
+
+                    <p><strong>Key Risk and Mitigation:</strong><br>
+                    The primary risk is that the portfolio rebalancing — reducing coastal exposure — alienates our distribution partners (agents in coastal zones) and creates negative media coverage. Mitigation: (a) the rebalancing is phased over 12 months, not a sudden withdrawal, (b) we offer an alternative product (the parametric micro-insurance) that keeps us present in the coastal market but with a different risk profile, (c) we work with agents to transition customers to the new product rather than simply cancelling policies. The secondary risk is that the climate risk pricing is challenged by regulators or customers. Mitigation: transparent communication using IMD data, clear linkage between premium and measured climate risk, and a customer appeal process for any pricing challenge.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Climate change affects insurance through physical risks (more extreme weather → more claims) and transition risks (carbon pricing, regulation, litigation). Non-stationarity — the fact that the past no longer predicts the future — undermines the actuarial foundation of insurance itself.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>India is one of the most climate-vulnerable countries globally, with massive exposure to cyclones, floods, heatwaves, and glacial melt. The 2015 Chennai floods were a watershed moment — flood cover uptake surged from 10% to 60% after the event, and the pattern of annual severe floods has forced insurers to update their risk models fundamentally.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Portfolio climate risk analysis requires four steps: geographic mapping of all policies → peril overlay → exposure aggregation → capital impact assessment. The Herfindahl-Hirschman Index (HHI) by peril zone is the single most important concentration metric — reinsurers track this closely.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>Merging weather data with claims data and analysing correlations — including lag effects (rainfall month t → claims month t+1) — enables insurers to quantify the climate-claims relationship and price climate risk more accurately. A Looker Studio dashboard with extreme weather annotations turns data into action.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>India's >90% natural catastrophe protection gap — only ₹5–10 of every ₹100 of climate loss is insured — represents both a societal crisis and a ₹5,000–10,000 crore market opportunity. Closing the gap requires product innovation (parametric, micro-insurance), better data, public-private partnerships, and financial literacy.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s18-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. The "non-stationarity" problem in climate risk insurance refers to:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) The fact that weather stations are not stationary during extreme events</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) The fact that the statistical distribution of weather events is shifting over time — the 100-year flood of 1980 may be the 25-year flood of 2025, making historical data an unreliable basis for pricing climate risk</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) The fact that insurance regulators change climate risk disclosure requirements every year</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) The fact that climate risk is not stationary across different insurance products</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A government introduces a carbon tax on fossil fuel companies. An insurer holds significant investments in coal mining companies. The insurance company's investment portfolio loses value. This is an example of:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Physical climate risk — because the carbon tax is a physical policy document</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Transition risk — because it arises from the policy transition to a low-carbon economy, not from a physical weather event</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Market risk — because it affects investment portfolios, not insurance policies</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Underwriting risk — because the insurer should not have insured coal companies</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. The Herfindahl-Hirschman Index (HHI) is used in climate risk management to measure:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The profitability of climate insurance products</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) The geographic concentration of portfolio exposure within natural peril zones — a high HHI (>0.15) indicates dangerous concentration that threatens solvency if a single event affects that zone</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The correlation between temperature and claim frequency</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The optimal pricing of catastrophe reinsurance</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. An insurer observes that claims in a specific coastal district are 2.3× higher in months following heavy rainfall. The 1-month lag between the rainfall event and the claims increase is most likely explained by:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) The rainfall causes claims in the same month — the lag is a data error</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Delayed reporting — flood damage may take days to weeks to become fully apparent (mould, subsidence, structural weakening), and policyholders may not file claims immediately during the crisis period — the claims come in over subsequent weeks</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Insurers deliberately delay processing claims in flood-affected areas</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) The rainfall measurement instrument is inaccurate, causing a systematic measurement lag</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A cyclone causes ₹10,000 crore in economic losses. Only ₹750 crore is insured. The "protection gap" for this event is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) 7.5% — the percentage of losses that were insured</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) 92.5% — the percentage of losses that were NOT insured (₹9,250 crore uninsured out of ₹10,000 crore total). This means individuals, businesses, and the government must absorb most of the cost</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) ₹750 crore — the absolute amount of insured losses</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) 100% — all losses are economic losses regardless of insurance status</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s18-quiz', ['b','b','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s18-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-17.html" class="nav-link">&larr; Previous: Cyber Risk &amp; Cyber Insurance</a>
+            <a href="session-19.html" class="nav-link next">Next: Parametric Insurance Design &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

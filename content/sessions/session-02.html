@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Session 02: Risk Management Fundamentals - Learn risk assessment, mitigation strategies, and build professional risk registers in Excel">
+    <title>Session 02: Risk Management Fundamentals — Insurtech &amp; Digital Risk Solutions [v2.0 - Corrected]</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* Editable answer fields — students can type directly in the page.
+           Input is NOT saved anywhere; it only lives in the browser session
+           so students can try their answer before revealing the solution. */
+        .write-in {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+            box-sizing: border-box;
+        }
+        .write-in:focus {
+            border-color: var(--primary);
+            border-style: solid;
+            background: var(--surface-hover);
+        }
+        .write-in::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .write-in-tall { min-height: 72px; }
+    </style>
+</head>
+<body>
+    <!-- SESSION-02 CORRECTED v2.0 - Last Updated: 30-Jul-2026 -->
+    <!-- Compatible with: Risk_Management_Fundamentals_CORRECTED.xlsx -->
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <!-- Session Navigation Top -->
+        <nav class="chapter-nav-top">
+            <a href="session-01.html" class="nav-link">&larr; Previous: Intro to Insurance Industry</a>
+            <a href="session-03.html" class="nav-link next">Next: Insurance Business Model &rarr;</a>
+        </nav>
+
+        <!-- Session Header -->
+        <header class="chapter-header" style="background: linear-gradient(135deg, #1a1a3e 0%, #2c1f52 100%); color: #fff;">
+            <div class="chapter-badge">Module 1 &middot; Session 02 &middot; 90 min &middot; Excel Lab</div>
+            <h1>Session 02: Risk Management Fundamentals</h1>
+            <div class="chapter-meta">
+                CILO-1 &middot; Domain Knowledge &middot; Lecture &amp; Problem Solving (Excel) &middot; Bring laptop with Excel
+            </div>
+        </header>
+
+        <!-- Learning Objectives -->
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Distinguish between pure risk and speculative risk, and explain why only pure risks are insurable</li>
+                <li>Apply the five-step risk management process — identification, assessment, mitigation, implementation, and monitoring — to a real-world insurance scenario</li>
+                <li>Use qualitative and quantitative risk assessment techniques including likelihood-impact matrices and expected loss calculations</li>
+                <li>Evaluate the five risk mitigation strategies (Transfer, Tolerate, Treat, Terminate, Take Advantage) and select the appropriate strategy for a given risk</li>
+                <li>Construct a complete risk register with 10+ risks in Excel using formulas, conditional formatting, and residual risk scoring</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1: Understanding Risk -->
+        <section class="content-section stability-core">
+            <h2>1. Understanding Risk</h2>
+
+            <p>Before we can manage risk, we must understand what it is. In everyday language, "risk" means the possibility of something bad happening. But in insurance and risk management, the definition is more precise — and the distinctions matter enormously for what can and cannot be insured.</p>
+
+            <h3>1.1 Defining Risk</h3>
+            <p>In insurance terms, <strong>risk</strong> has two components that must both be present:</p>
+            <ul>
+                <li><strong>Uncertainty:</strong> We do not know whether the event will occur, when it will occur, or how severe it will be. A certainty is not a risk. If a building is already on fire, there is no uncertainty — it is a loss event in progress, not a risk.</li>
+                <li><strong>Possibility of Loss:</strong> The outcome must have a downside. If an event can only produce neutral or positive outcomes, it may involve uncertainty but it does not involve risk in the insurable sense.</li>
+            </ul>
+
+            <p>Formally, risk can be expressed as:</p>
+
+            <pre><code class="language-text">Risk = Probability of Event × Severity of Loss
+
+Where: Probability = likelihood of the event occurring (0 to 1, or percentage)
+       Severity   = financial impact if the event occurs (in currency terms)
+
+Example: Risk of factory fire = 0.002 (0.2% per year) × ₹2,00,00,000
+        = ₹40,000 expected annual loss</code></pre>
+
+            <h3>1.2 Pure Risk vs. Speculative Risk</h3>
+            <p>This is arguably the most important conceptual distinction in insurance:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Pure Risk</th><th>Speculative Risk</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Possible Outcomes</strong></td>
+                        <td>Loss or No Loss (two outcomes)</td>
+                        <td>Loss, No Loss, or Gain (three outcomes)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Insurable?</strong></td>
+                        <td>Yes — under the right conditions</td>
+                        <td>Generally No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Examples</strong></td>
+                        <td>House fire, car accident, hospitalization, death, cyclone damage</td>
+                        <td>Stock market investment, launching a new product, gambling, buying lottery tickets</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Risk Pooling Viable?</strong></td>
+                        <td>Yes — the law of large numbers applies</td>
+                        <td>No — the possibility of gain creates adverse selection and moral hazard problems</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Social Benefit of Insurance?</strong></td>
+                        <td>High — protects against financial ruin</td>
+                        <td>Negative — would encourage excessive risk-taking</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Some risks seem to blur the line between pure and speculative, but the distinction becomes clear when you ask: <em>"What event actually triggers the insurance payout?"</em><br><br>
+                    <strong>Example 1 — Business Interruption Insurance:</strong> A factory burns down. The fire itself is a <strong>pure risk</strong> — it can only cause loss. The insurance pays because of the fire. The fact that the factory owner's <em>decision to operate a business</em> (a speculative risk — could succeed or fail) is related to the loss is irrelevant; the <em>trigger</em> is the fire, not the business decision. The pure risk (fire) makes it insurable.<br><br>
+                    <strong>Example 2 — Trade Credit Insurance:</strong> A supplier sells goods to a customer on credit and insures against the customer not paying. The customer's non-payment is a <strong>pure risk for the supplier</strong> — it can only cause loss. The fact that the customer's business may have <em>failed</em> due to speculative decisions (bad investments, poor strategy) does not matter — from the supplier's perspective, the non-payment is an unforeseen loss beyond their control.<br><br>
+                    <strong>The rule:</strong> Insurance covers the <strong>trigger event</strong>, not the broader business context. If the trigger event is a pure risk (fire, accident, default, illness, death), the risk is insurable — even if speculative risks are connected somewhere in the background.
+                </div>
+            </div>
+
+            <h3>1.3 Systematic vs. Unsystematic Risk</h3>
+            <p>Risk can also be classified by its scope:</p>
+            <ul>
+                <li><strong>Systematic Risk (Non-Diversifiable):</strong> Affects an entire market or system simultaneously. Cannot be eliminated through diversification. Examples: interest rate changes for life insurers, regulatory changes affecting all insurers, systemic cyber events (major cloud provider outage), pandemic risk.</li>
+                <li><strong>Unsystematic Risk (Diversifiable):</strong> Specific to an individual, company, or small group. Can be reduced through diversification and pooling. Examples: an individual policyholder's house burning down, a single factory's machinery breakdown, one driver's car accident.</li>
+            </ul>
+
+            <p>Insurance is fundamentally designed to handle unsystematic risk through pooling. Systematic risk, by its nature, cannot be pooled away — which is why pandemics, widespread cyber events, and systemic financial crises present existential challenges to the insurance industry and often require government backstops or reinsurance solutions.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> During COVID-19, Indian insurers faced simultaneous pressures: health claims surged, life insurance death claims increased, motor claims dropped (fewer cars on the road), and investment portfolios lost value as markets crashed. This was systematic risk in action — everything moved together. Insurers that had strong Enterprise Risk Management (ERM) frameworks weathered the storm far better than those that managed each risk in isolation.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: The Risk Management Process -->
+        <section class="content-section stability-core">
+            <h2>2. The Risk Management Process</h2>
+
+            <p>Risk management is not a one-time exercise. It is a continuous cycle of five interconnected steps that feed into each other. Every organization — and every insurance company — that manages risk effectively follows some version of this process.</p>
+
+            <h3>2.1 The Five-Step Cycle</h3>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>Step 1: Risk Identification</h4>
+                    <p>Systematically identify all risks the organization faces. What could go wrong? What events could cause financial loss, operational disruption, reputational damage, or regulatory penalty? The goal is comprehensiveness — a risk you haven't identified is a risk you cannot manage.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Step 2: Risk Assessment</h4>
+                    <p>For each identified risk, estimate two things: (a) How likely is it to occur? (b) If it does occur, how severe will the impact be? This can be qualitative (High/Medium/Low) or quantitative (annual probability of 2%, expected loss of ₹50 lakh). The output is a prioritized list of risks.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Step 3: Risk Mitigation</h4>
+                    <p>For each significant risk, decide what to do about it. The five options — Transfer, Tolerate, Treat, Terminate, Take Advantage — are the heart of risk management strategy. We explore each in detail in Section 5.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Step 4: Implementation</h4>
+                    <p>Put the chosen mitigation strategies into action. This is where strategy meets operations: purchasing insurance policies, installing fire suppression systems, training employees on cybersecurity, diversifying the investment portfolio, setting up compliance monitoring.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Step 5: Monitoring &amp; Review</h4>
+                    <p>Risk is dynamic. New risks emerge, existing risks change in probability or severity, mitigation measures degrade over time, and the external environment evolves. Continuous monitoring and periodic review — quarterly at minimum — are essential. The risk register is a living document, not a filing exercise.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The most common failure in risk management is treating Step 5 (monitoring and review) as optional. A risk register created in January and never revisited is worse than no risk register at all — it creates a false sense of security. Effective risk managers schedule quarterly risk review meetings as recurring calendar events, with clear ownership for each risk item and a requirement that owners come prepared with updates.
+                </div>
+            </div>
+
+            <!-- Exercise 2.1 — Sequence the Process -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128295; Exercise 2.1 — Sequence the Risk Management Process</h4>
+                    <p>Below are the <strong>5 steps</strong> of the risk management process and <strong>5 actions</strong> — but they are jumbled. Your task: (A) Arrange the steps in the correct order. (B) Match each step to the action that belongs with it.</p>
+                </div>
+
+                <h3 style="font-size: var(--font-size-base);">Part A — Order the Steps</h3>
+                <table>
+                    <thead>
+                        <tr><th style="width: 60px;">Your Order</th><th>Step</th><th style="width: 180px;">Step Name</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td>Put the chosen mitigation strategies into action — install controls, purchase insurance, train employees.</td><td><input class="write-in" type="text" placeholder="Type step name..."></td></tr>
+                        <tr><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td>For each identified risk, estimate how likely it is and how severe it would be.</td><td><input class="write-in" type="text" placeholder="Type step name..."></td></tr>
+                        <tr><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td>Systematically find all risks the organisation faces — what could go wrong?</td><td><input class="write-in" type="text" placeholder="Type step name..."></td></tr>
+                        <tr><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td>Track risks over time — new risks emerge, existing risks change, controls degrade.</td><td><input class="write-in" type="text" placeholder="Type step name..."></td></tr>
+                        <tr><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td>For each significant risk, decide what to do — Transfer, Tolerate, Treat, Terminate, or Take Advantage.</td><td><input class="write-in" type="text" placeholder="Type step name..."></td></tr>
+                    </tbody>
+                </table>
+
+                <h3 style="font-size: var(--font-size-base); margin-top: var(--space-md);">Part B — Apply the Process</h3>
+                <p><strong>Scenario:</strong> You are the risk manager of an insurance company. A new regulation requires you to assess and manage <strong>cyber risk</strong> across the organisation. Walk through the 5 steps and state briefly what you would do at each step.</p>
+
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>View Solution — Correct Sequence + Worked Example</summary>
+                    <div class="solution-content">
+                        <h4>Part A — Correct Order</h4>
+                        <table>
+                            <tr><th>Order</th><th>Step Name</th><th>Why This Order?</th></tr>
+                            <tr><td>1</td><td><strong>Risk Identification</strong></td><td>You cannot manage a risk you have not identified. Always start here.</td></tr>
+                            <tr><td>2</td><td><strong>Risk Assessment</strong></td><td>Once identified, assess each risk — how likely? how severe? Prioritise.</td></tr>
+                            <tr><td>3</td><td><strong>Risk Mitigation</strong></td><td>For significant risks, decide what to do (the Five Ts).</td></tr>
+                            <tr><td>4</td><td><strong>Implementation</strong></td><td>Strategy without action is worthless. Put the plan into motion.</td></tr>
+                            <tr><td>5</td><td><strong>Monitoring &amp; Review</strong></td><td>Risk changes constantly. Monitor and update — the cycle never ends.</td></tr>
+                        </table>
+
+                        <h4 style="margin-top: var(--space-md);">Part B — Cyber Risk Assessment Walkthrough (Example)</h4>
+                        <ol>
+                            <li><strong>Identify:</strong> Conduct a workshop with IT, Legal, and Operations teams. List all cyber risks — ransomware, data breach, insider threat, DDoS, third-party vendor compromise, system outage. Create a preliminary risk list of 15–20 items.</li>
+                            <li><strong>Assess:</strong> Score each risk on Likelihood (1–5) and Impact (1–5) using the matrix from Section 4.1. Ransomware: L=4 (likely), I=4 (major) → score 16 = Critical. Data breach: L=3 (possible), I=5 (catastrophic) → score 15 = Critical. Rank all risks by score.</li>
+                            <li><strong>Mitigate:</strong> For Critical and High risks, select strategies. Ransomware → Treat (MFA, offline backups, employee training, EDR) + Transfer (cyber insurance). Data breach → Treat (encryption, access controls, breach detection) + Tolerate (residual risk after controls is within appetite).</li>
+                            <li><strong>Implement:</strong> Deploy MFA across all systems within 60 days. Contract with a cyber forensic firm. Purchase cyber insurance policy with ₹10 Cr limit. Run phishing simulation training for all employees.</li>
+                            <li><strong>Monitor &amp; Review:</strong> Track: number of phishing emails reported, system patch compliance %, cyber insurance claims. Review the risk register quarterly. Update risk scores after each significant cyber incident anywhere in the industry — not just within the organisation.</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Risk Identification Techniques -->
+        <section class="content-section stability-core">
+            <h2>3. Risk Identification Techniques</h2>
+
+            <p>Risk identification is the foundation of the entire process. A risk you fail to identify at this stage will not be assessed, mitigated, or monitored. Different techniques are suited to different contexts — the best risk managers use multiple approaches and triangulate.</p>
+
+            <h3>3.1 Seven Identification Techniques</h3>
+
+            <p>Each technique below serves a different purpose. The best risk managers do not rely on one — they use multiple techniques in combination because each catches risks the others miss. Think of these as tools in a toolbox: you would not build a house with only a hammer.</p>
+
+            <table>
+                <thead>
+                    <tr><th style="width: 14%;">Technique</th><th style="width: 28%;">How It Works — Step by Step</th><th style="width: 12%;">Best For</th><th style="width: 16%;">Strengths</th><th style="width: 14%;">Weaknesses</th><th style="width: 16%;">Insurance Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Checklists</strong></td>
+                        <td>Start with a pre-existing list of common risks for your industry or function. Go through each item and ask: "Could this happen to us? How severe would it be?" Add organisation-specific items. Review and update the checklist annually.</td>
+                        <td>Ensuring no obvious risks are missed; regulatory compliance</td>
+                        <td>Fast, systematic, covers known risks, easy for non-experts to use</td>
+                        <td>Only catches known risks; may create false comfort ("we checked every box")</td>
+                        <td>IRDAI's prescribed risk categories (underwriting, market, credit, operational, liquidity, strategic) used by insurers for their quarterly solvency self-assessment. Each category has a sub-checklist.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. SWOT Analysis</strong></td>
+                        <td>Divide a whiteboard into four quadrants: Strengths, Weaknesses, Opportunities, Threats. List internal factors (Strengths, Weaknesses) and external factors (Opportunities, Threats). Risks emerge from: (a) Weaknesses that could be exploited, (b) Threats from the competitive environment. Then prioritise.</td>
+                        <td>Strategic planning; competitive positioning; new business initiatives</td>
+                        <td>Broad perspective, links risks to strategy, engaging team exercise</td>
+                        <td>Subjective; risks identified depend heavily on who is in the room; rarely surfaces operational or technical risks</td>
+                        <td>An insurer analysing the threat of digital disruption: <em>Weakness</em> = legacy IT systems, <em>Threat</em> = InsurTechs with lower cost structures, <em>Opportunity</em> = partnership with an InsurTech instead of building internally.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Scenario Analysis</strong></td>
+                        <td>Choose 2–4 drivers of change (e.g., regulatory, technological, economic). Create extreme but plausible scenarios by combining them (e.g., "tight regulation + rapid AI adoption"). For each scenario, trace the impact on every part of the organisation. Ask: "What would we need to do differently under this scenario?"</td>
+                        <td>Tail risks; low-probability, high-impact events; strategic uncertainty</td>
+                        <td>Surfaces risks that have never occurred before, builds strategic preparedness, challenges groupthink</td>
+                        <td>Time-intensive; scenarios depend on assumptions that may be wrong; can produce false confidence ("we planned for that scenario")</td>
+                        <td>"What if a Category 5 cyclone hits Mumbai directly?" — trace the impact on property insurance (massive claims), motor (flood-damaged cars), life (potential casualties), health (injuries, waterborne diseases), and business interruption (port closure, office shutdowns). Identifies accumulation risk across lines.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Root Cause Analysis</strong></td>
+                        <td>Start with a specific loss event that already happened. Ask "Why?" repeatedly (the "5 Whys" technique) — each answer leads to a deeper cause. Continue until you reach a systemic or process failure, not a human error. Then ask: "Could this same root cause produce other losses we have not yet seen?"</td>
+                        <td>Learning from past incidents; preventing recurrence; improving controls</td>
+                        <td>Deep, evidence-based, reveals systemic issues that single-incident reporting misses</td>
+                        <td>Requires a loss to have already occurred; only as good as the quality of the investigation</td>
+                        <td>After a major claims fraud is detected: <em>Why?</em> → No fraud check at FNOL. <em>Why?</em> → System did not flag repeat claimants. <em>Why?</em> → Claims system has no automatic cross-reference with previous claims. <em>Result:</em> fix the system, not just this one claim. Then check all other claims that could have slipped through the same gap.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Loss Data Analysis</strong></td>
+                        <td>Collect historical loss data (claims, incidents, near-misses). Segment by type, cause, location, time, and amount. Look for patterns: are certain types of loss increasing? Are certain locations over-represented? Are there peaks at specific times? Use statistical methods (trend analysis, regression) to separate signal from noise.</td>
+                        <td>Data-rich environments; quantitative risk assessment; identifying emerging trends</td>
+                        <td>Objective, data-driven, reveals patterns invisible to human observation, quantifiable</td>
+                        <td>Requires clean historical data; past patterns may not predict future (especially for emerging risks); can miss rare events</td>
+                        <td>Analysing 5 years of motor claims data to discover: SUV models made after 2020 have 40% lower claim frequency but 25% higher average severity than sedans. Older drivers (60+) in Chennai have the highest claim frequency during monsoon months (July–November). These insights feed into pricing and underwriting.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>6. Delphi Technique</strong></td>
+                        <td>Select a panel of experts (internal and external) who do NOT know each other's identities. Round 1: Circulate a questionnaire asking them to list and assess risks. Collect and anonymise all responses. Round 2: Share the aggregated results and ask each expert to revise their assessment in light of others' views. Repeat until consensus converges (typically 2–3 rounds). The anonymity prevents dominant personalities from swaying the group.</td>
+                        <td>Emerging risks with little historical data; expert-dependent domains; controversial topics</td>
+                        <td>Eliminates groupthink and authority bias; systematically aggregates expert judgment; works even without data</td>
+                        <td>Slow (weeks per round); depends on expert selection quality; consensus may be false (everyone is equally wrong)</td>
+                        <td>Assessing cyber insurance risk for quantum computing threats (2026+). There is zero claims history because quantum attacks do not exist yet at scale. A panel of cybersecurity experts, quantum physicists, and insurance underwriters anonymously estimates: probability of first major quantum-related loss event, timeline, and potential industry loss amount.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7. Process Mapping</strong></td>
+                        <td>Draw a detailed flowchart of a specific business process — every step, every decision point, every handoff between teams. At each step, ask: "What could go wrong here?" (risk identification) and "What controls exist to prevent or catch it?" (control identification). Mark steps with no controls as high-risk. Quantify the impact of failure at each step.</td>
+                        <td>Operational risk; internal controls assessment; process improvement; system implementation</td>
+                        <td>Granular, identifies specific failure points, directly links risks to controls, produces actionable improvements</td>
+                        <td>Narrow — focuses on one process at a time; requires detailed process knowledge; time-consuming to do well</td>
+                        <td>Mapping the claims settlement process: FNOL Received → Enter into System → Assign Surveyor → Surveyor Visits Site → Assessment Report → Manager Approval → Payment Processing. At the "Assign Surveyor" step: what if no surveyor is available within 48 hours? (risk: delayed assessment, customer complaint). At "Manager Approval": what if the manager approves without reviewing? (risk: control failure). Each step is analysed and improved.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> No single technique catches everything. Checklists ensure you don't miss known risks but won't surface new ones. Scenario analysis surfaces new risks but may miss mundane operational risks. A robust risk identification exercise uses at least three techniques and brings together people from different functions — the CFO sees financial risks the COO doesn't, and vice versa.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Risk Assessment & Measurement -->
+        <section class="content-section stability-core">
+            <h2>4. Risk Assessment &amp; Measurement</h2>
+
+            <p>Once risks are identified, they must be assessed. The goal is to answer two questions for each risk: <strong>How likely?</strong> and <strong>How bad?</strong> The answers determine which risks demand management attention and resources.</p>
+
+            <h3>4.1 The Likelihood × Impact Matrix</h3>
+            <p>This is the most widely used risk assessment tool in business. Every risk is scored on two dimensions, and the product of those scores determines its priority:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Likelihood Score</th><th>Meaning (Annual Probability)</th><th>Impact Score</th><th>Meaning (Financial Impact)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1 — Rare</td><td>&lt; 1% (less than once in 100 years)</td><td>1 — Negligible</td><td>&lt; ₹10 lakh</td></tr>
+                    <tr><td>2 — Unlikely</td><td>1–5% (once in 20–100 years)</td><td>2 — Minor</td><td>₹10 lakh – ₹1 crore</td></tr>
+                    <tr><td>3 — Possible</td><td>5–20% (once in 5–20 years)</td><td>3 — Moderate</td><td>₹1 crore – ₹10 crore</td></tr>
+                    <tr><td>4 — Likely</td><td>20–50% (once in 2–5 years)</td><td>4 — Major</td><td>₹10 crore – ₹100 crore</td></tr>
+                    <tr><td>5 — Almost Certain</td><td>&gt; 50% (more than once in 2 years)</td><td>5 — Catastrophic</td><td>&gt; ₹100 crore</td></tr>
+                </tbody>
+            </table>
+
+            <p>The risk score is calculated as:</p>
+
+            <pre><code class="language-text">Risk Score = Likelihood × Impact
+
+Risk Level (using a 5×5 matrix — all scores 1 to 25 are covered):
+   1–4   = Low (Green)       — Acceptable; monitor routinely
+   5–9   = Medium (Amber)    — Requires attention; implement controls where cost-effective
+  10–16  = High (Orange)     — Needs management attention; regular monitoring
+  17–25  = Critical (Red)    — Unacceptable; immediate action required</code></pre>
+            <p><em>Example: A risk with Likelihood = 3 (Possible, 5–20% probability) and Impact = 4 (Major, ₹10–100 crore) scores 3 × 4 = 12, placing it in the <strong>High</strong> category — requiring management attention.</em></p>
+
+            <h3>4.2 Quantitative Approaches — Expressing Risk in Rupees</h3>
+            <p>A score of 12 on a 5×5 matrix tells you a risk is "High" — but it does not tell you how much money is at stake. Quantitative methods fix this by expressing risk in rupees. They answer one simple question: <strong>"How much money could we lose, and how often?"</strong></p>
+
+            <p>Three metrics work together. The best way to understand them is through a single story:</p>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0;">
+                <p style="margin-bottom: var(--space-md);"><strong>Imagine you are an insurer covering 100,000 houses against fire.</strong> You have 100 years of data showing that, on average, 100 houses burn per year (0.1%), and the average claim per fire is ₹50 lakh. You want to understand your risk in rupees — how much to charge, how much to set aside, and whether you have enough capital to survive a catastrophe.</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md);">
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                        <div style="font-size: var(--font-size-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Step 1 — The Average</div>
+                        <div style="font-size: 1.75rem; font-weight: 800; color: var(--success); margin: var(--space-sm) 0;">₹50 Cr</div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-light);"><strong>Expected Loss (EL)</strong></div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-muted);">100 houses × ₹50 lakh = ₹50 crore expected claims per year. This is your "average year" — used for setting premiums and reserves.</div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                        <div style="font-size: var(--font-size-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Step 2 — The Bad Year</div>
+                        <div style="font-size: 1.75rem; font-weight: 800; color: var(--warning); margin: var(--space-sm) 0;">₹125 Cr</div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-light);"><strong>Value at Risk (VaR)</strong></div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-muted);">The 95% VaR is ₹125 crore. This means: in 95% of years, losses will be ₹125 crore or less. In 5% of years (1 in 20), they will EXCEED ₹125 crore.</div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                        <div style="font-size: var(--font-size-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Step 3 — The Really Bad Year</div>
+                        <div style="font-size: 1.75rem; font-weight: 800; color: var(--danger); margin: var(--space-sm) 0;">₹200 Cr</div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-light);"><strong>Tail VaR (TVaR)</strong></div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-muted);">The 95% TVaR is ₹200 crore. This means: ON THE DAYS THAT EXCEED ₹125 crore (the worst 5%), the average loss is ₹200 crore — far worse than the ₹125 crore threshold.</div>
+                    </div>
+                </div>
+
+                <p style="margin-top: var(--space-md); margin-bottom: 0; font-size: var(--font-size-sm); color: var(--text-light);">
+                    <strong>The key:</strong> ₹50 Cr (EL) tells you what to <em>budget</em>. ₹125 Cr (VaR) tells you where to set your <em>reinsurance</em>. ₹200 Cr (TVaR) tells you how much <em>capital</em> you need to survive. If you only budget for the average, you fail in the bad years.
+                </p>
+            </div>
+
+            <p style="font-size: var(--font-size-sm); color: var(--text-muted);"><em>Note on "95% VaR": This does NOT mean "95% chance of ₹125 crore loss." It means "95% chance that the loss will be ₹125 crore OR LESS." The loss could be ₹1 crore or ₹125 crore — there is a 95% probability it will not exceed ₹125 crore. In the remaining 5% — the "tail" — losses can be much worse, which is exactly what TVaR measures.</em></p>
+
+            <table style="margin-top: var(--space-md);">
+                <thead>
+                    <tr><th>Metric</th><th>What It Tells You</th><th>What It Ignores</th><th>Used For</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Expected Loss (EL)</strong></td>
+                        <td>The average loss you can expect every year.</td>
+                        <td>Does not capture the volatility — bad years can be far worse than the average.</td>
+                        <td>Setting premiums, budgeting for claims, reserve planning</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Value at Risk (VaR)</strong></td>
+                        <td>The loss threshold that will not be exceeded in a normal year (with 95% confidence).</td>
+                        <td>Does not tell you how bad things get when the threshold IS exceeded — it cuts off at the boundary.</td>
+                        <td>Setting reinsurance limits, regulatory solvency calculations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tail VaR (TVaR)</strong></td>
+                        <td>How bad it gets on average when things go really wrong (beyond the VaR threshold).</td>
+                        <td>Does not capture the worst single possible loss — only the average of all "bad" scenarios.</td>
+                        <td>Capital planning, stress testing, board-level risk appetite</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Analogy:</strong> Think of EL as your monthly grocery budget (what you usually spend). VaR is the maximum you expect to spend in any normal month — say ₹15,000 at the 95th percentile (only 1 month in 20 exceeds this). TVaR asks: when you DO exceed ₹15,000, what is the average overshoot — ₹22,000? ₹30,000? That is your TVaR, and it tells you how much buffer you need in your emergency fund.</p>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> The likelihood × impact matrix is deceptively simple. The biggest mistake is treating the scores as objective when they are actually subjective judgments. Two different risk managers scoring the same risk may give it scores of 4×3=12 (Medium) and 5×4=20 (High) — leading to completely different responses. Always calibrate scores across assessors. Use clear definitions for each score level (as in the tables above). And when a risk falls near a boundary, escalate — it's better to over-manage a borderline risk than to under-manage one that turns out to be critical.
+                </div>
+            </div>
+
+            <h3>4.3 Risk Heat Maps</h3>
+            <p>A risk heat map is the visual representation of the likelihood-impact matrix. Each risk is plotted as a point on a 5×5 grid, with color coding:</p>
+            <ul>
+                <li><strong>Green zone (bottom-left):</strong> Low likelihood, low impact. Accept; monitor.</li>
+                <li><strong>Amber zone (middle):</strong> Moderate on one or both dimensions. Mitigate where cost-effective.</li>
+                <li><strong>Red zone (top-right):</strong> High likelihood, high impact. Immediate action required. These risks should have dedicated mitigation plans with named owners and deadlines.</li>
+            </ul>
+
+            <p>A well-constructed heat map allows a board or risk committee to see, at a single glance, where the organization's major risk exposures lie. We will build one in Section 6 using Excel conditional formatting.</p>
+        </section>
+
+        <!-- SECTION 5: Risk Mitigation Strategies -->
+        <section class="content-section stability-core">
+            <h2>5. Risk Mitigation Strategies — The Five Ts</h2>
+
+            <p>Once risks are identified and assessed, the critical strategic question is: <strong>what should we do about each risk?</strong> Risk managers classify the options into five strategies, commonly called the "Five Ts."</p>
+
+            <h3>5.1 The Five Strategies</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Strategy</th><th>What It Means</th><th>When to Use</th><th>Insurance Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Transfer</strong></td>
+                        <td>Shift the financial consequences of the risk to another party, typically through insurance, reinsurance, hedging, or contractual indemnities</td>
+                        <td>The risk is too large to retain; the cost of transfer is less than the potential loss; the counterparty is better capitalized to bear the risk</td>
+                        <td>An insurer purchasing catastrophe reinsurance to protect against a ₹500 crore cyclone loss that would threaten its solvency</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Tolerate (Retain)</strong></td>
+                        <td>Accept the risk and budget for the potential loss. No active mitigation beyond monitoring.</td>
+                        <td>The cost of mitigation exceeds the expected loss; the risk is within the organization's risk appetite; the risk is low-probability and low-impact</td>
+                        <td>An insurer deciding not to reinsure motor own-damage claims below ₹1 lakh — the risk is high-frequency but low-severity and predictable through pooling</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Treat (Reduce)</strong></td>
+                        <td>Implement controls to reduce either the likelihood or the impact (or both) of the risk. This is "risk reduction."</td>
+                        <td>The risk is significant but can be reduced to an acceptable level through cost-effective controls; the organization has the capability to implement and maintain the controls</td>
+                        <td>An insurer implementing AI-based fraud detection to reduce claims fraud losses from 8% of claims to 3%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Terminate (Avoid)</strong></td>
+                        <td>Eliminate the risk entirely by ceasing the activity that creates it. This is the most definitive strategy — but also the most costly in terms of foregone opportunity.</td>
+                        <td>The risk cannot be reduced to an acceptable level; the potential loss, however unlikely, is existential; the activity is not core to the business</td>
+                        <td>An insurer deciding to stop writing property insurance in flood-zone areas after catastrophic losses made the line unprofitable despite reinsurance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Take Advantage (Exploit)</strong></td>
+                        <td>Actively pursue the upside of a risk — turning a threat into an opportunity. This applies primarily to speculative risks.</td>
+                        <td>The organization has a competitive advantage in managing this risk; the upside is significant; the downside is well-understood and acceptable</td>
+                        <td>An insurer with superior climate analytics capabilities actively expanding into parametric weather insurance, viewing climate change as a market opportunity</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.2 Choosing the Right Strategy</h3>
+            <p>The choice of strategy is not automatic — it depends on the organization's risk appetite, the cost-benefit analysis of each option, and the residual risk after controls. The decision framework is:</p>
+
+            <ol>
+                <li><strong>Can the risk be eliminated without sacrificing core business?</strong> If yes → <strong>Terminate.</strong></li>
+                <li><strong>If not, is the risk within our risk appetite?</strong> If yes and cost of mitigation exceeds benefit → <strong>Tolerate.</strong></li>
+                <li><strong>If not, can we reduce it to an acceptable level cost-effectively?</strong> If yes → <strong>Treat.</strong></li>
+                <li><strong>For the residual risk that remains after treatment, should we transfer it?</strong> If yes → <strong>Transfer</strong> (insurance/reinsurance).</li>
+                <li><strong>Is there an upside we can capture?</strong> If yes → <strong>Take Advantage.</strong></li>
+            </ol>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Most significant risks require a <strong>combination</strong> of strategies. Consider cyber risk for an insurer: Treat (implement firewalls, MFA, employee training, incident response plan), Transfer (purchase cyber insurance for residual exposure), and Tolerate (accept a deductible/self-insured retention of ₹50 lakh). The Five Ts are not mutually exclusive — they are building blocks of a comprehensive risk response.
+                </div>
+            </div>
+
+            <!-- Exercise 5.1 — Choose the Right Strategy -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#129518; Exercise 5.1 — Choose the Right Mitigation Strategy</h4>
+                    <p>For each scenario below, select the <strong>primary strategy</strong> from the Five Ts (Transfer / Tolerate / Treat / Terminate / Take Advantage) and justify your choice in one sentence. For the last scenario, more than one T may apply — identify the combination.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Scenario</th><th style="width: 180px;">Your Strategy</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A general insurer faces a 1-in-500 year earthquake risk that could cause ₹1,000 crore in losses — 10× its available capital.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Transfer</option><option>Tolerate</option><option>Treat</option><option>Terminate</option><option>Take Advantage</option><option>Combination</option></select></td></tr>
+                        <tr><td>2</td><td>An insurer's internal fraud rate is 8% of claims. An AI detection system costing ₹2 Cr/year can reduce it to 3%.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Transfer</option><option>Tolerate</option><option>Treat</option><option>Terminate</option><option>Take Advantage</option><option>Combination</option></select></td></tr>
+                        <tr><td>3</td><td>A health insurer finds that a wellness programme costs ₹5 Cr/year but only reduces claims by ₹3 Cr/year.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Transfer</option><option>Tolerate</option><option>Treat</option><option>Terminate</option><option>Take Advantage</option><option>Combination</option></select></td></tr>
+                        <tr><td>4</td><td>An insurer's property portfolio in coastal cyclone zones has a combined ratio of 140% — consistently unprofitable despite all mitigation efforts.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Transfer</option><option>Tolerate</option><option>Treat</option><option>Terminate</option><option>Take Advantage</option><option>Combination</option></select></td></tr>
+                        <tr><td>5</td><td>An insurer has built superior climate data analytics. Competitors are avoiding cyclone insurance due to fear of losses.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Transfer</option><option>Tolerate</option><option>Treat</option><option>Terminate</option><option>Take Advantage</option><option>Combination</option></select></td></tr>
+                        <tr><td>6</td><td>A large IT system migration project carries risk of business disruption, data loss, and customer dissatisfaction.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Transfer</option><option>Tolerate</option><option>Treat</option><option>Terminate</option><option>Take Advantage</option><option>Combination</option></select></td></tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top: var(--space-md);"><strong>Decision Tree Drill:</strong> Pick one scenario above (your choice). Trace it through the 5-question decision framework from Section 5.2. Write down: for each question, your Yes/No answer and the strategy it leads to.</p>
+
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>View Solution — Strategy Selection</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>#</th><th>Strategy</th><th>Rationale</th></tr>
+                            <tr><td>1</td><td><strong>Transfer</strong></td><td>The potential loss (₹1,000 Cr) is existential — 10× the insurer's capital. The risk cannot be retained, treated (it is a natural event), or terminated (the insurer cannot stop earthquakes). The only option is to transfer via reinsurance or a catastrophe bond.</td></tr>
+                            <tr><td>2</td><td><strong>Treat</strong></td><td>The risk can be reduced cost-effectively. Cost: ₹2 Cr/year. Benefit: 5% reduction in fraud on a claims pool. If total claims are ₹100 Cr, 5% = ₹5 Cr saved. Net benefit: ₹3 Cr/year. This is a classic "Treat" — the control costs less than the expected loss reduction.</td></tr>
+                            <tr><td>3</td><td><strong>Tolerate</strong></td><td>The programme costs more than it saves. The rational decision is to stop the programme and tolerate the underlying risk (health claims without the wellness intervention). The risk is within appetite — the insurer can absorb the claims.</td></tr>
+                            <tr><td>4</td><td><strong>Terminate</strong></td><td>Despite all efforts to Treat (tighter underwriting, higher premiums, risk controls), the combined ratio is 140% — the line is fundamentally unprofitable. The remaining options are Tolerate (but this destroys capital) or Terminate. Terminate means stop writing this product in these zones.</td></tr>
+                            <tr><td>5</td><td><strong>Take Advantage</strong></td><td>The insurer has a competitive advantage (superior climate data) that others lack. The growing demand for cyclone insurance (driven by climate change awareness) creates a market opportunity. This is a speculative risk — but the insurer can manage it better than competitors.</td></tr>
+                            <tr><td>6</td><td><strong>Combination:</strong> Treat + Tolerate | Treat (reduce risk): thorough testing, phased rollout, rollback plan, parallel running. Tolerate: accept that some disruption is inevitable. Transfer: purchase project-specific insurance or warranties from the vendor. The project may also be Terminated if the business case fails at any stage.</td></tr>
+                        </table>
+
+                        <h4 style="margin-top: var(--space-md);">Decision Tree Trace — Earthquake Scenario (#1)</h4>
+                        <ol>
+                            <li><strong>"Can the risk be eliminated without sacrificing core business?"</strong> → No. Earthquakes cannot be prevented. The insurer cannot stop operating in earthquake-prone zones without exiting the property insurance market entirely — which is core business.</li>
+                            <li><strong>"Is the risk within our risk appetite?"</strong> → No. ₹1,000 Cr loss is 10× capital — existential. It is far outside any reasonable risk appetite.</li>
+                            <li><strong>"Can we reduce it to an acceptable level cost-effectively?"</strong> → No. We cannot "reduce" earthquake probability or severity. Loss prevention (better building codes) helps over time but does not reduce the 1-in-500 year extreme loss.</li>
+                            <li><strong>"For the residual risk after treatment, should we transfer it?"</strong> → Yes. Transfer via catastrophe reinsurance is the only viable option. The insurer accepts a deductible (retention) and transfers everything above that.</li>
+                            <li><strong>"Is there an upside we can capture?"</strong> → Not for earthquake — it is a pure risk. This option does not apply.</li>
+                        </ol>
+                        <p><strong>Result:</strong> Transfer (primary) + Tolerate (retention/deductible).</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Building a Risk Register in Excel -->
+        <section class="content-section stability-core">
+            <h2>6. Building a Risk Register in Excel</h2>
+
+            <p>The risk register is the central document of the risk management process. It captures every identified risk, its assessment, the chosen mitigation strategy, residual risk, ownership, and review status — all in one place. Excel is the most widely used tool for risk registers in practice, and mastering the Excel-based risk register gives you a skill you can deploy in any organization from day one.</p>
+
+            <h3>6.1 The Risk Register Structure</h3>
+
+            <p>A professional risk register contains the following columns at minimum:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Column</th><th>Field Name</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>A</td><td>Risk ID</td><td>Unique identifier (e.g., RISK-001, RISK-002)</td></tr>
+                    <tr><td>B</td><td>Risk Category</td><td>Operational / Financial / Strategic / Compliance / Reputational</td></tr>
+                    <tr><td>C</td><td>Risk Description</td><td>Clear, specific description of the risk event and its consequences</td></tr>
+                    <tr><td>D</td><td>Likelihood (1–5)</td><td>How likely is this risk to occur? (See Section 4.1 scale)</td></tr>
+                    <tr><td>E</td><td>Impact (1–5)</td><td>How severe would the consequences be? (See Section 4.1 scale)</td></tr>
+                    <tr><td>F</td><td>Inherent Risk Score</td><td>= D × E (before any controls)</td></tr>
+                    <tr><td>G</td><td>Existing Controls</td><td>What controls are already in place?</td></tr>
+                    <tr><td>H</td><td>Control Effectiveness</td><td>How effective are existing controls? (1=Weak, 2=Partial, 3=Strong)</td></tr>
+                    <tr><td>I</td><td>Residual Likelihood</td><td>Likelihood AFTER existing controls</td></tr>
+                    <tr><td>J</td><td>Residual Impact</td><td>Impact AFTER existing controls</td></tr>
+                    <tr><td>K</td><td>Residual Risk Score</td><td>= I × J (after existing controls)</td></tr>
+                    <tr><td>L</td><td>Mitigation Strategy</td><td>Transfer / Tolerate / Treat / Terminate / Take Advantage</td></tr>
+                    <tr><td>M</td><td>Additional Actions</td><td>What further actions are planned?</td></tr>
+                    <tr><td>N</td><td>Risk Owner</td><td>Named individual responsible for managing this risk</td></tr>
+                    <tr><td>O</td><td>Review Date</td><td>Date of next scheduled review</td></tr>
+                    <tr><td>P</td><td>Status</td><td>Open / In Progress / Closed / Escalated</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.2 Essential Excel Formulas</h3>
+
+            <p>Here are the key formulas you will use to build an intelligent risk register:</p>
+
+            <pre><code class="language-excel">' Inherent Risk Score (Column F, Row 2):
+=D2*E2
+
+' Residual Risk Score (Column K, Row 2):
+=I2*J2
+
+' Risk Level Classification (Column Q, Row 2):
+=IF(K2>=17,"CRITICAL",IF(K2>=10,"HIGH",IF(K2>=5,"MEDIUM","LOW")))
+
+' Action status based on risk level (Column R, Row 2):
+=IF(K2>=17,"⚠ IMMEDIATE ACTION REQUIRED",IF(K2>=10,"◆ Mitigation Planned",IF(K2>=5,"● Monitor","✓ Acceptable")))
+
+' Days until next review (Column S, Row 2):
+=O2-TODAY()
+
+' Overdue flag (Column T, Row 2):
+=IF(AND(O2&lt;TODAY(),P2&lt;&gt;"Closed"),"OVERDUE","On Track")</code></pre>
+
+            <h3>6.3 Conditional Formatting for the Heat Map Effect</h3>
+
+            <p>Apply these conditional formatting rules to the Inherent Risk Score and Residual Risk Score columns to create an instant visual heat map:</p>
+
+            <ul>
+                <li><strong>Red fill (Score 17–25 — Critical):</strong> Select cells → Conditional Formatting → Highlight Cells → Greater Than → 16 → Custom Format → Fill Red, Font White Bold</li>
+                <li><strong>Orange fill (Score 10–16 — High):</strong> Conditional Formatting → Between → 10 and 16 → Custom Format → Fill Orange, Font Dark</li>
+                <li><strong>Amber fill (Score 5–9 — Medium):</strong> Conditional Formatting → Between → 5 and 9 → Custom Format → Fill Amber, Font Dark</li>
+                <li><strong>Green fill (Score 1–4 — Low):</strong> Conditional Formatting → Less Than → 5 → Custom Format → Fill Green, Font White</li>
+            </ul>
+
+            <p>The result: anyone looking at your risk register can instantly see which risks need attention — no analysis required. The red cells are your action list.</p>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> A risk register is only as good as its last review. Risks that were scored 6 (Low) six months ago may be 16 (Critical) today because of changes in the business environment, regulatory landscape, or threat landscape. Always add a "Days Since Last Review" column with conditional formatting that highlights overdue items in red. A risk register that isn't reviewed and updated quarterly is not just useless — it is dangerous, because it gives stakeholders false assurance that risks are being managed.
+                </div>
+            </div>
+
+            <!-- Exercise 6.1 — Spot the Mistakes -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128270; Exercise 6.1 — Spot the Mistakes in This Risk Register</h4>
+                    <p>The risk register below contains <strong>5 deliberate errors</strong>. Find each one, explain why it is wrong, and state how to fix it.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Risk Description</th><th style="width: 70px;">L</th><th style="width: 70px;">I</th><th style="width: 80px;">Inherent</th><th>Mitigation</th><th style="width: 70px;">Resid L</th><th style="width: 70px;">Resid I</th><th style="width: 80px;">Residual</th><th>Owner</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>001</td><td>Data breach exposing customer PII</td>
+                            <td style="text-align: center;">3</td><td style="text-align: center;">5</td>
+                            <td style="text-align: center; background: #e17055;">8</td>
+                            <td>Encryption, access controls</td>
+                            <td style="text-align: center;">2</td><td style="text-align: center;">4</td>
+                            <td style="text-align: center; background: #fdcb6e;">8</td>
+                            <td>CTO</td><td>In Progress</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-sm); color: var(--text-light); font-size: var(--font-size-sm);"><em>Hint: Check the calculations, the logic of before-and-after scores, the ownership, and the status fields.</em></p>
+
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Answers — 5 Errors Revealed</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Inherent Score calculated incorrectly:</strong> L=3 × I=5 = <strong>15</strong>, not 8. The table shows 8 (which would be 2×4 or addition). <em>Fix:</em> Change Inherent Score to 15 (Critical).</li>
+                            <li><strong>Residual Score equals Inherent Score despite controls:</strong> Residual L=2 × Residual I=4 = 8. But if controls exist (encryption, access controls), the residual score should be LOWER than the inherent score. If it is the same, either the controls are ineffective and should be removed from the register, or the residual scores need re-evaluation. You cannot claim controls exist and yet the score stays unchanged.</li>
+                            <li><strong>Status says "In Progress" but residual risk is still 8 (Medium-amber):</strong> If mitigation is still "In Progress," the controls are not yet fully operational. The residual score of 8 is misleading — it should reflect the CURRENT risk level with partial controls, or the status should be updated to reflect that controls are not yet effective.</li>
+                            <li><strong>Review Date missing:</strong> Every risk in a register must have a review date. Without it, there is no accountability for when this risk will be reassessed. <em>Fix:</em> Add a review date column and populate it.</li>
+                            <li><strong>Risk Owner is CTO — too generic for a data breach risk:</strong> While CTO-level ownership is acceptable for a Critical risk, the "In Progress" status needs a specific action owner — e.g., the CISO (Chief Information Security Officer) who is actually implementing the encryption and access controls. <em>Fix:</em> Add a secondary "Action Owner" column for the person responsible for the specific mitigation steps.</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Exercise 6.2 — Quick Risk Scoring Drill -->
+            <div class="hands-on-project" style="margin-bottom: var(--space-lg);">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#9998; Exercise 6.2 — Quick Risk Scoring Drill</h4>
+                    <p>For each scenario below, assign Likelihood (1–5) and Impact (1–5), calculate the risk score, and classify it (Low / Medium / High / Critical) using the 4-level scale from Section 4.1.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Scenario</th><th style="width: 55px;">L (1–5)</th><th style="width: 55px;">I (1–5)</th><th style="width: 55px;">Score</th><th style="width: 110px;">Level</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td><strong>Data breach at a large insurer:</strong> Industry data shows a 30% probability per year. Worst case: ₹50 Cr in regulatory penalties + remediation costs.</td>
+                            <td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="L×I" style="text-align: center;"></td>
+                            <td><select class="write-in"><option value="">— level —</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></td></tr>
+                        <tr><td>2</td><td><strong>Minor office theft:</strong> ~5% chance of employee theft of office supplies. Maximum loss: ₹25,000.</td>
+                            <td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="L×I" style="text-align: center;"></td>
+                            <td><select class="write-in"><option value="">— level —</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></td></tr>
+                        <tr><td>3</td><td><strong>Category 5 cyclone hitting Mumbai:</strong> Experts estimate &lt; 1% annual probability. If it happens: ₹5,000 Cr in insured losses.</td>
+                            <td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="L×I" style="text-align: center;"></td>
+                            <td><select class="write-in"><option value="">— level —</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></td></tr>
+                        <tr><td>4</td><td><strong>Regulatory change in motor TP pricing:</strong> IRDAI announces new pool pricing every 2–3 years (30–50% chance in any given year). Impact: moderate profitability shift of ₹10–25 Cr.</td>
+                            <td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="1–5" style="text-align: center;"></td><td><input class="write-in" type="text" placeholder="L×I" style="text-align: center;"></td>
+                            <td><select class="write-in"><option value="">— level —</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></td></tr>
+                    </tbody>
+                </table>
+
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Scores</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>#</th><th>L</th><th>I</th><th>Score</th><th>Level</th><th>Reasoning</th></tr>
+                            <tr><td>1</td><td>4</td><td>4</td><td>16</td><td><strong>High</strong></td><td>30% probability = Likely (4). ₹50 Cr impact = Major (4). 4×4=16 → High. Requires dedicated mitigation plan with named owner.</td></tr>
+                            <tr><td>2</td><td>3</td><td>1</td><td>3</td><td><strong>Low</strong></td><td>5% = Possible (3). ₹25K = Negligible (1). 3×1=3 → Low. Accept and monitor routinely. Not worth significant investment.</td></tr>
+                            <tr><td>3</td><td>1</td><td>5</td><td>5</td><td><strong>Medium</strong></td><td>&lt;1% = Rare (1). ₹5,000 Cr = Catastrophic (5). 1×5=5 → Medium. Despite the low probability, the severity is so high that the insurer must have reinsurance and a disaster recovery plan. The Medium level correctly signals "do not ignore, but do not over-invest."</td></tr>
+                            <tr><td>4</td><td>3</td><td>3</td><td>9</td><td><strong>Medium</strong></td><td>30–50% = Possible (3). ₹10–25 Cr = Moderate (3). 3×3=9 → Medium. Requires attention — monitor the regulatory landscape, model the potential impact, prepare a pricing response.</td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Key insight from scenario 3:</strong> A low-probability × high-impact risk scores only 5 (Medium), but most insurers would treat it more seriously than the score suggests. This is a limitation of the simple L×I matrix — it does not capture risk aversion or the "sleep-at-night" factor. Many organisations add a separate "catastrophic risk" category for events with Impact = 5 that get escalated regardless of Likelihood.</p>
+                    </div>
+                </details>
+            </div>
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch2-indian-erm">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Risk Management in Indian Insurance</h2>
+
+            <p>The Indian insurance industry has a structured regulatory framework for risk management that all insurers must follow. Understanding this framework gives you insight into how insurers actually manage risk — not just in theory but as a matter of regulatory compliance.</p>
+
+            <h3>7.1 IRDAI's Risk Management Requirements</h3>
+
+            <p>IRDAI mandates that all insurers implement a robust risk management framework. The key regulatory requirements include:</p>
+
+            <ul>
+                <li><strong>Enterprise Risk Management (ERM) Policy:</strong> Every insurer must have a board-approved ERM policy covering all material risks — underwriting, market, credit, operational, liquidity, and strategic risks.</li>
+                <li><strong>Risk Management Committee (RMC):</strong> The board must constitute a Risk Management Committee with majority independent directors. The RMC oversees the ERM framework and reviews the risk register quarterly.</li>
+                <li><strong>Own Risk and Solvency Assessment (ORSA):</strong> Insurers must conduct an annual self-assessment of their risk profile and capital adequacy. ORSA asks: given our risks, do we have enough capital to survive a severe but plausible adverse scenario?</li>
+                <li><strong>Chief Risk Officer (CRO):</strong> A dedicated CRO with direct reporting access to the board RMC. The CRO cannot be the CFO or the Chief Actuary — risk management must be independent of profit-center functions.</li>
+                <li><strong>Solvency Margin:</strong> The Available Solvency Margin must exceed the Required Solvency Margin by at least 50% (ratio ≥ 1.5). This is the ultimate backstop — if capital falls below this threshold, the insurer must stop writing new business.</li>
+            </ul>
+
+            <h3>7.2 Risk Categories for Indian Insurers</h3>
+
+            <p>IRDAI's framework categorizes insurer risks into six buckets that every ERM framework must address:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Risk Category</th><th>What It Covers</th><th>Example for a General Insurer</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Underwriting Risk</strong></td><td>Risk that premiums are insufficient to cover claims and expenses</td><td>Under-pricing motor third-party insurance due to competitive pressure; inadequate reserving for long-tail liability claims</td></tr>
+                    <tr><td><strong>Market Risk</strong></td><td>Risk of losses from changes in market prices (interest rates, equity prices, FX, real estate)</td><td>Investment portfolio losing 20% in a market crash, eroding solvency margin</td></tr>
+                    <tr><td><strong>Credit Risk</strong></td><td>Risk that counterparties fail to meet their obligations</td><td>Reinsurer defaulting on a large claim; bond issuer in the investment portfolio defaulting</td></tr>
+                    <tr><td><strong>Operational Risk</strong></td><td>Risk of loss from inadequate or failed internal processes, people, systems, or external events</td><td>Fraud by an employee; system outage during peak renewal season; data entry error causing incorrect policy issuance</td></tr>
+                    <tr><td><strong>Liquidity Risk</strong></td><td>Risk that the insurer cannot meet its payment obligations as they fall due</td><td>Surge in claims after a catastrophe requiring rapid cash outflows while investments are illiquid</td></tr>
+                    <tr><td><strong>Strategic Risk</strong></td><td>Risk arising from adverse business decisions or failure to adapt to changes in the business environment</td><td>Investing heavily in agency distribution while the market shifts to digital; failing to develop cyber insurance capability as demand surges</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.3 ERM Maturity in Indian Insurance</h3>
+
+            <p>The maturity of risk management varies significantly across the Indian insurance industry. Large private-sector insurers and multinational joint ventures typically have sophisticated ERM frameworks with dedicated risk teams, quantitative risk models, and quarterly board-level risk reviews. Smaller players and some public-sector insurers are still building toward this standard — their risk management tends to be more compliance-driven (meeting regulatory minimums) than strategic (using risk insight to drive business decisions).</p>
+
+            <p>For InsurTech startups, understanding this framework is critical. When an InsurTech sells software or services to an insurer, the insurer's CRO will evaluate it through the lens of these six risk categories. A tool that reduces underwriting risk (better pricing) will get a different reception than one that introduces new operational risk (dependency on an unproven vendor).</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The 2023 IRDAI guidelines on Operational Risk Management were a direct response to the increasing digitization of insurance operations. As insurers moved to cloud-based core systems, API-driven distribution, and AI-based claims processing, the operational risk profile shifted from "people making errors with paper forms" to "APIs failing, cloud services going down, and AI models producing biased outputs." The regulatory framework is evolving to keep pace with the technology — and risk managers are on the front line of that evolution.
+                </div>
+            </div>
+
+            <!-- Exercise 7.1 — Categorise the Risk -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128220; Exercise 7.1 — Categorise the Risk (IRDAI Framework)</h4>
+                    <p>IRDAI's Enterprise Risk Management framework defines <strong>6 risk categories</strong>: Underwriting, Market, Credit, Operational, Liquidity, and Strategic. For each scenario below, identify which category it belongs to and explain your choice in one sentence.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Scenario</th><th style="width: 180px;">Risk Category</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>The stock market drops 20%, causing an insurer's equity-heavy investment portfolio to lose ₹50 crore in value.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Underwriting Risk</option><option>Market Risk</option><option>Credit Risk</option><option>Operational Risk</option><option>Liquidity Risk</option><option>Strategic Risk</option></select></td></tr>
+                        <tr><td>2</td><td>An international reinsurer delays payment of a ₹100 crore claim by 7 months, citing documentation issues.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Underwriting Risk</option><option>Market Risk</option><option>Credit Risk</option><option>Operational Risk</option><option>Liquidity Risk</option><option>Strategic Risk</option></select></td></tr>
+                        <tr><td>3</td><td>Motor third-party claims in the industry pool are running 25% higher than the premiums collected through the pool.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Underwriting Risk</option><option>Market Risk</option><option>Credit Risk</option><option>Operational Risk</option><option>Liquidity Risk</option><option>Strategic Risk</option></select></td></tr>
+                        <tr><td>4</td><td>A critical system outage during the peak renewal season (March) prevents policy issuance for 48 hours.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Underwriting Risk</option><option>Market Risk</option><option>Credit Risk</option><option>Operational Risk</option><option>Liquidity Risk</option><option>Strategic Risk</option></select></td></tr>
+                        <tr><td>5</td><td>A major cyclone in Gujarat triggers 5,000+ claims simultaneously — the insurer needs ₹300 crore in cash within 30 days, but most investments are in 5-year government bonds.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Underwriting Risk</option><option>Market Risk</option><option>Credit Risk</option><option>Operational Risk</option><option>Liquidity Risk</option><option>Strategic Risk</option></select></td></tr>
+                        <tr><td>6</td><td>The insurer invested ₹50 crore in building an agent distribution network just as the market shifted to digital — market share among young customers dropped 15%.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Underwriting Risk</option><option>Market Risk</option><option>Credit Risk</option><option>Operational Risk</option><option>Liquidity Risk</option><option>Strategic Risk</option></select></td></tr>
+                    </tbody>
+                </table>
+
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Categorisation</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>#</th><th>Category</th><th>Why?</th></tr>
+                            <tr><td>1</td><td><strong>Market Risk</strong></td><td>Losses from changes in market prices (equity decline). This is a standard market risk exposure in the investment portfolio — not related to insurance operations.</td></tr>
+                            <tr><td>2</td><td><strong>Credit Risk</strong></td><td>Risk that a counterparty (reinsurer) fails to meet its obligations. Credit risk is not just about bond defaults — it includes any counterparty who owes the insurer money and may not pay.</td></tr>
+                            <tr><td>3</td><td><strong>Underwriting Risk</strong></td><td>The premiums collected are insufficient to cover claims. This is the classic underwriting risk — pricing inadequacy in the core insurance business.</td></tr>
+                            <tr><td>4</td><td><strong>Operational Risk</strong></td><td>Loss from failed internal processes, systems, or external events — a system outage during renewal season is a pure operational risk event.</td></tr>
+                            <tr><td>5</td><td><strong>Liquidity Risk</strong></td><td>The insurer cannot meet payment obligations as they fall due because its assets are locked in illiquid investments. This is a liquidity crisis — the insurer has enough money overall (the bonds will mature) but does not have it available when needed.</td></tr>
+                            <tr><td>6</td><td><strong>Strategic Risk</strong></td><td>Risk from adverse business decisions — investing in a distribution model that was becoming obsolete. Strategic risk is the hardest to identify because it looks like a "good idea" at the time.</td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Bonus question:</strong> Some scenarios could fit multiple categories. For example, #5 (cyclone liquidity) has elements of Underwriting Risk (the claims event) and Operational Risk (the system capacity to process 5,000 claims). The primary classification depends on which aspect is most material. In this case, the <em>inability to pay</em> (liquidity) is the dominant risk — if that is resolved, the claims processing is manageable.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a Risk Register for a General Insurance Company</h2>
+            <div class="project-brief">
+                <p>You are the newly appointed Chief Risk Officer of "SecureSure General Insurance," a mid-size Indian general insurer with ₹5,000 crore in annual gross written premium. The company sells motor, health, property, crop, and liability insurance across 15 states. The CEO has asked you to prepare the company's first comprehensive risk register. Use Excel to build a professional risk register with at least 10 risks spanning all six IRDAI risk categories.</p>
+            </div>
+
+            <!-- Companion Workbook Guide -->
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                <h3 style="font-size: var(--font-size-lg); color: var(--accent); margin-bottom: var(--space-sm);">&#128193; Companion Workbook: Risk_Management_Fundamentals_CORRECTED.xlsx</h3>
+                <p style="font-size: var(--font-size-sm); color: var(--text-light); margin-bottom: var(--space-md);">This session is supported by a pre-built Excel workbook with <strong>5 tabs</strong>. Use it as your reference solution and as a hands-on exercise file. Each tab maps to a specific part of this session. Open it in Excel (columns Q–T populate automatically with formulas).</p>
+                <p style="margin-bottom: var(--space-md);">
+                    <a href="Risk_Management_Fundamentals_CORRECTED.xlsx" download style="display: inline-block; padding: 10px 22px; background: linear-gradient(135deg, var(--success), #007a63); color: #fff; border-radius: var(--radius-md); font-weight: 700; font-size: var(--font-size-sm); text-decoration: none;">&#11015; Download the Workbook (.xlsx, 18 KB)</a>
+                </p>
+                <table>
+                    <thead>
+                        <tr><th style="width: 20%;">Tab</th><th style="width: 30%;">What It Contains</th><th style="width: 30%;">How to Use It</th><th style="width: 20%;">Maps To</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Risk Register</strong></td>
+                            <td>The <strong>completed solution</strong>: 12 risks across all IRDAI categories (Underwriting ×3, Operational ×3, Market, Strategic ×2, Credit, Compliance, Liquidity). Contains formulas (=D×E, =I×J), four-level conditional formatting (Red ≥17, Orange 10–16, Amber 5–9, Green &lt;5), and auto-calculating helper columns Q–T (Risk Level, Action Status, Days to Review, Overdue?).</td>
+                            <td>Use as the <strong>model answer</strong> for your Hands-On Project. Study how each risk is scored, mitigated, and tracked before building your own.</td>
+                            <td>Sections 6.1–6.3 &amp; Hands-On Project</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Exercise 6.1</strong></td>
+                            <td>A <strong>deliberately flawed</strong> one-row risk register containing 5 errors (wrong Inherent score, Residual = Inherent despite controls, status timing mismatch, missing Review Date, generic owner). Answer Key is in rows 7–13.</td>
+                            <td>Find the 5 mistakes <em>before</em> checking the Answer Key — then verify. Reinforces what a well-built register must contain.</td>
+                            <td>Exercise 6.1 in Section 6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Exercise 6.2</strong></td>
+                            <td>A <strong>quick scoring drill</strong>: 4 scenarios with blank Likelihood / Impact / Score / Level columns for you to fill, plus an Answer Key column (rows 5–8).</td>
+                            <td>Fill in your scores for each scenario, then compare with the Answer Key. Practises applying the L×I matrix and the four-level scale.</td>
+                            <td>Exercise 6.2 in Section 6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. Reference</strong></td>
+                            <td>The <strong>IRDAI six-category risk framework</strong> with a one-line definition of each category (Underwriting, Market, Credit, Operational, Liquidity, Strategic).</td>
+                            <td>A quick lookup while classifying your risks. Use it to make sure every risk in your register is placed in the correct category.</td>
+                            <td>Section 7 &amp; Exercise 7.1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. Executive Summary</strong></td>
+                            <td>The <strong>completed management summary</strong>: top 3 critical risks (RISK-001, RISK-003, RISK-009) with drivers and mitigation, resource requirements (₹15–20 Cr technology, 25–30 hires, ₹5–8 Cr operational budget), and governance cadence.</td>
+                            <td>Use as the <strong>model answer</strong> for Hands-On Project Step 7. Note how it quantifies impact and names owners and timelines.</td>
+                            <td>Hands-On Project Step 7</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-sm); font-size: var(--font-size-sm); color: var(--text-muted); font-style: italic;">Note: The workbook is a companion to this session — build your own register from scratch for the assignment, using this file only as reference. When you update the register, the Q–T helper columns recalculate automatically; conditional formatting is already applied to columns F and K.</p>
+            </div>
+
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Identify 10+ risks:</strong> Create at least two risks from each of the following categories: underwriting, operational, and strategic. Create at least one risk from each of: market, credit, and liquidity. Write clear, specific risk descriptions.</li>
+                    <li><strong>Build the register structure:</strong> Set up columns A through P as specified in Section 6.1. Freeze the header row. Format the Risk ID column to auto-generate (RISK-001, RISK-002...).</li>
+                    <li><strong>Score each risk:</strong> For each risk, assign Likelihood (1–5), Impact (1–5), Existing Controls, Control Effectiveness (1–3), Residual Likelihood, and Residual Impact. Use the formula =InherentLikelihood × InherentImpact for the Inherent Risk Score, and =ResidualLikelihood × ResidualImpact for the Residual Risk Score.</li>
+                    <li><strong>Select mitigation strategies:</strong> For each risk, choose a primary strategy from the Five Ts. For risks where you choose "Treat," specify at least one additional action. Assign a Risk Owner (use job titles — Chief Underwriting Officer, CIO, CFO, Head of Claims, etc.).</li>
+                    <li><strong>Apply conditional formatting:</strong> Apply the four-level heat map to the Residual Risk Score column — Red (≥17), Orange (10–16), Amber (5–9), Green (<5) — as shown in Section 6.3. Then add the Risk Level (Q), Action Status (R), Days to Review (S), and Overdue? (T) helper columns using the formulas in Section 6.2.</li>
+                    <li><strong>Add review tracking:</strong> Add a "Next Review Date" column and a "Days Until Review" column with the formula =ReviewDate-TODAY(). Apply conditional formatting to highlight overdue reviews in red.</li>
+                    <li><strong>Write a summary:</strong> In a separate sheet or section below the register, write a 200-word Executive Summary identifying the top 3 risks, the chosen mitigation approach, and any resource requirements (budget, headcount, technology) needed to implement the risk management plan.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Example Risk Register — SecureSure General Insurance</h4>
+
+                    <p>Here are 12 sample risks you might include. The scores and details would be in your Excel file — this table shows the thinking behind each risk.</p>
+
+                    <table>
+                        <thead>
+                            <tr><th>ID</th><th>Category</th><th>Risk Description</th><th>Inherent L</th><th>Inherent I</th><th>Strategy</th><th>Key Control / Action</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>RISK-001</td>
+                                <td>Underwriting</td>
+                                <td>Motor third-party pool losses exceed pricing assumptions by >20% due to regulatory pricing constraints and claims inflation</td>
+                                <td>4</td><td>5</td>
+                                <td>Treat + Transfer</td>
+                                <td>Advanced pricing analytics; excess-of-loss reinsurance for motor TP</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-002</td>
+                                <td>Underwriting</td>
+                                <td>Climate change causes property insurance claims in coastal states to double over 5 years, making the property portfolio unprofitable</td>
+                                <td>4</td><td>4</td>
+                                <td>Treat + Terminate</td>
+                                <td>Dynamic risk-based pricing with climate risk factor; exit high-risk flood zones</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-003</td>
+                                <td>Underwriting</td>
+                                <td>Health insurance claims ratio exceeds 95% due to medical inflation (15% pa) and provider fraud</td>
+                                <td>5</td><td>3</td>
+                                <td>Treat</td>
+                                <td>AI-based fraud detection; preferred provider network with negotiated rates; co-payment for non-network hospitals</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-004</td>
+                                <td>Operational</td>
+                                <td>Core policy administration system experiences outage lasting >24 hours during renewal season, causing customer dissatisfaction and regulatory scrutiny</td>
+                                <td>2</td><td>4</td>
+                                <td>Treat</td>
+                                <td>Cloud migration with auto-failover; disaster recovery testing every 6 months; manual workaround SOP documented</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-005</td>
+                                <td>Operational</td>
+                                <td>Employee in claims department colludes with a garage network to approve inflated motor repair bills, causing ₹5+ crore in annual claims leakage</td>
+                                <td>3</td><td>3</td>
+                                <td>Treat</td>
+                                <td>Mandatory job rotation in claims; AI anomaly detection on repair costs by garage; anonymous whistleblower hotline</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-006</td>
+                                <td>Operational</td>
+                                <td>Data entry error in policy issuance system results in 5,000 policies being issued with incorrect sum assured, creating a ₹50 crore gap between premium collected and risk covered</td>
+                                <td>2</td><td>5</td>
+                                <td>Treat</td>
+                                <td>Automated validation rules in policy admin system; daily exception report; maker-checker control for policies above ₹1 crore sum assured</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-007</td>
+                                <td>Market</td>
+                                <td>RBI raises interest rates by 200 bps, causing the insurer's government bond portfolio (60% of investments) to lose 8–10% in market value</td>
+                                <td>3</td><td>4</td>
+                                <td>Treat + Tolerate</td>
+                                <td>Reduce portfolio duration from 8 years to 5 years; increase allocation to floating-rate bonds; hold 20% in held-to-maturity</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-008</td>
+                                <td>Credit</td>
+                                <td>Reinsurer (international, A-rated) downgraded to BBB and subsequently delays/contests a ₹200 crore claim payment after a major cyclone</td>
+                                <td>2</td><td>5</td>
+                                <td>Transfer (diversify) + Treat</td>
+                                <td>Diversify reinsurance panel (no single reinsurer >30% of program); include cut-through clauses; maintain letter of credit from reinsurer</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-009</td>
+                                <td>Liquidity</td>
+                                <td>Major cyclone in Gujarat causes 2,000+ claims within 72 hours requiring ₹300 crore in claim payments within 30 days, while bond portfolio is temporarily illiquid</td>
+                                <td>3</td><td>4</td>
+                                <td>Treat</td>
+                                <td>Maintain ₹100 crore liquid buffer (overnight funds, liquid mutual funds); committed credit line of ₹200 crore from consortium of banks</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-010</td>
+                                <td>Strategic</td>
+                                <td>Digital-first competitors (Acko, Digit) capture 15% market share in motor insurance within 3 years by offering 20% lower premiums, eroding SecureSure's largest line of business</td>
+                                <td>5</td><td>4</td>
+                                <td>Treat + Take Advantage</td>
+                                <td>Launch digital direct-to-consumer channel; partner with 3 e-commerce platforms for embedded insurance; invest in telematics-based UBI product</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-011</td>
+                                <td>Strategic</td>
+                                <td>IRDAI introduces new rural/social sector obligations requiring 10% of GWP from rural areas, which SecureSure lacks the distribution network to achieve</td>
+                                <td>3</td><td>3</td>
+                                <td>Treat</td>
+                                <td>Partner with regional rural banks and cooperative societies for distribution; develop micro-insurance products for rural markets</td>
+                            </tr>
+                            <tr>
+                                <td>RISK-012</td>
+                                <td>Strategic</td>
+                                <td>DPDP Act enforcement results in ₹100 crore penalty because customer data used for AI underwriting model training was obtained without explicit consent</td>
+                                <td>2</td><td>5</td>
+                                <td>Treat</td>
+                                <td>Conduct data audit; obtain retrospective consent from existing customers; implement consent management platform; establish AI ethics committee</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Executive Summary (Sample)</h4>
+                    <p>The risk assessment for SecureSure General Insurance identifies three critical risks requiring immediate board attention. First, motor third-party underwriting risk (RISK-001, Residual Score: 16) — persistent pricing inadequacy combined with regulatory constraints demands a dual response: deploy advanced pricing analytics to improve risk selection within regulatory limits, and purchase additional excess-of-loss reinsurance to cap downside exposure at ₹75 crore. Second, strategic disruption risk from digital competitors (RISK-010, Residual Score: 15) — the 3-year trajectory shows market share erosion accelerating. We recommend a ₹45 crore investment over 18 months to build a digital direct channel (₹25 crore), establish embedded insurance partnerships with 3 e-commerce platforms (₹12 crore), and launch a telematics-based UBI pilot for private cars (₹8 crore). Third, the DPDP Act compliance risk (RISK-012, Residual Score: 12) — while assessed as lower likelihood, the potential penalty magnitude makes this a board-level concern. We recommend a 90-day data audit and consent management implementation at an estimated cost of ₹3 crore. Total incremental resource requirement: ₹48 crore capital allocation and 12 new hires (data science, digital product, compliance).</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- 3-2-1 Reflection -->
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-2xl);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">&#9997;</div>
+                <div style="flex: 1;">
+                    <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-md);">3-2-1 Reflection — Before You Move On</h2>
+                    <p style="color: var(--text-light); margin-bottom: var(--space-lg);">Retrieval practice strengthens long-term memory. Before moving to Session 03, take 3 minutes to write down what you have learned.</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--primary-light); margin-bottom: var(--space-md);">3 Things I Learned Today</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="3. ______________________________________"></textarea></div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--accent); margin-bottom: var(--space-md);">2 Real Risks I Can Now Identify</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                        </div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-top: var(--space-md);">
+                        <h3 style="font-size: var(--font-size-base); color: var(--warning); margin-bottom: var(--space-md);">1 Question I Still Have About Risk Management</h3>
+                        <div><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Pure risk (loss or no loss) is insurable. Speculative risk (loss, no loss, or gain) is not. This single distinction defines the boundary of the entire insurance industry.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Risk management is a continuous five-step cycle — Identify → Assess → Mitigate → Implement → Monitor — not a one-time exercise. The most common failure is neglecting step five.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>The Five Ts — Transfer, Tolerate, Treat, Terminate, Take Advantage — are the complete strategic toolkit. Most significant risks require a combination of strategies, not just one.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>A well-built risk register with formulas, conditional formatting, and review tracking transforms risk management from a compliance exercise into a strategic decision-making tool.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>Indian insurers operate within IRDAI's six-category risk framework (underwriting, market, credit, operational, liquidity, strategic). Every InsurTech selling into insurers must understand how its product affects each category.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s02-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. A company investing in the stock market faces which type of risk?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Pure risk — because stocks can only lose value</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Speculative risk — because stocks can lose value, maintain value, or gain value</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Systematic risk only — because all stocks move together</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Insurable risk — because stock losses can be pooled</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. Which is the correct sequence of the five-step risk management process?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Assessment → Identification → Mitigation → Monitoring → Implementation</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Mitigation → Assessment → Identification → Implementation → Monitoring</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Identification → Assessment → Mitigation → Implementation → Monitoring</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Identification → Mitigation → Assessment → Monitoring → Implementation</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. An insurer purchasing catastrophe reinsurance to protect against cyclone losses is applying which of the Five Ts?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) Terminate — because it eliminates the cyclone risk</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) Treat — because reinsurance reduces the likelihood of cyclone claims</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Transfer — because it shifts the financial consequences of the risk to the reinsurer</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) Tolerate — because the insurer retains the risk on its balance sheet</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. In a likelihood × impact risk matrix, a risk scored Likelihood=4 (Likely, 20–50% annual probability) and Impact=4 (Major, ₹10–₹100 crore impact) has a risk score of 16. This risk should be classified as:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Low — because 4+4=8 which is below 10</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Medium — because the risk can be managed through existing controls</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) High/Critical — because 4×4=16 falls in the red zone requiring immediate action</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Not assessable — because qualitative scales cannot produce definitive classifications</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. Which of the following must a professional risk register contain?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Risk ID, risk description, and mitigation strategy only</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Inherent risk score, residual risk score, risk owner, and review date — in addition to the risk description and mitigation strategy</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Only risks scored above 15 (Critical)</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) A single aggregated score representing the organization's total risk exposure</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s02-quiz', ['b','c','c','c','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s02-quiz-score" style="display:none;"></div>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav class="chapter-nav-bottom">
+            <a href="session-01.html" class="nav-link">&larr; Previous: Intro to Insurance Industry</a>
+            <a href="session-03.html" class="nav-link next">Next: Insurance Business Model &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

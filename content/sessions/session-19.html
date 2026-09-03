@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 19: Parametric Insurance Design — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-18.html" class="nav-link">&larr; Previous: Climate Risk in Insurance</a>
+            <a href="session-20.html" class="nav-link next">Next: Catastrophe Modeling &amp; Risk Assessment &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 100%); color: #fff;">
+            <div class="chapter-badge">Module 6 &middot; Session 19 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 19: Parametric Insurance Design</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Explain the four components of a parametric insurance product — index definition, trigger threshold, exit threshold, and payout function — and how they differ from traditional indemnity insurance</li>
+                <li>Design a rainfall-index parametric insurance product for Indian farmers using historical weather data</li>
+                <li>Simulate payouts across 20+ years of historical data and calculate the pure premium</li>
+                <li>Analyse basis risk — the probability that the parametric trigger does not match the actual loss — and identify mitigation strategies</li>
+                <li>Design a cyclone parametric trigger using wind speed categories and model the payout function</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. What is Parametric Insurance?</h2>
+
+            <p>Parametric insurance is a type of insurance that pays out a fixed amount when a predefined <strong>index</strong> reaches a specified <strong>trigger</strong> — regardless of the actual loss incurred by the policyholder. Unlike traditional indemnity insurance, which reimburses the policyholder for the actual loss suffered (after assessment and adjustment), parametric insurance pays based on an objective, independently verifiable parameter — millimetres of rainfall, wind speed, earthquake magnitude, crop yield index, or any other measurable variable that is correlated with loss.</p>
+
+            <p>The fundamental tradeoff is simple and powerful: <strong>parametric pays faster but may pay less (or more) than the actual loss.</strong> The difference between the parametric payout and the actual loss is called <strong>basis risk</strong> — and it is the central design challenge of every parametric insurance product.</p>
+
+            <h3>1.1 Parametric vs. Indemnity — The Key Differences</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Indemnity Insurance</th><th>Parametric Insurance</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Payout trigger</strong></td><td>Actual loss suffered — must be assessed and verified</td><td>Index value reaches predefined threshold — objective, independent, verifiable</td></tr>
+                    <tr><td><strong>Settlement speed</strong></td><td>Weeks to months — loss assessment, document verification, claims adjustment</td><td>Days — automated trigger detection, no claims adjustment, instant or near-instant payment</td></tr>
+                    <tr><td><strong>Loss assessment</strong></td><td>Required — surveyor, adjuster, third-party assessor</td><td>Not required — the index IS the assessment</td></tr>
+                    <tr><td><strong>Moral hazard</strong></td><td>Present — policyholder may take less care knowing they are insured</td><td>Minimal — policyholder cannot influence the index (rainfall, wind speed, earthquake magnitude)</td></tr>
+                    <tr><td><strong>Basis risk</strong></td><td>None — payout matches actual loss (in theory)</td><td>Present — the index may not perfectly match the policyholder's loss (index says no trigger, but policyholder has loss — or vice versa)</td></tr>
+                    <tr><td><strong>Policy terms</strong></td><td>Complex — exclusions, conditions, sub-limits, deductibles</td><td>Simple — trigger level, payout amount, term. Typically one page or less.</td></tr>
+                    <tr><td><strong>Administrative cost</strong></td><td>High — claims adjustment, loss assessment, document processing</td><td>Low — automated monitoring, no claims adjustment</td></tr>
+                    <tr><td><strong>Best for</strong></td><td>Complex, idiosyncratic losses where loss assessment is feasible and cost-effective</td><td>Standardised, correlated losses where a reliable index exists and rapid payout is valuable</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> After the 2010 Haiti earthquake — which killed 100,000+ people and caused $8B in economic losses — the Caribbean Catastrophe Risk Insurance Facility (CCRIF) paid the Haitian government $8 million within 14 days. The payout was triggered not by an assessment of Haiti's losses (which took months), but by the earthquake's magnitude and location as measured by the US Geological Survey. Parametric payout while the rescue operation was still ongoing. This is the defining advantage of parametric insurance: speed when speed matters most.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Parametric Product Structure</h2>
+
+            <p>Every parametric insurance product has four components that must be defined precisely. The design of each component determines the product's risk profile, pricing, and basis risk.</p>
+
+            <h3>2.1 The Four Components</h3>
+
+            <pre><code class="language-text">PARAMETRIC PRODUCT STRUCTURE — THE RAINFALL-INDEX EXAMPLE
+
+1. INDEX DEFINITION
+   What exactly is being measured?
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │ Index: Cumulative Rainfall during the Kharif cropping season       │
+   │        (June 1 – September 30) at the Mandal-level weather station │
+   │ Unit: Millimetres (mm) of rainfall                                │
+   │ Data source: India Meteorological Department (IMD)                │
+   │ Historical period: 20 years (2006–2025)                           │
+   │ Historical average: 850 mm (10-year moving average)               │
+   └─────────────────────────────────────────────────────────────────────┘
+
+2. TRIGGER THRESHOLD
+   At what index value does the policy pay out?
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │ Trigger: Seasonal rainfall < 60% of the 10-year historical average │
+   │          i.e., cumulative rainfall < 510 mm                        │
+   │ This is a "deficit rainfall" trigger — drought protection           │
+   │ Type: Binary trigger (above = no payout, below = payout)           │
+   └─────────────────────────────────────────────────────────────────────┘
+
+3. EXIT THRESHOLD
+   At what index value does the maximum payout occur?
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │ Exit: Seasonal rainfall < 20% of the 10-year historical average   │
+   │       i.e., cumulative rainfall < 170 mm                           │
+   │ At or below this level, the maximum payout is made                 │
+   └─────────────────────────────────────────────────────────────────────┘
+
+4. PAYOUT FUNCTION
+   How does the payout vary between the trigger and exit thresholds?
+   ┌─────────────────────────────────────────────────────────────────────┐
+   │ Type: Linear interpolation between trigger and exit                │
+   │                                                                     │
+   │ IF rainfall >= 510 mm: Payout = ₹0 (no trigger)                   │
+   │ IF rainfall <= 170 mm: Payout = ₹100,000 (maximum)                 │
+   │ IF 170 < rainfall < 510 mm:                                        │
+   │   Payout = ₹100,000 × (510 − rainfall) / (510 − 170)              │
+   │   = ₹100,000 × (510 − rainfall) / 340                              │
+   │                                                                     │
+   │ Example: If seasonal rainfall = 350 mm:                             │
+   │   Payout = ₹100,000 × (510 − 350) / 340 = ₹47,059                  │
+   └─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The index definition is the most critical component — and the most common source of product failure. A poorly defined index creates unmanageable basis risk. The index must be: (a) <strong>objective</strong> — measured by an independent third party (IMD, USGS, etc.) with transparent methodology, (b) <strong>verifiable</strong> — the policyholder can independently check the index value, (c) <strong>timely</strong> — available soon enough after the event to trigger rapid payout, (d) <strong>stable</strong> — the measurement methodology does not change unexpectedly, and (e) <strong>correlated</strong> — strongly correlated with the loss being insured. An index that satisfies all five criteria is a good index. An index that fails any one criterion will produce a product with unmanageable basis risk.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch19-global-parametric">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>3. Global Parametric Success Stories</h2>
+
+            <p>Parametric insurance has moved from experimental to proven over the past 15 years. Several landmark programmes have demonstrated that parametric insurance can work at scale, for multiple perils, across developed and developing markets.</p>
+
+            <h3>3.1 Landmark Programmes</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Programme</th><th>Region</th><th>Peril</th><th>Index</th><th>Scale</th><th>Key Achievement</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CCRIF — Caribbean Catastrophe Risk Insurance Facility</strong></td>
+                        <td>19 Caribbean nations</td>
+                        <td>Cyclone, Earthquake, Excess Rainfall</td>
+                        <td>Wind speed (USGS/NOAA), Earthquake magnitude (USGS), Rainfall (satellite)</td>
+                        <td>$1.5B+ in coverage, 50+ payouts since 2007</td>
+                        <td>World's first multi-country parametric facility. Paid $8M to Haiti within 14 days of 2010 earthquake. Reduced member countries' disaster fiscal volatility by providing predictable post-disaster liquidity.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ARC — Africa Risk Capacity</strong></td>
+                        <td>33 African Union member states</td>
+                        <td>Drought, Flood, Cyclone</td>
+                        <td>Satellite-based rainfall data (Africa Rainfall Climatology), modelled crop loss</td>
+                        <td>$200M+ in coverage, $65M+ in payouts since 2014</td>
+                        <td>Combines parametric insurance with pre-approved contingency plans — recipient governments must have a plan for using the payout effectively (food distribution, livestock feed, cash transfers). Payouts made within 10 days of harvest season end.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PMFBY — Pradhan Mantri Fasal Bima Yojana</strong></td>
+                        <td>India (all states, 30M+ farmers)</td>
+                        <td>Crop loss (drought, flood, pest, cyclone)</td>
+                        <td>Yield-based (Crop Cutting Experiments) + Weather-based (IMD rainfall/temperature/wind triggers)</td>
+                        <td>$5B+ in premiums, 30M+ farmers covered annually</td>
+                        <td>World's largest crop insurance programme. Uses hybrid model — yield-based assessment for area-wide losses and weather-based parametric triggers for rapid payouts on specific perils. Challenges with delayed payments have reduced farmer satisfaction.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IDFC FIRST Bank Parametric Heat Stress Insurance</strong></td>
+                        <td>India (Odisha, Andhra Pradesh)</td>
+                        <td>Heatwave</td>
+                        <td>Temperature (IMD weather stations)</td>
+                        <td>10,000+ women entrepreneurs covered</td>
+                        <td>Innovative product targeting women entrepreneurs in urban informal sector. Payout triggered when temperature exceeds 42°C for 3+ consecutive days — provides working capital replacement during heatwaves when business activity drops. Premium subsidised by partner organisations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Swiss Re Parametric — Flood Protection for Small Businesses</strong></td>
+                        <td>India, Bangladesh, Indonesia</td>
+                        <td>Flood</td>
+                        <td>River gauge height + satellite flood extent (Global Flood Detection System)</td>
+                        <td>In pilot stage (2024–25)</td>
+                        <td>Designed for small businesses in flood-prone river basins. Payout triggered when river gauge at nearest station exceeds defined danger level. No claims adjustment — payout in 7 days. Premium: 2–5% of sum insured.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The CCRIF model is particularly instructive for India. Before CCRIF, Caribbean governments relied on post-disaster borrowing and aid — which could take 6–18 months to arrive. After CCRIF, governments receive parametric payouts within 14 days, providing immediate liquidity for emergency response. The key design feature: CCRIF is a <strong>risk pool</strong>, not just a product. By pooling cyclone and earthquake risk across 19 geographically diversified countries, CCRIF reduces each country's premium by approximately 40% compared to purchasing parametric coverage individually. The pooling principle — which made insurance viable in 18th-century London coffee houses — applies just as powerfully to 21st-century climate risk in developing countries. India's states, with their geographic diversity, could benefit from a similar inter-state parametric risk pool — and some policy discussions have explored this as an extension of the PMFBY framework.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Parametric Product Modeling in Python</h2>
+
+            <p>The core of parametric product design is modelling the historical payout distribution — how often would the trigger have been hit in the past, and what would the payouts have been? This analysis determines the pure premium (the expected annual payout) and helps the product designer understand the risk profile of the product.</p>
+
+            <h3>4.1 Loading and Exploring Weather Data</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load historical weather data for the target region
+weather = pd.read_csv('data/weather_data.csv')
+weather['date'] = pd.to_datetime(weather['date'])
+
+# Filter to the target crop season and region (e.g., Kharif, June-September, Maharashtra)
+# For this synthetic dataset, we'll use all available data
+print(f"Weather data: {len(weather):,} records, {weather['region'].nunique()} regions")
+print(f"Date range: {weather['date'].min().date()} to {weather['date'].max().date()}")
+print(f"\nColumns: {weather.columns.tolist()}")
+print(f"\nSummary statistics:\n{weather[['rainfall_mm', 'max_temp', 'min_temp']].describe()}")
+
+# Aggregate to seasonal rainfall totals (e.g., June-September = monsoon season)
+weather['year'] = weather['date'].dt.year
+weather['month'] = weather['date'].dt.month
+
+# Define monsoon season months
+monsoon_months = [6, 7, 8, 9]
+seasonal = weather[weather['month'].isin(monsoon_months)].groupby(['year', 'region']).agg(
+    seasonal_rainfall=('rainfall_mm', 'sum'),
+    rainy_days=('rainfall_mm', lambda x: (x > 2.5).sum()),  # Days with >2.5mm rain
+    max_temp_seasonal=('max_temp', 'max')
+).reset_index()
+
+print(f"\nSeasonal (monsoon) data: {len(seasonal):,} region-years")
+print(f"Average seasonal rainfall: {seasonal['seasonal_rainfall'].mean():.0f} mm")
+print(f"Std deviation: {seasonal['seasonal_rainfall'].std():.0f} mm")
+print(f"Min: {seasonal['seasonal_rainfall'].min():.0f} mm, Max: {seasonal['seasonal_rainfall'].max():.0f} mm")</code></pre>
+
+            <h3>4.2 Defining the Product and Simulating Payouts</h3>
+
+            <pre><code class="language-python"># Select a specific region for the product
+target_region = 'Region_A' if 'Region_A' in seasonal['region'].values else seasonal['region'].iloc[0]
+product_data = seasonal[seasonal['region'] == target_region].copy()
+product_data = product_data.sort_values('year')
+
+print(f"Product region: {target_region}")
+print(f"Years of data: {len(product_data)}")
+
+# Define product parameters
+HISTORICAL_AVERAGE = product_data['seasonal_rainfall'].mean()
+HISTORICAL_PERIOD = 10  # Years for moving average
+
+product_data['rolling_avg'] = product_data['seasonal_rainfall'].rolling(window=HISTORICAL_PERIOD, min_periods=5).mean()
+
+# Product design parameters
+TRIGGER_PCT = 0.60      # Trigger at 60% of historical average
+EXIT_PCT = 0.20         # Exit at 20% of historical average
+MAX_PAYOUT = 100000     # Maximum payout in rupees
+
+print(f"\nPRODUCT DESIGN PARAMETERS")
+print(f"=" * 50)
+print(f"Region:                 {target_region}")
+print(f"Historical avg rainfall: {HISTORICAL_AVERAGE:.0f} mm")
+print(f"Trigger:                {TRIGGER_PCT*100:.0f}% of avg = {HISTORICAL_AVERAGE * TRIGGER_PCT:.0f} mm")
+print(f"Exit:                   {EXIT_PCT*100:.0f}% of avg = {HISTORICAL_AVERAGE * EXIT_PCT:.0f} mm")
+print(f"Max payout:             ₹{MAX_PAYOUT:,.0f}")
+
+# Calculate payout for each historical year
+TRIGGER_VALUE = product_data['rolling_avg'] * TRIGGER_PCT
+EXIT_VALUE = product_data['rolling_avg'] * EXIT_PCT
+
+# Payout function (linear between trigger and exit)
+product_data['rainfall_trigger'] = product_data['rolling_avg'] * TRIGGER_PCT
+product_data['rainfall_exit'] = product_data['rolling_avg'] * EXIT_PCT
+
+payouts = []
+for _, row in product_data.iterrows():
+    rainfall = row['seasonal_rainfall']
+    trigger = row['rainfall_trigger']
+    exit_val = row['rainfall_exit']
+
+    if rainfall >= trigger:
+        payout = 0  # No trigger
+    elif rainfall <= exit_val:
+        payout = MAX_PAYOUT  # Maximum payout
+    else:
+        # Linear interpolation
+        payout = MAX_PAYOUT * (trigger - rainfall) / (trigger - exit_val)
+
+    payouts.append(payout)
+
+product_data['payout'] = payouts</code></pre>
+
+            <h3>4.3 Pure Premium Calculation</h3>
+
+            <pre><code class="language-python"># Pure premium = expected annual payout (average of historical payouts)
+pure_premium = product_data['payout'].mean()
+trigger_frequency = (product_data['payout'] > 0).mean() * 100
+max_payout_years = (product_data['payout'] >= MAX_PAYOUT * 0.99).sum()
+
+print(f"\n{'=' * 55}")
+print(f"PURE PREMIUM ANALYSIS")
+print(f"{'=' * 55}")
+print(f"Number of years modelled:    {len(product_data)}")
+print(f"Pure premium (annual):       ₹{pure_premium:,.0f}")
+print(f"Trigger probability:         {trigger_frequency:.1f}%")
+print(f"Years with max payout:       {max_payout_years} ({(max_payout_years/len(product_data))*100:.1f}%)")
+print(f"Maximum annual payout:       ₹{product_data['payout'].max():,.0f}")
+print(f"Standard deviation of payout: ₹{product_data['payout'].std():,.0f}")
+
+# Commercial premium = pure premium + loading
+loading_factor = 1.35  # 35% loading for administration, capital cost, profit
+commercial_premium = pure_premium * loading_factor
+
+print(f"\nCommercial premium (with {loading_factor-1:.0%} loading): ₹{commercial_premium:,.0f}")
+print(f"Premium as % of max payout: {commercial_premium/MAX_PAYOUT*100:.1f}%")
+
+# Payout history visualization
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# LEFT: Rainfall vs payout
+ax1.plot(product_data['year'], product_data['seasonal_rainfall'],
+         'o-', color='#00d2d3', linewidth=2, markersize=6, label='Seasonal Rainfall')
+ax1.axhline(y=TRIGGER_VALUE.iloc[-1] if hasattr(TRIGGER_VALUE, 'iloc') else TRIGGER_VALUE,
+            color='orange', linestyle='--', linewidth=1.5, label='Trigger Level')
+ax1.axhline(y=EXIT_VALUE.iloc[-1] if hasattr(EXIT_VALUE, 'iloc') else EXIT_VALUE,
+            color='red', linestyle='--', linewidth=1.5, label='Exit Level')
+ax1.fill_between(product_data['year'], TRIGGER_VALUE, EXIT_VALUE,
+                 alpha=0.1, color='red', label='Payout Zone')
+ax1.set_xlabel('Year')
+ax1.set_ylabel('Seasonal Rainfall (mm)')
+ax1.set_title(f'Rainfall vs. Parametric Triggers — {target_region}', fontweight='bold')
+ax1.legend()
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+# RIGHT: Payouts
+colors = ['#e17055' if p > 0 else '#00b894' for p in product_data['payout']]
+ax2.bar(product_data['year'], product_data['payout'] / 1000, color=colors, alpha=0.8)
+ax2.axhline(y=pure_premium / 1000, color='#6c5ce7', linestyle='--',
+            linewidth=1.5, label=f'Pure Premium: ₹{pure_premium/1000:.0f}K')
+ax2.set_xlabel('Year')
+ax2.set_ylabel('Payout (₹ Thousands)')
+ax2.set_title('Historical Payouts — Parametric Rainfall Product', fontweight='bold')
+ax2.legend()
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+
+print(f"\nThe chart shows {int(trigger_frequency)} years with trigger events out of {len(product_data)} years.")
+print(f"In the worst year, the payout was ₹{product_data['payout'].max()/1000:.0f}K.")
+print(f"The pure premium of ₹{pure_premium/1000:.0f}K/year over the modelled period")
+print(f"would have covered all payouts on average.")</code></pre>
+
+            <h3>4.4 Sensitivity Analysis — Changing the Trigger</h3>
+
+            <pre><code class="language-python"># Sensitivity: how does the pure premium change with different trigger levels?
+trigger_levels = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80]
+sensitivity_results = []
+
+for trigger_pct in trigger_levels:
+    trig_val = product_data['rolling_avg'] * trigger_pct
+    exit_val = product_data['rolling_avg'] * EXIT_PCT
+
+    payouts_s = []
+    for i, (_, row) in enumerate(product_data.iterrows()):
+        rainfall = row['seasonal_rainfall']
+        t = trig_val.iloc[i] if hasattr(trig_val, 'iloc') else trig_val
+        e = exit_val.iloc[i] if hasattr(exit_val, 'iloc') else exit_val
+
+        if rainfall >= t:
+            payout = 0
+        elif rainfall <= e:
+            payout = MAX_PAYOUT
+        else:
+            payout = MAX_PAYOUT * (t - rainfall) / (t - e)
+        payouts_s.append(payout)
+
+    pure_p = np.mean(payouts_s)
+    freq = np.mean([1 for p in payouts_s if p > 0]) * 100
+    sensitivity_results.append({'trigger_pct': trigger_pct, 'pure_premium': pure_p,
+                                 'trigger_frequency': freq})
+
+sens_df = pd.DataFrame(sensitivity_results)
+
+print(f"{'Trigger':12s} {'Pure Premium':15s} {'Freq':8s} {'Commercial':15s}")
+print("-" * 50)
+for _, row in sens_df.iterrows():
+    comm = row['pure_premium'] * 1.35
+    print(f"< {row['trigger_pct']*100:>3.0f}% of avg    ₹{row['pure_premium']:>7,.0f}    {row['trigger_frequency']:>4.1f}%   ₹{comm:>7,.0f}")
+
+# Plot sensitivity
+fig, ax1 = plt.subplots(figsize=(10, 5))
+ax1.plot(sens_df['trigger_pct'] * 100, sens_df['pure_premium'] / 1000,
+         'o-', color='#6c5ce7', linewidth=2.5, markersize=8)
+ax1.set_xlabel('Trigger (% of Historical Average Rainfall)')
+ax1.set_ylabel('Pure Premium (₹ Thousands)', color='#6c5ce7')
+ax1.tick_params(axis='y', labelcolor='#6c5ce7')
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+ax2 = ax1.twinx()
+ax2.plot(sens_df['trigger_pct'] * 100, sens_df['trigger_frequency'],
+         's--', color='#e17055', linewidth=2, markersize=6)
+ax2.set_ylabel('Trigger Frequency (%)', color='#e17055')
+ax2.tick_params(axis='y', labelcolor='#e17055')
+
+ax1.set_title('Sensitivity Analysis: Trigger Level → Premium & Frequency', fontweight='bold')
+lines1, labels1 = ax1.get_legend_handles_labels()
+lines2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(lines1 + lines2, ['Pure Premium', 'Trigger Frequency'], loc='upper left')
+plt.tight_layout()
+plt.show()
+
+print(f"\nTradeoff: A lower trigger (e.g., 50% of avg) makes the product cheaper")
+print(f"({sens_df.iloc[0]['pure_premium']/1000:.0f}K premium) but pays out less often")
+print(f"({sens_df.iloc[0]['trigger_frequency']:.0f}% of years). A higher trigger (e.g., 80%)")
+print(f"pays more often ({sens_df.iloc[-1]['trigger_frequency']:.0f}%) but costs more")
+print(f"({sens_df.iloc[-1]['pure_premium']/1000:.0f}K premium). The product designer must")
+print(f"choose the trigger that balances affordability with coverage value.")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> When designing a parametric product, spend 80% of your effort on the <strong>index quality assessment</strong> — not the payout function, not the premium calculation. The most elegant payout function in the world cannot compensate for a bad index. Test the index against these criteria before writing any code: (a) does the index correlate with the loss at the individual policyholder level? (b) is the data source reliable, independent, and available in real-time? (c) can the policyholder independently verify the index value? (d) what is the spatial resolution — is the nearest weather station representative of the policyholder's location? If the answer to any of these is unsatisfactory, redesign the index — do not proceed with the product. A parametric product with high basis risk is not "good enough" — it is a product that will create disappointed customers, regulatory complaints, and reputational damage when a policyholder suffers a loss but receives no payout because the index was not triggered.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Basis Risk Analysis</h2>
+
+            <p>Basis risk is the most important concept in parametric insurance design — and the most misunderstood. It is the risk that the parametric index does not perfectly match the policyholder's actual loss. Basis risk can manifest in two directions, and both matter for product design.</p>
+
+            <h3>5.1 Types of Basis Risk</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Type</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Spatial Basis Risk</strong></td>
+                        <td>The weather station or satellite pixel measuring the index is not at the same location as the policyholder's farm, business, or property. The index says "normal rainfall" but the policyholder experienced drought — or vice versa.</td>
+                        <td>A farmer's field is 25 km from the nearest IMD weather station. The station recorded 600 mm of rainfall (above the trigger of 510 mm). But the farmer's field received only 400 mm due to localised rainfall variation. The farmer suffers a crop loss but receives no parametric payout.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Temporal Basis Risk</strong></td>
+                        <td>The index measures over a period that does not perfectly match the policyholder's exposure period. The timing of the index may not capture the critical loss window.</td>
+                        <td>A cyclonic wind event occurs on May 15 — just outside the June–September monsoon season window defined in the product. The policyholder's crops are destroyed, but the index was not measured during the event period. No payout.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Definitional Basis Risk</strong></td>
+                        <td>The index is defined in a way that does not capture the actual loss driver. The "wrong" metric is being measured, or the trigger threshold does not align with the loss threshold.</td>
+                        <td>The product uses cumulative rainfall as the index, but the farmer's loss was caused by a pest infestation that followed unusually high humidity (correlated with rainfall but not perfectly). Rainfall was below the trigger, so the index pays nothing — but the farmer's loss is real.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.2 Quantifying Basis Risk</h3>
+
+            <pre><code class="language-python"># Simulate basis risk by comparing index at weather station vs. index at policyholder location
+# We model the policyholder location as having a random offset from the station reading
+# (representing spatial variation in rainfall)
+
+np.random.seed(42)
+
+# Simulate actual rainfall at policyholder location
+# Assume: actual = station_reading × N(μ=1.0, σ=0.15) — 15% spatial variability
+spatial_variability = 0.15
+n_years = len(product_data)
+
+station_rainfall = product_data['seasonal_rainfall'].values
+policyholder_rainfall = station_rainfall * np.random.normal(1.0, spatial_variability, n_years)
+
+# Calculate payouts based on station data (insurance) vs. actual at policyholder
+trigger_val = product_data['rainfall_trigger'].values
+exit_val = product_data['rainfall_exit'].values
+
+station_payouts = product_data['payout'].values
+policyholder_payouts = []
+
+for i in range(n_years):
+    ph_rain = policyholder_rainfall[i]
+    t = trigger_val[i]
+    e = exit_val[i]
+
+    if ph_rain >= t:
+        payout = 0
+    elif ph_rain <= e:
+        payout = MAX_PAYOUT
+    else:
+        payout = MAX_PAYOUT * (t - ph_rain) / (t - e)
+    policyholder_payouts.append(payout)
+
+# Basis risk analysis
+basis_risk_types = {
+    'Correct payout (both same)': sum(1 for i in range(n_years)
+                                       if abs(station_payouts[i] - policyholder_payouts[i]) < 1000),
+    'Station says payout, farmer says no': sum(1 for i in range(n_years)
+                                                if station_payouts[i] > 1000 and policyholder_payouts[i] < 1000),
+    'Station says no, farmer says payout': sum(1 for i in range(n_years)
+                                                if station_payouts[i] < 1000 and policyholder_payouts[i] > 1000),
+    'Both pay but amounts differ': sum(1 for i in range(n_years)
+                                        if station_payouts[i] > 1000 and policyholder_payouts[i] > 1000 and
+                                        abs(station_payouts[i] - policyholder_payouts[i]) >= 1000)
+}
+
+print("=" * 60)
+print("BASIS RISK ANALYSIS")
+print("=" * 60)
+pd.options.display.float_format = '{:.1f}'.format
+print(f"{'Basis Risk Type':40s} {'Cases':>8s} {'%':>8s}")
+print("-" * 56)
+total_cases = n_years
+for risk_type, count in basis_risk_types.items():
+    pct = count / total_cases * 100
+    print(f"{risk_type:40s} {count:>5d}     {pct:>5.1f}%")
+
+# Summary statistics
+mean_station = np.mean(station_payouts)
+mean_ph = np.mean(policyholder_payouts)
+rmse_basis = np.sqrt(np.mean((np.array(station_payouts) - np.array(policyholder_payouts)) ** 2))
+
+print(f"\nBasis Risk Statistics:")
+print(f"  Station average payout:  ₹{mean_station:,.0f}")
+print(f"  Policylholder average:   ₹{mean_ph:,.0f}")
+print(f"  RMSE (payout error):     ₹{rmse_basis:,.0f} ({rmse_basis/MAX_PAYOUT*100:.1f}% of max payout)")
+print(f"  In {basis_risk_types['Station says no, farmer says payout']} out of {n_years} years, the farmer")
+print(f"  suffered a loss but the index did not trigger — this is basis risk.")
+print(f"  ({basis_risk_types['Station says no, farmer says payout']/n_years*100:.0f}% of years)")
+print(f"\nMitigation strategies:")
+print(f"  1. Increase weather station density to reduce spatial basis risk")
+print(f"  2. Use satellite data with higher spatial resolution")
+print(f"  3. Offer multi-trigger products (rainfall + satellite vegetation index)")
+print(f"  4. Include a 'basis risk buffer' — reduce the trigger threshold from 60% to 55%")
+print(f"     to widen the coverage zone, accepting a higher premium")</code></pre>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> Basis risk is not an abstract statistical concept — it is a real customer harm that will destroy trust in parametric insurance if not managed transparently. A farmer who loses their entire crop but receives no parametric payout because "the weather station 20 km away recorded normal rainfall" will never buy parametric insurance again — and will tell everyone they know not to buy it either. The single most important product disclosure for parametric insurance is a clear, quantified explanation of basis risk: "This product pays out when the IMD station at X location records rainfall below Y mm. If your farm receives less rainfall than the station, you may suffer a loss without receiving a payout." This disclosure must be prominent, specific, and in the local language. A parametric product that does not honestly discuss basis risk is a product that is setting itself — and the parametric insurance market — up for failure.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Cyclone Parametric Trigger Design</h2>
+
+            <p>Cyclone parametric triggers are conceptually similar to rainfall triggers but use wind speed (or barometric pressure) as the index instead of cumulative rainfall. Cyclone triggers are used for: property insurance (buildings damaged by wind), crop insurance (wind + salination damage to crops), and business interruption (port closures, tourism disruption, supply chain interruption caused by cyclones).</p>
+
+            <h3>6.1 The Cyclone Trigger Framework</h3>
+
+            <pre><code class="language-python"># Cyclone parametric trigger design
+# Index: Maximum sustained wind speed at the nearest IMD weather station
+# during a cyclone event (3-second gust at 10m height)
+
+import warnings
+warnings.filterwarnings('ignore')
+
+# Define cyclone categories (Indian IMD classification)
+cyclone_categories = pd.DataFrame({
+    'category': ['Depression', 'Deep Depression', 'Cyclonic Storm',
+                  'Severe Cyclonic Storm', 'Very Severe Cyclonic Storm',
+                  'Extremely Severe Cyclonic Storm', 'Super Cyclone'],
+    'wind_knots': [28, 33, 48, 64, 90, 120, 140],
+    'wind_kmph': [52, 61, 89, 119, 167, 222, 259],
+    'damage_level': ['Minor', 'Minor-Moderate', 'Moderate',
+                      'Moderate-Severe', 'Severe', 'Very Severe', 'Catastrophic'],
+    'payout_pct': [0.0, 0.0, 0.15, 0.30, 0.55, 0.80, 1.0]
+})
+
+print("=" * 80)
+print("CYCLONE PARAMETRIC TRIGGER — Payout Structure by Wind Speed")
+print("=" * 80)
+print(f"{'Category':30s} {'Speed (km/h)':15s} {'Payout %':10s} {'Payout (₹50L max)':20s}")
+print("-" * 75)
+
+max_payout_cyclone = 5000000  # ₹50 lakh maximum payout
+
+for _, row in cyclone_categories.iterrows():
+    payout_amt = row['payout_pct'] * max_payout_cyclone
+    print(f"{row['category']:30s} {row['wind_kmph']:>4.0f}−{row['wind_kmph'] + 30:>3.0f}      {row['payout_pct']*100:>5.0f}%        ₹{payout_amt:>7,.0f}")
+
+print(f"\n{'─' * 75}")
+print(f"  Trigger threshold: Cyclonic Storm (≥89 km/h) — minimum payout of")
+print(f"                     15% of max = ₹{max_payout_cyclone*0.15:,.0f}")
+print(f"  Exit threshold:    Super Cyclone (≥259 km/h) — full payout of ₹{max_payout_cyclone:,.0f}")
+print(f"  Payout function:   Linear interpolation between category thresholds")
+
+# Simulate cyclone events
+np.random.seed(42)
+n_sim_years = 100
+
+# Simulate cyclone frequency (Poisson) and intensity (categorical probabilities)
+sim_years = []
+sim_wind = []
+sim_payouts = []
+
+for year in range(1, n_sim_years + 1):
+    # Number of cyclones affecting the target region per year
+    n_cyclones = np.random.poisson(1.2)  # Average 1.2 cyclones/year
+
+    for _ in range(n_cyclones):
+        # Wind speed distribution (conditional on cyclone occurrence)
+        wind_speed = np.random.choice(
+            cyclone_categories['wind_kmph'] + np.random.uniform(0, 30, len(cyclone_categories)),
+            p=[0.05, 0.10, 0.25, 0.25, 0.20, 0.10, 0.05]  # More common at lower intensities
+        )
+        sim_years.append(year)
+        sim_wind.append(wind_speed)
+
+        # Calculate payout
+        if wind_speed < 89:  # Below trigger
+            sim_payouts.append(0)
+        elif wind_speed >= 259:  # Exit
+            sim_payouts.append(max_payout_cyclone)
+        else:
+            # Find the category bracket
+            cat_row = cyclone_categories[
+                (cyclone_categories['wind_kmph'] <= wind_speed) &
+                (cyclone_categories['wind_kmph'].shift(-1).fillna(999) > wind_speed)
+            ]
+            if len(cat_row) > 0:
+                payout_pct = cat_row['payout_pct'].values[0]
+                sim_payouts.append(payout_pct * max_payout_cyclone)
+            else:
+                sim_payouts.append(0)
+
+sim_df = pd.DataFrame({
+    'year': sim_years,
+    'wind_speed': sim_wind,
+    'payout': sim_payouts
+})
+
+# Aggregate to annual
+annual_cyclone = sim_df.groupby('year').agg(
+    cyclone_count=('wind_speed', 'count'),
+    max_wind=('wind_speed', 'max'),
+    total_payout=('payout', 'sum')
+).reset_index()
+
+pure_premium_cyclone = annual_cyclone['total_payout'].mean()
+trigger_prob = (annual_cyclone['total_payout'] > 0).mean() * 100
+
+print(f"\n{'=' * 55}")
+print(f"CYCLONE PARAMETRIC — SIMULATION RESULTS")
+print(f"{'=' * 55}")
+print(f"Years simulated:                    {n_sim_years}")
+print(f"Total cyclone events:               {len(sim_df)}")
+print(f"Average cyclones/year:              {len(sim_df)/n_sim_years:.2f}")
+print(f"Years with payout event:            {trigger_prob:.1f}%")
+print(f"Pure premium (annual):              ₹{pure_premium_cyclone:,.0f}")
+print(f"Commercial premium (35% loading):   ₹{pure_premium_cyclone * 1.35:,.0f}")
+print(f"Max annual payout:                  ₹{annual_cyclone['total_payout'].max():,.0f}")
+
+# Plot wind speed distribution
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+ax1.hist(sim_df['wind_speed'], bins=20, color='#e17055', edgecolor='white', alpha=0.7)
+ax1.axvline(x=89, color='red', linestyle='--', linewidth=1.5, label='Trigger (89 km/h)')
+ax1.axvline(x=259, color='darkred', linestyle='--', linewidth=1.5, label='Exit (259 km/h)')
+ax1.set_xlabel('Maximum Wind Speed (km/h)')
+ax1.set_ylabel('Number of Events')
+ax1.set_title('Cyclone Wind Speed Distribution — Simulated 100 Years', fontweight='bold')
+ax1.legend()
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+ax2.hist(annual_cyclone['total_payout'] / 100000, bins=15, color='#6c5ce7', edgecolor='white', alpha=0.7)
+ax2.set_xlabel('Annual Payout (₹ Lakhs)')
+ax2.set_ylabel('Number of Years')
+ax2.set_title('Annual Payout Distribution — Cyclone Parametric', fontweight='bold')
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Cyclone parametric triggers in India face a specific challenge: the India Meteorological Department's cyclone warning system is world-class (IMD was recognised as a WMO Regional Specialised Meteorological Centre for cyclones), but the availability of historical wind speed data at the granularity needed for parametric insurance is limited. IMD maintains wind speed records at coastal weather stations for recent decades, but the station network is sparse in some coastal areas. Satellite-based wind speed estimation (from scatterometers on Indian and international satellites) is improving rapidly but has higher uncertainty at the individual-event level than ground-based measurements. For a cyclone parametric product to be viable, the index must use the best available data source (IMD ground stations where available, gap-filled with satellite data) and the basis risk must be clearly disclosed.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch19-parametric-business-case">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. The Business Case for Parametric Insurance</h2>
+
+            <p>Parametric insurance is not a replacement for indemnity insurance — it is a complement that addresses specific needs that indemnity insurance cannot serve efficiently. Understanding where parametric fits in the insurance ecosystem is essential for product strategy, distribution, and customer communication.</p>
+
+            <h3>7.1 When Parametric is the Right Solution</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Situation</th><th>Why Parametric Wins</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Rapid liquidity needed</strong></td><td>Post-disaster, organisations and governments need cash immediately — not after a 6-month claims assessment. Parametric pays in days.</td><td>CCRIF paying Haiti $8M within 14 days of the 2010 earthquake — while rescue operations were still active.</td></tr>
+                    <tr><td><strong>Low premium, high volume</strong></td><td>Traditional claims adjustment costs ₹2,000–₹5,000 per claim. For low-premium products (₹1,000–₹10,000), the claims cost makes indemnity insurance uneconomical. Parametric's zero-adjustment model makes these products viable.</td><td>Micro-insurance for smallholder farmers. Premium: ₹500/year. Payout: ₹10,000. Indemnity insurance would spend more on claims adjustment than the premium. Parametric makes the product viable.</td></tr>
+                    <tr><td><strong>Standardised, correlated losses</strong></td><td>When many policyholders are affected by the same event (cyclone, flood, earthquake), indemnity insurance requires adjusting each claim individually — a massive operational burden. Parametric pays everyone with the same trigger simultaneously.</td><td>A cyclone affects 10,000 policyholders in a district. Parametric: one trigger check, 10,000 automated payments. Indemnity: 10,000 individual claim adjustments, months of work.</td></tr>
+                    <tr><td><strong>Hard-to-verify losses</strong></td><td>Some losses are difficult or expensive to verify — crop loss between planting and harvest, business interruption for informal businesses without financial records, contingent business interruption. Parametric bypasses the verification problem entirely.</td><td>A small shop in a flood-prone area has no reliable revenue records. Indemnity business interruption insurance is impossible to adjust. Parametric flood trigger pays a fixed amount per day of flood, regardless of actual revenue loss.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 When Indemnity is Still the Right Solution</h3>
+
+            <p>Parametric is not always the better choice. Indemnity insurance remains the right solution when: (a) losses are idiosyncratic and variable (different policyholders have very different loss amounts from the same event — parametric cannot match individual risk profiles), (b) the customer needs full coverage of their actual loss (not a fixed payment that may be less than the loss), (c) a reliable index does not exist for the risk being covered, and (d) the product is for large commercial risks where the cost of claims adjustment is a small fraction of the premium — the efficiency advantage of parametric is less relevant.</p>
+
+            <h3>7.3 The Hybrid Model — Combining Parametric and Indemnity</h3>
+
+            <p>The most innovative climate risk products use a hybrid structure: parametric for the first layer of coverage (rapid liquidity immediately after the event) and indemnity for the second layer (covering the actual loss above the parametric payout). This structure addresses the main weakness of each approach — parametric's basis risk is covered by the indemnity layer, and indemnity's slow payment is addressed by the parametric layer. A hybrid product might work as follows:</p>
+
+            <ul>
+                <li><strong>Parametric layer (first 30 days):</strong> If wind speed at the nearest IMD station exceeds 89 km/h, the policyholder receives an immediate ₹2 lakh payout — regardless of actual damage. The money is available within 3 days of the event, providing working capital for emergency response, temporary repairs, and business continuity.</li>
+                <li><strong>Indemnity layer (30–90 days):</strong> The policyholder can file a traditional indemnity claim for the actual damage above ₹2 lakh. The claims adjustment process proceeds normally. The parametric payout is deducted from the indemnity settlement (to avoid double-counting), but the policyholder's total recovery is the greater of (a) the parametric payout or (b) the indemnity settlement — ensuring they are fully covered for their actual loss.</li>
+            </ul>
+
+            <p>This hybrid model is gaining traction in commercial property insurance in cyclone-prone regions globally. It is not yet widely available in India, but several insurers are developing pilot programmes for the 2026–27 cyclone season.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The World Bank's Global Index Insurance Facility (GIIF) has supported parametric insurance development in 25+ countries, including India. GIIF's experience yields a critical lesson for product design: <strong>parametric products must be designed WITH the target customers, not for them.</strong> Early parametric products in Africa and the Caribbean failed because they were designed by actuaries and data scientists without farmer input — the triggers used indices that farmers did not understand or trust. Successful products involved farmers in the design process: what index do you trust? (IMD rainfall data, not satellite index that farmers cannot see), what trigger level makes sense? (when does a dry spell become a drought in your experience?), what payout is meaningful? (enough to replant, not enough to change livelihoods). The products that worked were co-designed with the community — and had dramatically lower basis risk because the community's local knowledge improved the index selection. This lesson applies to any parametric product in any market: the customer knows the risk context better than the data ever will.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Design a Parametric Insurance Product</h2>
+            <div class="project-brief">
+                <p>You are a product designer at "ParampCover Insurance," a hypothetical InsurTech launching parametric insurance products for climate-vulnerable communities in India. Your first product is a rainfall-index parametric insurance for paddy farmers in a district of Odisha — one of India's most cyclone- and drought-prone states. You have 20 years of historical rainfall data. Your task is to design the product, simulate payouts, analyse basis risk, and prepare a product launch memo.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Data preparation:</strong> Load the weather dataset. Aggregate to seasonal (monsoon, June–September) rainfall totals for your target region. Calculate the 10-year rolling average as the baseline for your triggers. Print the historical average, minimum, and maximum.</li>
+                    <li><strong>Product design:</strong> Choose trigger (50%, 60%, or 70% of baseline) and exit (15%, 20%, or 25%) levels. Define the payout function (linear stepped). Max payout: ₹75,000 per farmer. Document your rationale for the trigger/exit choices.</li>
+                    <li><strong>Payout simulation:</strong> Calculate the payout for each historical year. Compute: pure premium, trigger frequency, maximum annual payout, and commercial premium (with 35% loading).</li>
+                    <li><strong>Sensitivity analysis:</strong> Vary the trigger from 50% to 80% (in 5% increments) and compute the pure premium at each level. Plot the sensitivity curve. Recommend an optimal trigger level and explain the tradeoff.</li>
+                    <li><strong>Basis risk analysis:</strong> Simulate basis risk by adding ±15% spatial variation between the weather station and the farmer's location. Calculate: how many years does the farmer receive a payout when the station says no trigger (false negative for the farmer)? How many years does the farmer receive no payout when they suffered a loss (false negative for the index)?</li>
+                    <li><strong>Write a 500-word product launch memo</strong> to the CEO covering: product description (index, trigger, exit, payout), target customer segment and distribution strategy, premium pricing and expected loss ratio, basis risk disclosure plan, and key risks and mitigation strategies.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Product Launch Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> CEO, ParampCover Insurance<br>
+                    <strong>From:</strong> Product Design — Parametric Agriculture<br>
+                    <strong>Subject:</strong> Product Launch Recommendation — RainSafe Odisha Parametric</p>
+
+                    <p><strong>Product Description:</strong><br>
+                    RainSafe Odisha Parametric covers paddy farmers in the target district against drought risk during the Kharif monsoon season (June–September). The index is cumulative rainfall measured at the nearest IMD weather station. The trigger is set at 60% of the 10-year rolling average rainfall, the exit at 20%, with a linear payout function between trigger and exit. Maximum payout: ₹75,000 per farmer. The product is a deficit-rainfall trigger — meaning it protects against drought, not flood. We chose drought over flood as the first product because: (a) drought has lower basis risk than flood (flood is more spatially variable), (b) drought claims are harder to adjust under traditional crop insurance (they require crop-cutting experiments that take months), making parametric drought cover more valuable, and (c) the historical data shows that drought occurs more frequently in the target district (18% of years) than flood (12% of years), making the product more relevant to farmers.</p>
+
+                    <p><strong>Target Customer and Distribution:</strong><br>
+                    Primary customer: smallholder paddy farmers (1–5 acres) in the target district. Estimated addressable market: 12,000 farmers. Distribution: through three partner channels — (1) Kisan Credit Card-linked: distributed through the district's largest rural bank (2,000 farmers pre-registered), (2) FPO (Farmer Producer Organisation) membership: the district's two largest FPOs will offer RainSafe to their 4,500 members, (3) Direct digital: through a simple WhatsApp-based purchase flow, supported by local agricultural extension workers. Target Year 1: 5,000 policies.</p>
+
+                    <p><strong>Premium Pricing:</strong><br>
+                    Historical analysis (20 years) shows a pure premium of ₹3,800 per farmer per year (based on the 60% trigger, 20% exit structure). Applying a 35% loading (administration, capital cost, distribution commission, profit margin) produces a commercial premium of ₹5,130. We recommend a premium of ₹5,000 per farmer to simplify the price point and drive adoption. At this premium, the expected loss ratio is 76% (₹3,800/₹5,000) — within the target range for parametric products (70–80% loss ratio is considered healthy for this segment). Sensitivity analysis indicates that if we tighten the trigger to 50%, the premium drops to ₹1,800 (more affordable, but covers fewer years of loss). We recommend the 60% trigger as the optimal balance between affordability and coverage — the farmer pays ₹5,000/year and receives a payout in years when rainfall falls below 60% of average.</p>
+
+                    <p><strong>Basis Risk Disclosure:</strong><br>
+                    The basis risk analysis with ±15% spatial variation shows that in approximately 6% of years, a farmer may experience a loss that the index does not trigger (false negative for the farmer). We will manage this through: (a) clear disclosure at the point of sale — "This product uses rainfall data from the IMD station at [location]. Your farm's actual rainfall may differ. If your farm experiences drought but the station records normal rainfall, you will not receive a payout." (b) A "basis risk hotline" — farmers who experience a loss that the index did not capture can call a dedicated number. Each case is reviewed individually. While we cannot pay outside the parametric structure (that would make it indemnity insurance), we track these cases for product improvement and can offer a discounted premium on next year's policy as a goodwill gesture. This is not a perfect solution, but it is transparent — and transparency is the most important risk mitigation for basis risk.</p>
+
+                    <p><strong>Key Risks and Mitigation:</strong><br>
+                    (1) <strong>Data source risk:</strong> IMD weather station data may be delayed or unavailable. Mitigation: Use satellite-based rainfall estimates (IMD's INSAT-3DR derived rainfall product) as a secondary data source. If IMD data is unavailable, the satellite estimate is the fallback index. This fallback is disclosed in the policy terms. (2) <strong>Adverse selection risk:</strong> Farmers with knowledge of drought forecasts may purchase more coverage in expected drought years. Mitigation: policies must be purchased before the monsoon season (by May 31), farmers cannot purchase coverage once the season has started and monsoon predictions are confirmed. (3) <strong>Distribution risk:</strong> Farmers may not trust a parametric product. Mitigation: Partner with a local NGO for farmer education workshops before the launch. Use testimonials from pilot farmers. Start with a subsidised pilot (50% premium subsidy from a donor partner in Year 1) to build the evidence base and farmer trust.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Parametric insurance pays based on an objective index (rainfall, wind speed, earthquake magnitude) reaching a predefined threshold — not on the actual loss. The tradeoff: faster payment but potential basis risk (payout ≠ actual loss).</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Every parametric product has four components: Index Definition, Trigger Threshold, Exit Threshold, and Payout Function. The index is the most critical — it must be objective, verifiable, timely, stable, and strongly correlated with the loss.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Modelling a parametric product in Python involves: loading historical weather data, defining trigger/exit parameters, simulating payouts across all historical years, and calculating the pure premium as the expected annual payout. Sensitivity analysis on the trigger level reveals the affordability-coverage tradeoff.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>Basis risk takes three forms — spatial (weather station ≠ farm), temporal (index period ≠ loss period), and definitional (index metric ≠ loss driver). Quantifying and transparently disclosing basis risk is the most important customer protection in parametric insurance.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>Parametric insurance is best suited for: rapid liquidity needs, low-premium/high-volume products, standardised correlated losses, and hard-to-verify losses. Hybrid parametric + indemnity products offer the best of both worlds — immediate liquidity from the parametric layer plus full coverage from the indemnity layer.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s19-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. The most important difference between parametric and indemnity insurance is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Parametric is only for weather risks; indemnity covers all risks</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Parametric pays based on an objective index value reaching a predefined threshold — not on the assessed actual loss. This eliminates the need for claims adjustment but creates basis risk</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Parametric always pays more than indemnity for the same event</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Parametric does not require a policy contract</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A farmer purchases a rainfall-index parametric policy with trigger at 60% of average (510 mm) and exit at 20% (170 mm). The seasonal rainfall is 400 mm. The maximum payout is ₹100,000. Using linear interpolation, the payout is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) ₹0 — 400 mm is above the trigger of 510 mm</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) ₹100,000 — 400 mm is below the exit of 170 mm</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) ₹32,353 — payout = ₹100,000 × (510 − 400) / (510 − 170) = ₹100,000 × 110/340</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) ₹47,059 — payout = ₹100,000 × (400 − 170) / (510 − 170)</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. Basis risk in parametric insurance refers to:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The risk that the insurance company does not have enough capital to pay claims</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) The risk that the parametric index does not perfectly match the policyholder's actual loss — the index indicates no payout while the policyholder suffers a loss, or vice versa</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The risk that the trigger level was set too high for the product to be affordable</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The risk that the insurance agent mis-sells the parametric product to an ineligible customer</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. A parametric product has a commercial premium of ₹5,000 and a pure premium of ₹3,800. The 32% difference between them represents:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) The insurer's profit margin, which is too high for a parametric product</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) The loading for administration costs, distribution commission, capital cost, and profit margin — a 30–35% loading is standard for parametric products given the technology, data, and capital costs involved</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) The cost of the basis risk that the insurer bears</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) An error in the premium calculation — parametric products should have zero loading because they require no claims adjustment</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A parametric cyclone product pays based on wind speed at the nearest IMD station. After a cyclone, the station records wind speeds of 75 km/h (below the trigger of 89 km/h). The policyholder's property suffered severe damage from the cyclone's localised wind gust. This is an example of:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Successful product design — the station correctly recorded below-trigger wind speeds</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Spatial basis risk — the policyholder's location experienced higher wind speeds than the nearest weather station recorded. The index was not triggered, but the loss was real. The product design must account for this spatial variability or the customer must understand and accept this basis risk at purchase</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) A fraudulent claim — the policyholder is exaggerating their loss</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) A failure of the India Meteorological Department's wind measurement equipment</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s19-quiz', ['b','c','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s19-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-18.html" class="nav-link">&larr; Previous: Climate Risk in Insurance</a>
+            <a href="session-20.html" class="nav-link next">Next: Catastrophe Modeling &amp; Risk Assessment &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

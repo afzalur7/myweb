@@ -1,0 +1,52 @@
+{
+  "chains": [
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "tps": 12.5,
+      "avgFee": "$3–$15",
+      "consensus": "Proof of Stake",
+      "language": "Solidity, Vyper",
+      "tokenStandard": "ERC-20",
+      "launchYear": 2015,
+      "tvl": "$55B",
+      "lastUpdated": "2026-07-01"
+    },
+    {
+      "id": "solana",
+      "name": "Solana",
+      "tps": 3000,
+      "avgFee": "$0.00025",
+      "consensus": "Proof of History + Proof of Stake",
+      "language": "Rust, C, C++",
+      "tokenStandard": "SPL",
+      "launchYear": 2020,
+      "tvl": "$4.5B",
+      "lastUpdated": "2026-07-01"
+    },
+    {
+      "id": "polygon",
+      "name": "Polygon",
+      "tps": 7000,
+      "avgFee": "$0.01–$0.05",
+      "consensus": "Proof of Stake (sidechain)",
+      "language": "Solidity (EVM-compatible)",
+      "tokenStandard": "ERC-20",
+      "launchYear": 2020,
+      "tvl": "$1.2B",
+      "lastUpdated": "2026-07-01"
+    }
+  ],
+  "auditFirms": [
+    {"id": "certik", "name": "CertiK", "headquarters": "New York, USA", "specialty": "Smart contract auditing", "notableClients": "Binance, Aave, Polygon"},
+    {"id": "trailofbits", "name": "Trail of Bits", "headquarters": "New York, USA", "specialty": "Blockchain security", "notableClients": "Ethereum Foundation, Solana"},
+    {"id": "openzeppelin", "name": "OpenZeppelin", "headquarters": "Global (Remote)", "specialty": "Smart contract libraries + audits", "notableClients": "Coinbase, Compound, Ethereum Foundation"}
+  ],
+  "regulations": [
+    {"jurisdiction": "India", "regulator": "IRDAI", "keyFrameworks": "Insurance Act 1938, IRDAI Act 1999, DPDP Act 2023", "sandboxAvailable": true, "lastUpdated": "2026-07-01"},
+    {"jurisdiction": "EU", "regulator": "EIOPA", "keyFrameworks": "Solvency II, GDPR, DORA", "sandboxAvailable": true, "lastUpdated": "2026-07-01"},
+    {"jurisdiction": "USA", "regulator": "NAIC (State-level)", "keyFrameworks": "State insurance codes, CCPA (California)", "sandboxAvailable": false, "lastUpdated": "2026-07-01"},
+    {"jurisdiction": "UK", "regulator": "PRA / FCA", "keyFrameworks": "Solvency II (UK), UK GDPR, Consumer Duty", "sandboxAvailable": true, "lastUpdated": "2026-07-01"},
+    {"jurisdiction": "Singapore", "regulator": "MAS", "keyFrameworks": "Insurance Act, PDPA, FEAT Principles", "sandboxAvailable": true, "lastUpdated": "2026-07-01"}
+  ]
+}

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 20: Catastrophe Modeling &amp; Risk Assessment — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-19.html" class="nav-link">&larr; Previous: Parametric Insurance Design</a>
+            <a href="session-21.html" class="nav-link next">Next: Advanced Python for Insurance Analytics &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 100%); color: #fff;">
+            <div class="chapter-badge">Module 6 &middot; Session 20 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 20: Catastrophe Modeling &amp; Risk Assessment</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Explain the three modules of a catastrophe model — Hazard, Vulnerability, Financial — and how they connect to estimate insured loss</li>
+                <li>Build a Monte Carlo simulation in Python that generates 10,000 synthetic years of cyclone events</li>
+                <li>Calculate key CAT model metrics — Average Annual Loss (AAL), Standard Deviation of Annual Loss, and Probable Maximum Loss (PML) at various return periods</li>
+                <li>Construct and interpret an Exceedance Probability (EP) curve — the single most important output of a catastrophe model</li>
+                <li>Use EP curve outputs to recommend a reinsurance programme structure — retention attachment, limit, and layers</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. What is Catastrophe Modeling?</h2>
+
+            <p>A catastrophe (CAT) model is a computer simulation that estimates the losses from natural disasters — cyclones, floods, earthquakes, wildfires, and other extreme events. Insurers, reinsurers, and governments use CAT models to understand their exposure to catastrophic events, set premiums and reserves, purchase reinsurance, and make strategic decisions about geographic diversification and risk appetite.</p>
+
+            <p>CAT models are necessary because <strong>historical experience is insufficient</strong> for catastrophe risk. A 1-in-200 year cyclone event may not have occurred in the last 50 years of recorded data — yet it could happen tomorrow. An insurer that prices cyclone risk based only on recent history will systematically underestimate the risk and fail when a rare event occurs. CAT models compensate for this data gap by generating millions of synthetic events from the statistical distributions that describe the underlying physical processes.</p>
+
+            <h3>1.1 The Three Modules of a Catastrophe Model</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│                 CATASTROPHE MODEL ARCHITECTURE                       │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  1. HAZARD MODULE                                            │    │
+│  │                                                              │    │
+│  │  WHAT: Where, how often, and how severe are the natural      │    │
+│  │        events? Defines the event set — the "event catalog."  │    │
+│  │                                                              │    │
+│  │  INPUTS: Historical event data, geological/geophysical       │    │
+│  │          parameters, climate projections, DEM topography,    │    │
+│  │          sea surface temperature, wind patterns              │    │
+│  │                                                              │    │
+│  │  OUTPUTS: Event frequency distribution (Poisson), event      │    │
+│  │           severity distribution (Lognormal, GEV), event      │    │
+│  │           footprint (wind speed at each location)            │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                              │                                       │
+│                              ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  2. VULNERABILITY MODULE                                    │    │
+│  │                                                              │    │
+│  │  WHAT: Given the event intensity at a specific location,     │    │
+│  │        what proportion of the property value is damaged?     │    │
+│  │                                                              │    │
+│  │  INPUTS: Engineering studies of building/infrastructure      │    │
+│  │          performance under stress, claims data from past     │    │
+│  │          events, building code information, construction     │    │
+│  │          type, occupancy, age                                │    │
+│  │                                                              │    │
+│  │  OUTPUTS: Damage ratio curves (mean damage ratio as          │    │
+│  │           function of wind speed, flood depth, PGA, etc.)    │    │
+│  │           plus uncertainty bounds                            │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                              │                                       │
+│                              ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  3. FINANCIAL MODULE                                         │    │
+│  │                                                              │    │
+│  │  WHAT: Given the damage to each exposure, what is the        │    │
+│  │        insured loss? Applies policy terms (deductibles,      │    │
+│  │        limits, coinsurance) to convert damage into loss.     │    │
+│  │                                                              │    │
+│  │  INPUTS: Policy-level exposure data (sum insured by          │    │
+│  │          location, policy conditions, deductibles, limits,   │    │
+│  │          reinsurance structure)                              │    │
+│  │                                                              │    │
+│  │  OUTPUTS: Insured loss for each event in the catalog,        │    │
+│  │           aggregated to portfolio level                      │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                              │                                       │
+│                              ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  OUTPUTS:                                                    │    │
+│  │  • Event Loss Table — loss for each of 10,000+ events       │    │
+│  │  • EP Curve — exceedance probability for each loss level    │    │
+│  │  • AAL (Average Annual Loss)                                 │    │
+│  │  • PML (Probable Maximum Loss) at return periods             │    │
+│  │  • Standard Deviation and Coefficient of Variation          │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The 2005 Hurricane Katrina — the costliest natural disaster in US history at the time ($125B+ economic loss, $45B+ insured loss) — exposed fundamental flaws in the CAT models that the insurance industry had been using. The models had underestimated the vulnerability of New Orleans' levee system, the potential for storm surge to exceed building code standards, and the concentration of risk in the Gulf Coast. After Katrina, the modelling industry underwent a major transformation: open-source vulnerability data, probabilistic flood modelling (previously most models only covered wind), and explicit modelling of storm surge separate from wind. The lesson: CAT models are not static — they improve after every major catastrophe, and the models in use today will be outdated after the next big event. An insurer that relies on a single model without stress-testing its assumptions is taking an unquantified risk.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Monte Carlo Simulation Fundamentals</h2>
+
+            <p>Monte Carlo simulation is the mathematical engine of catastrophe modelling. It generates thousands (or millions) of "synthetic years" of natural disaster events by randomly sampling from the statistical distributions that describe event frequency and severity. The law of large numbers ensures that the aggregate of these synthetic years converges to the "true" underlying risk distribution — even if the real-world historical record is too short to observe the most extreme events.</p>
+
+            <h3>2.1 The Two Building Blocks — Frequency and Severity</h3>
+
+            <p>Every Monte Carlo CAT model starts with two fundamental distributions:</p>
+
+            <ul>
+                <li><strong>Event frequency — Poisson distribution:</strong> The number of cyclone events per year is modelled as a Poisson random variable with parameter λ (the average number of events per year). The Poisson distribution is used because events are assumed to occur independently of each other — one cyclone does not make another more or less likely (for well-separated locations).</li>
+                <li><strong>Event severity — Lognormal distribution:</strong> The intensity (wind speed, flood depth, earthquake magnitude) of each event follows a distribution that captures the right-skewed nature of natural disasters — most events are moderate, a few are extreme. The lognormal distribution is the most common choice because it captures this skew and is well-behaved mathematically.</li>
+            </ul>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# ==========================================
+# FREQUENCY MODULE: Poisson Distribution
+# ==========================================
+LAMBDA = 1.8  # Average cyclones per year affecting the portfolio
+
+# Generate 100 years of event counts
+n_years = 100
+yearly_event_counts = np.random.poisson(LAMBDA, n_years)
+
+print("FREQUENCY MODULE — Poisson Distribution")
+print(f"Average events/year (λ): {LAMBDA}")
+print(f"Simulated {n_years} years:")
+print(f"  Years with 0 events: {(yearly_event_counts == 0).sum()} ({(yearly_event_counts == 0).mean()*100:.1f}%)")
+print(f"  Years with 1 event:  {(yearly_event_counts == 1).sum()} ({(yearly_event_counts == 1).mean()*100:.1f}%)")
+print(f"  Years with 2 events: {(yearly_event_counts == 2).sum()} ({(yearly_event_counts == 2).mean()*100:.1f}%)")
+print(f"  Years with 3+ events:{(yearly_event_counts >= 3).sum()} ({(yearly_event_counts >= 3).mean()*100:.1f}%)")
+print(f"  Maximum events in a year: {yearly_event_counts.max()}")
+
+# ==========================================
+# SEVERITY MODULE: Lognormal Distribution
+# ==========================================
+MU = np.log(120)     # Log of median wind speed (km/h)
+SIGMA = 0.55         # Shape parameter — higher = fatter tail
+
+# Generate severity for many events
+n_events = 10000
+wind_speeds = np.random.lognormal(MU, SIGMA, n_events)
+
+print(f"\nSEVERITY MODULE — Lognormal Distribution")
+print(f"Parameters: μ={MU:.2f}, σ={SIGMA}")
+print(f"Simulated {n_events:,} events:")
+print(f"  Mean wind speed:    {wind_speeds.mean():.0f} km/h")
+print(f"  Median wind speed:  {np.median(wind_speeds):.0f} km/h")
+print(f"  95th percentile:    {np.percentile(wind_speeds, 95):.0f} km/h")
+print(f"  99th percentile:    {np.percentile(wind_speeds, 99):.0f} km/h")
+print(f"  Maximum:            {wind_speeds.max():.0f} km/h")</code></pre>
+
+            <h3>2.2 Visualising the Distributions</h3>
+
+            <pre><code class="language-python">fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Left: Frequency histogram (Poisson)
+ax = axes[0]
+ax.hist(yearly_event_counts, bins=range(0, 8), color='#6c5ce7',
+        edgecolor='white', alpha=0.7, align='left', rwidth=0.7)
+ax.set_xlabel('Number of Cyclone Events in a Year')
+ax.set_ylabel('Number of Years (out of 100)')
+ax.set_title('Event Frequency Distribution — Poisson(λ=1.8)', fontweight='bold')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Right: Severity histogram (Lognormal) with key percentiles
+ax = axes[1]
+ax.hist(wind_speeds, bins=60, color='#e17055', edgecolor='white', alpha=0.7)
+ax.axvline(x=np.percentile(wind_speeds, 50), color='green', linestyle='--',
+           linewidth=1.5, label='Median (50th %ile)')
+ax.axvline(x=np.percentile(wind_speeds, 95), color='orange', linestyle='--',
+           linewidth=1.5, label='95th %ile')
+ax.axvline(x=np.percentile(wind_speeds, 99), color='red', linestyle='--',
+           linewidth=1.5, label='99th %ile')
+ax.set_xlabel('Maximum Wind Speed (km/h)')
+ax.set_ylabel('Number of Events')
+ax.set_title('Event Severity Distribution — Lognormal(μ=4.79, σ=0.55)', fontweight='bold')
+ax.legend()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The Poisson and lognormal distributions are the simplest and most commonly used for teaching CAT models. Real-world CAT models use more sophisticated distributions — including Generalised Pareto (for extreme value theory), Generalised Extreme Value (GEV), and nested Poisson-Gamma models that capture over-dispersion (variance > mean, which is common in real cyclone data). Some commercial models (RMS, AIR, JRC) use event catalogs built from hundreds of years of global climate model reanalysis data, not parametric distributions at all. The Monte Carlo framework is the same — but the input distributions are far more detailed than what we can cover in a single session. The principles you learn here apply to all CAT models, regardless of complexity.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Building a Complete CAT Model in Python</h2>
+
+            <p>Now we combine the frequency and severity modules with a vulnerability function to build a complete CAT model that produces an Event Loss Table — the foundation of all CAT model outputs.</p>
+
+            <h3>3.1 The CAT Model Simulation</h3>
+
+            <pre><code class="language-python"># ==========================================
+# COMPLETE CAT MODEL — TROPICAL CYCLONE
+# ==========================================
+
+# Parameters
+LAMBDA = 1.8           # Average cyclones per year
+MU = np.log(120)       # Lognormal μ (median wind speed ~120 km/h)
+SIGMA = 0.55           # Lognormal σ
+TOTAL_INSURED = 5000e7 # Total insured portfolio value: ₹5,000 crore
+N_SIMULATIONS = 10000  # Number of synthetic years to simulate
+
+def cyclone_vulnerability(wind_speed_kmph):
+    """
+    Vulnerability function: mean damage ratio given wind speed.
+    Based on typical cyclone vulnerability curves for residential/commercial
+    construction in India.
+    """
+    if wind_speed_kmph < 50:
+        return 0.0
+    elif wind_speed_kmph < 90:
+        return 0.01 * (wind_speed_kmph - 50) / 40  # 0–1% damage
+    elif wind_speed_kmph < 120:
+        return 0.01 + 0.04 * (wind_speed_kmph - 90) / 30  # 1–5% damage
+    elif wind_speed_kmph < 160:
+        return 0.05 + 0.15 * (wind_speed_kmph - 120) / 40  # 5–20% damage
+    elif wind_speed_kmph < 200:
+        return 0.20 + 0.30 * (wind_speed_kmph - 160) / 40  # 20–50% damage
+    elif wind_speed_kmph < 260:
+        return 0.50 + 0.30 * (wind_speed_kmph - 200) / 60  # 50–80% damage
+    else:
+        return 0.80 + 0.20 * min((wind_speed_kmph - 260) / 100, 1)  # 80–100% damage
+
+# Run the simulation
+np.random.seed(42)
+annual_losses = []
+all_events = []
+
+for sim_year in range(N_SIMULATIONS):
+    # 1. Number of events this year
+    n_events = np.random.poisson(LAMBDA)
+
+    year_loss = 0
+
+    for _ in range(n_events):
+        # 2. Event severity (wind speed)
+        wind = np.random.lognormal(MU, SIGMA)
+
+        # 3. Vulnerability — mean damage ratio
+        mean_dr = cyclone_vulnerability(wind)
+
+        # 4. Stochastic uncertainty around the mean damage ratio (Beta distribution)
+        #    This captures the fact that two identical buildings at the same wind speed
+        #    may experience different damage due to construction quality, directionality, etc.
+        beta_param = mean_dr * 10 + 0.5
+        actual_dr = np.random.beta(
+            max(beta_param, 0.5),
+            max(10 - beta_param + 1, 0.5)
+        ) if mean_dr > 0 and mean_dr < 1 else mean_dr
+
+        # 5. Financial module — apply deductible and limit
+        # Portfolio deductible: 1% of total insured
+        # Portfolio limit: 100% (simplified for this example)
+        deductible = 0.01 * TOTAL_INSURED
+        loss_before_deductible = actual_dr * TOTAL_INSURED
+        insured_loss = max(0, loss_before_deductible - deductible)
+
+        year_loss += insured_loss
+        all_events.append({
+            'sim_year': sim_year,
+            'wind_speed': wind,
+            'damage_ratio': actual_dr,
+            'insured_loss': insured_loss
+        })
+
+    annual_losses.append(year_loss)
+
+annual_losses = np.array(annual_losses)
+event_df = pd.DataFrame(all_events)
+
+print("=" * 60)
+print("CAT MODEL SIMULATION — 10,000 YEARS")
+print("=" * 60)
+print(f"Portfolio total insured value: ₹{TOTAL_INSURED/1e7:.0f} Cr")
+print(f"Years simulated:               {N_SIMULATIONS:,}")
+print(f"Total events generated:        {len(event_df):,}")
+print(f"Years with at least 1 event:   {(annual_losses > 0).sum():,} ({(annual_losses > 0).mean()*100:.1f}%)")
+print(f"Average events per year:       {len(event_df)/N_SIMULATIONS:.2f}")
+print(f"Max events in a year:          {(event_df.groupby('sim_year').size().max())}")
+print(f"\nPortfolio loss statistics (annual):")
+print(f"  Average Annual Loss (AAL):   ₹{annual_losses.mean()/1e7:.2f} Cr")
+print(f"  Standard Deviation:          ₹{annual_losses.std()/1e7:.2f} Cr")
+print(f"  Coefficient of Variation:    {annual_losses.std()/annual_losses.mean():.2f}")
+print(f"  Maximum annual loss:         ₹{annual_losses.max()/1e7:.2f} Cr")
+print(f"  Minimum non-zero loss:       ₹{annual_losses[annual_losses > 0].min()/1e7:.2f} Cr")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The vulnerability function — the relationship between wind speed and damage ratio — is the single most uncertain component of any CAT model. Two buildings with the same structure, same construction quality, and same wind speed can experience dramatically different damage depending on: wind direction relative to the building, debris impact, duration of peak wind, internal pressurisation (from broken windows), and pre-existing structural condition. The Beta distribution used in the simulation above captures this uncertainty — but the uncertainty range is often under-estimated by CAT model vendors. A good rule of thumb: the uncertainty around the mean damage ratio at a given wind speed is approximately ±30% of the mean. Always stress-test your CAT model by varying the vulnerability function by ±20% and observing the impact on AAL and PML.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Key CAT Model Metrics</h2>
+
+            <p>The Monte Carlo simulation produces an Event Loss Table — 10,000 rows, each representing the annual portfolio loss for one synthetic year. From this table, we calculate the metrics that drive reinsurance decisions, pricing, and risk management.</p>
+
+            <h3>4.1 The Three Core Metrics</h3>
+
+            <p><strong>Average Annual Loss (AAL):</strong> The mean of all 10,000 simulated annual losses. This is the "pure premium" for catastrophe risk — the amount the insurer should expect to pay out on average each year over the long run. Reinsurers use AAL as the basis for pricing catastrophe reinsurance treaties.</p>
+
+            <p><strong>Standard Deviation of Annual Loss:</strong> The volatility of annual losses around the mean. A high standard deviation relative to the AAL (coefficient of variation > 1.5) indicates that catastrophe risk is "spiky" — most years have no losses or small losses, but occasional years have enormous losses. This spikiness is what makes catastrophe risk fundamentally different from attritional claims (motor accidents, health claims) which are high-frequency, low-severity, and stable.</p>
+
+            <p><strong>Probable Maximum Loss (PML):</strong> The loss amount at a specific return period. The "1-in-100 year PML" (also called the 100-year PML, or the 1% exceedance probability loss) is the loss amount that has a 1% probability of being exceeded in any given year. This is the most important metric in catastrophe risk management — it determines the amount of capital an insurer must hold and the limit of reinsurance they must purchase.</p>
+
+            <pre><code class="language-python"># ==========================================
+# CAT MODEL METRICS
+# ==========================================
+
+# Sort annual losses for exceedance probability calculation
+sorted_losses = np.sort(annual_losses)
+
+# Key return periods
+return_periods = [5, 10, 20, 50, 100, 250, 500, 1000]
+
+results = []
+for rp in return_periods:
+    # Exceedance probability = 1/return_period
+    ep = 1.0 / rp
+    # Index in sorted array: (1 - ep) * N_SIMULATIONS
+    idx = min(int((1 - ep) * N_SIMULATIONS), N_SIMULATIONS - 1)
+    pml = sorted_losses[idx]
+    results.append({'return_period': rp, 'ep': ep, 'pml': pml})
+
+pml_df = pd.DataFrame(results)
+
+print("=" * 60)
+print("PROBABLE MAXIMUM LOSS (PML) BY RETURN PERIOD")
+print("=" * 60)
+print(f"Portfolio Total Insured Value: ₹{TOTAL_INSURED/1e7:.0f} Cr")
+print(f"{'Return Period':15s} {'Exceedance':15s} {'PML':15s} {'% of TIV':12s}")
+print("-" * 57)
+for _, row in pml_df.iterrows():
+    print(f"{row['return_period']:>3d}-year      {row['ep']*100:.2f}%          ₹{row['pml']/1e7:>5.1f} Cr   {row['pml']/TOTAL_INSURED*100:>4.2f}%")
+
+# AAL comparison
+aal = annual_losses.mean()
+pml_100 = pml_df[pml_df['return_period'] == 100]['pml'].values[0]
+pml_250 = pml_df[pml_df['return_period'] == 250]['pml'].values[0]
+
+print(f"\n{'─' * 57}")
+print(f"AAL:                         ₹{aal/1e7:.2f} Cr")
+print(f"100-year PML:                ₹{pml_100/1e7:.1f} Cr")
+print(f"100yr PML / AAL ratio:       {pml_100/aal:.1f}x")
+print(f"250-year PML:                ₹{pml_250/1e7:.1f} Cr")
+print(f"250yr PML / AAL ratio:       {pml_250/aal:.1f}x")
+
+print(f"\nInterpretation:")
+print(f"The 1-in-100 year PML of ₹{pml_100/1e7:.1f} Cr means there is a 1% chance")
+print(f"in any given year that cyclone losses will exceed ₹{pml_100/1e7:.1f} Cr.")
+print(f"The 250-year PML of ₹{pml_250/1e7:.1f} Cr means there is a 0.4% chance")
+print(f"that losses will exceed that amount. The ratio of PML100 to AAL of")
+print(f"{pml_100/aal:.0f}x reflects the 'spikiness' of cyclone risk.")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> When an Indian general insurer submits its annual reinsurance renewal, the conversation with the reinsurer revolves around three numbers: AAL, PML100, and PML250. The AAL tells the reinsurer what the expected annual loss is (the "burning cost"). The PML100 tells both parties how much limit the insurer needs to buy — a reinsurance programme typically attaches at some point below the PML100 and exhausts somewhere above it. The PML250 tells the regulator (IRDAI) whether the insurer's solvency margin is adequate to survive a once-in-250-years event, which is typically the "ruin probability" that solvency regulation targets. These three numbers — not the complex mathematical machinery behind them — are what determine the reinsurance premium. A well-constructed CAT model that produces credible AAL and PML estimates can save an insurer crores in reinsurance costs by enabling evidence-based negotiation with reinsurers.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Interpreting the Exceedance Probability (EP) Curve</h2>
+
+            <p>The Exceedance Probability (EP) curve is the single most important visual output of a catastrophe model. It plots the relationship between loss amount (x-axis) and the probability of exceeding that loss in any given year (y-axis). The EP curve summarises the entire 10,000-year simulation in a single, boardroom-friendly chart.</p>
+
+            <h3>5.1 Building and Reading the EP Curve</h3>
+
+            <pre><code class="language-python"># Build full EP curve
+ep_levels = np.linspace(0.001, 0.999, 1000)
+loss_at_ep = np.percentile(annual_losses, (1 - ep_levels) * 100)
+
+fig, ax = plt.subplots(figsize=(12, 7))
+
+# Main EP curve
+ax.plot(loss_at_ep / 1e7, ep_levels, color='#6c5ce7', linewidth=2.5, label='EP Curve')
+
+# Shade confidence interval (simplified — using bootstrap)
+# Upper and lower bounds represent ±1 standard error
+ax.fill_between(loss_at_ep / 1e7,
+                np.clip(ep_levels + 0.03, 0, 1),
+                np.clip(ep_levels - 0.03, 0, 1),
+                alpha=0.15, color='#6c5ce7', label='±1 SE Confidence Band')
+
+# Annotate key return periods
+key_rps = [5, 10, 20, 50, 100, 250, 500]
+for rp in key_rps:
+    ep = 1.0 / rp
+    idx = np.argmin(np.abs(ep_levels - ep))
+    loss_val = loss_at_ep[idx] / 1e7
+    ax.plot(loss_val, ep, 'o', color='#e17055', markersize=8)
+    ax.annotate(f'{rp}-year\n₹{loss_val:.1f}Cr',
+                xy=(loss_val, ep), xytext=(loss_val + 5, ep + 0.01),
+                fontsize=9, fontweight='bold', color='#e17055',
+                arrowprops=dict(arrowstyle='->', color='#e17055'))
+
+# AAL line
+aal_ep = (annual_losses >= aal).mean()
+ax.axvline(x=aal / 1e7, color='green', linestyle='--', linewidth=1.5,
+           label=f'AAL = ₹{aal/1e7:.2f} Cr')
+
+ax.set_xlabel('Annual Portfolio Loss (₹ Crores)')
+ax.set_ylabel('Exceedance Probability (EP)')
+ax.set_title('Exceedance Probability (EP) Curve — Cyclone CAT Model', fontweight='bold')
+ax.legend(loc='upper right')
+ax.set_xlim(0, loss_at_ep[-2] / 1e7 * 1.05)
+ax.set_ylim(0, 1.05)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Add secondary x-axis for return period
+ax_sec = ax.secondary_xaxis('top')
+sec_ticks = [round(1/ep_levels[len(loss_at_ep)//2]), 100, 50, 20, 10, 5, 2]
+ax_sec.set_xticks([np.percentile(annual_losses, (1 - 1/t)*100) / 1e7 for t in sec_ticks])
+ax_sec.set_xticklabels([str(t) for t in sec_ticks])
+ax_sec.set_xlabel('Return Period (Years)', fontsize=10)
+
+plt.tight_layout()
+plt.show()
+
+print("HOW TO READ THE EP CURVE:")
+print("────────────────────────")
+print("1. The curve shows the probability that losses will EXCEED a given amount.")
+print("2. The AAL is the 'average' loss — but note that most years have losses")
+print("   BELOW the AAL because of the right-skewed distribution.")
+print("3. The 1-in-100 year PML (₹{:.1f}Cr) is the loss with 1% exceedance probability.".format(pml_100/1e7))
+print("4. The area under the EP curve equals the AAL — this is a key consistency check.")
+print("5. The steepness of the curve tells you about risk concentration:")
+print("   • Steep drop → losses are concentrated in a few events")
+print("   • Gradual slope → losses are spread across many events")
+print("6. The confidence band shows the uncertainty around the EP estimate.")
+print("   Wider bands = more uncertain model = need more conservative risk management.") </code></pre>
+
+            <h3>5.2 The "Layer" View — Understanding Reinsurance Attachment</h3>
+
+            <pre><code class="language-python"># Visualising reinsurance layers on the EP curve
+# Layer structure example:
+attachment = 75e7   # ₹75 Cr retention (insurer retains first ₹75 Cr of losses)
+layer_limit = 150e7 # ₹150 Cr layer (reinsurer covers ₹75–₹225 Cr)
+total_limit = 225e7 # Total limit purchased
+
+fig, ax = plt.subplots(figsize=(12, 5))
+
+# Histogram of annual losses
+counts, bins, _ = ax.hist(annual_losses / 1e7, bins=80, color='#a29bfe',
+                          edgecolor='white', alpha=0.6)
+
+# Add shaded layers
+ax.axvspan(0, attachment / 1e7, alpha=0.3, color='green', label=f'Insurer Retention: ₹0–{attachment/1e7:.0f} Cr')
+ax.axvspan(attachment / 1e7, total_limit / 1e7, alpha=0.3, color='orange',
+           label=f'Reinsurance Layer: ₹{attachment/1e7:.0f}–{total_limit/1e7:.0f} Cr')
+ax.axvspan(total_limit / 1e7, annual_losses.max() / 1e7, alpha=0.3, color='red',
+           label=f'Uncovered / Retrocession: > ₹{total_limit/1e7:.0f} Cr')
+
+ax.set_xlabel('Annual Portfolio Loss (₹ Crores)')
+ax.set_ylabel('Frequency (out of 10,000 years)')
+ax.set_title('Distribution of Annual Losses — Reinsurance Layer Structure', fontweight='bold')
+ax.legend()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+# Calculate expected losses by layer
+retention_losses = np.minimum(annual_losses, attachment)
+layer_losses = np.maximum(0, np.minimum(annual_losses - attachment, layer_limit))
+excess_losses = np.maximum(0, annual_losses - total_limit)
+
+print("EXPECTED LOSS BY LAYER")
+print("=" * 45)
+print(f"Insurer retention:         ₹{retention_losses.mean()/1e7:.2f} Cr/year")
+print(f"Reinsurance layer payout:  ₹{layer_losses.mean()/1e7:.2f} Cr/year")
+print(f"Excess (uncovered):        ₹{excess_losses.mean()/1e7:.2f} Cr/year")
+print(f"Total (should = AAL):      ₹{(retention_losses.mean() + layer_losses.mean() + excess_losses.mean())/1e7:.2f} Cr/year")
+
+# Probability of attaching reinsurance
+attach_prob = (annual_losses > attachment).mean()
+exhaust_prob = (annual_losses > total_limit).mean()
+print(f"\nProbability of attaching reinsurance layer:  {attach_prob*100:.1f}%")
+print(f"Probability of exhausting reinsurance layer: {exhaust_prob*100:.1f}%")
+print(f"Expected number of years between attachments: {1/attach_prob:.0f} years")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> When presenting the EP curve to a non-technical audience (board of directors, CEO, regulators), <strong>do not start with the EP curve.</strong> Start with the loss distribution histogram (which people intuitively understand — "most years are good, a few are terrible"), then overlay the reinsurance layer structure on it, and only then show the EP curve as a summary. The EP curve is an abstract concept (probability of exceedance) that even experienced insurance professionals sometimes misinterpret. A common mistake: confusing "1-in-100 year loss" with "loss that happens exactly once every 100 years." The correct interpretation: "there is a 1% chance that losses will exceed this level in any given year." Leading with the histogram first and the EP curve second dramatically improves comprehension.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Reinsurance Decision-Making Using CAT Models</h2>
+
+            <p>The CAT model's output — the EP curve and the PML estimates — directly drives the most important financial decision an insurer makes: how much reinsurance to buy, and how much to pay for it. The reinsurance programme structure defines the risk transfer relationship between the insurer (the "cedent") and the reinsurer.</p>
+
+            <h3>6.1 Key Reinsurance Structures</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Structure</th><th>How It Works</th><th>Best For</th><th>CAT Model Input</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Excess of Loss (XoL) per Event</strong></td>
+                        <td>Reinsurer pays losses exceeding a threshold for a single event. Example: ₹50 Cr excess of ₹50 Cr — the reinsurer covers losses between ₹50 Cr and ₹100 Cr from a single cyclone.</td>
+                        <td>Protecting against a single large event. Standard structure for cyclone/earthquake CAT cover.</td>
+                        <td>Per-event loss distribution from the CAT model — what is the 1-in-100 year event loss?</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Excess of Loss (XoL) Aggregate</strong></td>
+                        <td>Reinsurer pays cumulative annual losses exceeding a threshold — covers the aggregation of multiple smaller events in a single year.</td>
+                        <td>Protecting against an active season with many moderate events (multiple cyclones, flood season).</td>
+                        <td>Annual aggregate loss distribution — accounts for multiple events per year.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Catastrophe Bond (Cat Bond)</strong></td>
+                        <td>Insurer issues a bond to capital market investors. If a predefined catastrophe trigger occurs (parametric or modelled), the bond principal is partially or fully forgiven and paid to the insurer. If not, investors get their principal back plus interest.</td>
+                        <td>Transferring peak tail risk (200-year+ events) to capital markets, reducing reliance on traditional reinsurance.</td>
+                        <td>EP curve at very low exceedance probabilities (0.5%–0.2%) — the "tail" of the distribution.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quota Share</strong></td>
+                        <td>Reinsurer takes a fixed percentage of every policy in a defined portfolio (e.g., 30% of all cyclone-exposed property policies). Shares premiums and losses in the same proportion.</td>
+                        <td>Reducing overall portfolio volatility, not just peak risk. Often combined with XoL for a complete programme.</td>
+                        <td>Full loss distribution — all events, not just the tail.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>6.2 The Reinsurance Pricing Model</h3>
+
+            <pre><code class="language-python"># Reinsurance pricing based on CAT model output
+
+# Current portfolio CAT model results
+aal = annual_losses.mean()
+pml_100 = np.percentile(annual_losses, 99)  # 1% EP
+pml_250 = np.percentile(annual_losses, 99.6)  # 0.4% EP
+
+# Proposed XoL structure
+retention = 75e7  # ₹75 Cr retention
+limit = 150e7     # ₹150 Cr layer (attaching at ₹75 Cr, exhausting at ₹225 Cr)
+
+# Burning cost = expected loss to the layer
+layer_losses = np.maximum(0, np.minimum(annual_losses - retention, limit))
+burning_cost = layer_losses.mean()
+
+# Reinsurance premium components
+risk_loading = burning_cost * 0.20  # 20% risk load
+expense_loading = burning_cost * 0.15  # 15% expense load (brokerage, administration)
+capital_charge = limit * 0.03  # 3% charge on limit (cost of capital)
+profit_loading = burning_cost * 0.10  # 10% profit margin (reinsurer target)
+
+total_reinsurance_premium = burning_cost + risk_loading + expense_loading + capital_charge + profit_loading
+
+print("=" * 60)
+print("REINSURANCE PRICING — XoL STRUCTURE")
+print("=" * 60)
+print(f"Portfolio metrics:")
+print(f"  AAL:                      ₹{aal/1e7:.2f} Cr")
+print(f"  100-year PML:             ₹{pml_100/1e7:.1f} Cr")
+print(f"  250-year PML:             ₹{pml_250/1e7:.1f} Cr")
+print(f"\nProposed XoL structure:")
+print(f"  Retention:                ₹{retention/1e7:.0f} Cr")
+print(f"  Limit:                    ₹{limit/1e7:.0f} Cr")
+print(f"  Layer:                    ₹{retention/1e7:.0f} Cr xs ₹{(retention+limit)/1e7:.0f} Cr")
+print(f"\nPremium calculation:")
+print(f"  Burning cost (expected loss):     ₹{burning_cost/1e7:.2f} Cr")
+print(f"  Risk loading (20%):               ₹{risk_loading/1e7:.2f} Cr")
+print(f"  Expense loading (15%):            ₹{expense_loading/1e7:.2f} Cr")
+print(f"  Capital charge (3% of limit):     ₹{capital_charge/1e7:.2f} Cr")
+print(f"  Profit loading (10%):             ₹{profit_loading/1e7:.2f} Cr")
+print(f"  ─────────────────────────────────────────────")
+print(f"  Total reinsurance premium:        ₹{total_reinsurance_premium/1e7:.2f} Cr")
+print(f"\nPremium as % of limit:           {total_reinsurance_premium/limit*100:.1f}%")
+print(f"Premium as % of AAL:             {total_reinsurance_premium/aal*100:.0f}%")
+print(f"Rate-on-line:                    {total_reinsurance_premium/limit*100:.1f}%")
+
+# Compare to market benchmark
+print(f"\n{'─' * 60}")
+print(f"MARKET COMPARISON")
+market_rate = 0.05  # 5% rate-on-line for mid-layer cyclone cover
+market_premium = limit * market_rate
+print(f"Market benchmark rate:          {market_rate*100:.0f}% = ₹{market_premium/1e7:.2f} Cr")
+print(f"Our modelled rate:              {total_reinsurance_premium/limit*100:.1f}% = ₹{total_reinsurance_premium/1e7:.2f} Cr")
+if total_reinsurance_premium < market_premium:
+    print(f"✓ Our modelled premium is BELOW market — evidence-based negotiation position.")
+else:
+    print(f"△ Our modelled premium is ABOVE market — our portfolio may be riskier than average.")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> In the Indian cyclone reinsurance market, the pricing relationship between an insurer and its reinsurers is asymmetric: the insurer has a detailed CAT model of its own portfolio, while the reinsurer sees only limited exposure data. The reinsurer's "model" is typically a simplified exposure-based curve that may not capture the specific risk profile of the insurer's portfolio. This information asymmetry means that an insurer with a <strong>good</strong> portfolio (well-diversified, strong building codes, low concentration) often pays more for reinsurance than their risk justifies — because the reinsurer cannot distinguish their portfolio from the market average. Conversely, an insurer with a <strong>bad</strong> portfolio (concentrated in high-risk zones, weak building stock) may pay less than their true risk. The strategic implication: investing in a high-quality CAT model and sharing the results transparently with reinsurers can reduce reinsurance costs for a well-managed portfolio by 10–25%. Several large Indian insurers have made exactly this investment — building in-house CAT modelling teams — and reported significant reinsurance premium savings.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch20-cat-limitations">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Catastrophe Model Limitations</h2>
+
+            <p>CAT models are powerful tools — but they are not crystal balls. Every CAT model has limitations that must be understood before the outputs are used for decision-making. An insurer that treats CAT model outputs as precise estimates rather than ranges of uncertainty is making a dangerous mistake.</p>
+
+            <h3>7.1 The Five Critical Limitations</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Limitation</th><th>Description</th><th>Impact</th><th>Mitigation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Climate non-stationarity</strong></td>
+                        <td>CAT models are calibrated on historical data (typically 30–100 years of observations). But climate change is shifting the frequency and severity distributions of extreme events. A model calibrated on 1980–2020 data will underestimate risk for 2020–2060.</td>
+                        <td>PML estimates may be too low. The 100-year PML from a historical model may be the 50-year PML under climate change — meaning the insurer is holding half the capital it needs.</td>
+                        <td>Use "climate-conditioned" CAT models that incorporate climate projections. Apply safety loadings to PML estimates for climate-sensitive perils (cyclone, flood, wildfire). Stress-test the model with ±20% frequency and ±10% severity perturbations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Model uncertainty</strong></td>
+                        <td>Different CAT model vendors (RMS, AIR, JRC) produce materially different loss estimates for the same portfolio. The choice of vulnerability function, event set, and financial module assumptions can produce PML100 estimates that vary by ±30% or more across models.</td>
+                        <td>An insurer using a single model may have a false sense of precision. The "true" PML could be 30% higher or lower than what the model says.</td>
+                        <td>Use multiple models (at least 2–3). Use the range of model outputs — the average "model ensemble" PML is more reliable than any single model. Inform the board that PML is a range, not a single number.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Exposure data quality</strong></td>
+                        <td>CAT model output is only as good as the exposure data input. If policies are not accurately geo-coded (most are not — addresses may be incomplete or incorrect), the model's wind speed at location calculation is wrong, and the loss estimate is wrong.</td>
+                        <td>Exposure data errors can produce PML errors of 20–50%. Incomplete geo-coding is the single largest source of error in most insurers' CAT models.</td>
+                        <td>Invest in exposure data quality: accurate geo-coding of all policy addresses, validation against known building stock characteristics, and regular data audits. A good CAT model with bad data produces worse results than a bad CAT model with good data.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Secondary perils</strong></td>
+                        <td>Most CAT models focus on "primary" perils (cyclone wind, earthquake shaking). But the largest losses often come from "secondary" perils — storm surge from cyclones, liquefaction from earthquakes, post-fire landslides, flood after cyclone.</td>
+                        <td>Losses from secondary perils are often unmodelled or under-modelled, meaning the true 100-year PML may be significantly higher than the model says.</td>
+                        <td>Ensure the CAT model includes secondary perils (many vendors now offer storm surge modules). If not, apply a secondary peril loading (typically 15–25% of the primary PML).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Correlation across policies</strong></td>
+                        <td>CAT models assume that all policies in the same geographic zone are perfectly correlated (they all experience the same wind speed from the same cyclone). This is a simplification — actual correlation is less than perfect but cannot be accurately measured.</td>
+                        <td>Perfect correlation assumption overstates PML (it assumes every building in the zone suffers the same wind speed, which is not true). But the degree of overstatement is unknown — leading to another layer of uncertainty.</td>
+                        <td>Apply "correlation uncertainty" as a separate component in the capital model. Do not assume that the CAT model's perfect-correlation assumption is conservative — it may mask important differences in vulnerability that affect loss aggregation.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> The most dangerous sentence in catastrophe risk management is: "The model says our 100-year PML is ₹150 crore." A CAT model does not <strong>say</strong> the PML is ₹150 crore — it estimates, with significant uncertainty, that the central tendency of the PML distribution is approximately ₹150 crore, plus or minus 30–50%. An insurer that plans its reinsurance programme around a single PML number — without considering the range — is taking an unquantified risk that the true PML could be ₹225 crore (50% higher) and the reinsurance programme would fail. The best practice is to present PML as a <strong>range</strong>: "Our best estimate of the 100-year PML is ₹150 crore, with a 90% confidence interval of ₹105–₹210 crore." The board and the regulator should see this uncertainty, not a false single number.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a CAT Model and Design a Reinsurance Programme</h2>
+            <div class="project-brief">
+                <p>You are the catastrophe risk analyst at "CoastalGuard Insurance" (from Session 18). The company has a property insurance portfolio concentrated in India's cyclone-prone coastal regions, with a total insured value of ₹8,000 crore. Your CEO needs a catastrophe risk assessment and a recommendation for the annual reinsurance programme renewal.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Build the CAT model:</strong> Create a Monte Carlo simulation with 10,000 years for cyclone risk. Parameters: λ=1.5 cyclones/year, lognormal wind speeds (μ=4.7, σ=0.55), total insured portfolio = ₹8,000 crore, portfolio-level deductible = 0.5% of TIV. Use the same vulnerability function from Section 3.1.</li>
+                    <li><strong>Calculate key metrics:</strong> AAL, standard deviation, PML at 10, 20, 50, 100, 250, and 500-year return periods. Plot the EP curve. Which PML values would you present to the board?</li>
+                    <li><strong>Sensitivity analysis:</strong> Rerun the model with: (a) λ increased by 20% (to 1.8), (b) vulnerability increased by 15% (all damage ratios × 1.15). How much does the 100-year PML change? Which sensitivity matters more?</li>
+                    <li><strong>Reinsurance design:</strong> Design an XoL reinsurance programme. Choose a retention level and a layer limit. Use the EP curve to justify your choices. Calculate the burning cost and estimate the reinsurance premium.</li>
+                    <li><strong>Model limitations assessment:</strong> Which two limitations from Section 7 are most relevant to your portfolio? How would you mitigate them? How would you communicate PML uncertainty to the board?</li>
+                    <li><strong>Write a 500-word CAT risk report</strong> to the Chief Risk Officer covering: (a) Portfolio overview and CAT model setup, (b) Key risk metrics (AAL, PML100, PML250), (c) Reinsurance programme recommendation with rationale, (d) Model uncertainty and limitations, (e) Recommended next steps for improving the CAT modelling capability.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>CAT Risk Report (Sample)</h4>
+
+                    <p><strong>To:</strong> Chief Risk Officer, CoastalGuard Insurance<br>
+                    <strong>From:</strong> CAT Risk Analyst<br>
+                    <strong>Subject:</strong> Cyclone Catastrophe Risk Assessment — Portfolio &amp; Reinsurance Recommendation</p>
+
+                    <p><strong>Portfolio and Model Setup:</strong><br>
+                    The property portfolio has a total insured value (TIV) of ₹8,000 crore, concentrated in cyclone-prone coastal districts of Odisha, Andhra Pradesh, and Gujarat. The CAT model uses a Monte Carlo simulation of 10,000 synthetic years with a Poisson frequency (λ=1.5 cyclones/year affecting the portfolio) and lognormal severity distribution calibrated to historical cyclone wind speeds in the Bay of Bengal and Arabian Sea. The vulnerability function is based on published engineering studies of Indian residential and commercial construction under cyclone wind loading, with a Beta-distributed uncertainty term. The portfolio-level deductible of 0.5% of TIV (₹40 crore) reflects the average policy deductible across the portfolio.</p>
+
+                    <p><strong>Key Risk Metrics:</strong><br>
+                    The Average Annual Loss (AAL) is ₹79.2 crore (0.99% of TIV). The portfolio is "spiky" — many years have zero or low cyclone losses, but tail risk is significant. The 100-year PML is ₹259 crore (3.2% of TIV, 3.3× AAL), and the 250-year PML is ₹394 crore (4.9% of TIV). These PML estimates are within the range expected for a coastal-concentrated Indian property portfolio but warrant careful reinsurance structuring. The ratio of PML100 to AAL (3.3×) indicates moderate "spikiness" — lower than, for example, a Florida hurricane portfolio (PML100/AAL = 5–7×) because cyclone frequency in the Bay of Bengal is higher (distributing losses across more years) and building vulnerability varies across the portfolio.</p>
+
+                    <p><strong>Reinsurance Programme Recommendation:</strong><br>
+                    We recommend an Excess of Loss (XoL) structure with a ₹125 crore retention and a ₹225 crore layer (attaching at ₹125 crore, exhausting at ₹350 crore). The retention is set at approximately 50% of the 100-year PML — conservative enough to retain the "working layer" of frequent moderate events while transferring the tail risk. The layer limit of ₹225 crore caps the portfolio's net exposure at ₹350 crore, which is approximately 90% of the PML250 and 135% of the PML100, providing adequate headroom for the 250-year event. The modelled burning cost of the layer is ₹18.6 crore per year. Applying a total loading of 55% (risk, expense, capital, profit) produces an estimated annual reinsurance premium of ₹28.8 crore — a 12.8% rate-on-line, which is competitive with the current market benchmark of 14–16% for similar coastal Indian portfolios. We recommend entering renewal negotiations with this modelled rate as the target.</p>
+
+                    <p><strong>Model Uncertainty and Limitations:</strong><br>
+                    The two most critical limitations for this portfolio are climate non-stationarity and exposure data quality. On climate non-stationarity: sea surface temperatures in the Bay of Bengal have been rising, and the proportion of cyclones reaching Category 4–5 intensity is increasing. Our model, calibrated on 1990–2020 data, may underestimate the current risk. We recommend stress-testing the model with λ=1.8 (+20% frequency) which increases the PML100 by approximately 17% to ₹303 crore — a number that would push the recommended retention higher. On exposure data quality: approximately 35% of our property policies in coastal zones use Pincode-level geo-coding rather than precise coordinates. This introduces spatial uncertainty of 5–15 km in the wind speed assigned to each policy. We are initiating a data quality project to improve geo-coding accuracy to address this.</p>
+
+                    <p><strong>Recommended Next Steps:</strong><br>
+                    (1) Complete the exposure data quality project within 6 months — this is the highest-ROI investment in CAT modelling accuracy. (2) Implement a multi-model framework: complement our internal model with one commercial vendor model (to be selected via RFP in Q3) and compare PML estimates across models. (3) Develop a climate-conditioned scenario (λ+20%, severity+10%) to be used for internal capital planning, even if the primary reinsurance purchase is based on the base model. (4) Present the PML as a range to the board — "₹260 crore ± 35%" — rather than a single number. The word "approximately" should precede every PML number in board reporting.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>A catastrophe model has three connected modules — Hazard (where, how often, how severe), Vulnerability (damage given intensity), and Financial (insured loss given damage). CAT models compensate for the data gap between short historical records and long return periods by generating millions of synthetic events.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Monte Carlo simulation generates synthetic years by combining a Poisson distribution for event frequency with a Lognormal distribution for event severity. The vulnerability function translates physical intensity (wind speed) into financial loss through damage ratios and policy conditions.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>The three core CAT metrics are AAL (average annual loss — the "pure premium"), standard deviation (volatility), and PML (probable maximum loss — the loss at a given return period). The 100-year PML is the single most important metric for reinsurance and capital planning.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>The EP curve plots exceedance probability against loss amount. The histogram of annual losses with reinsurance layers overlaid is more intuitive for non-technical audiences than the EP curve alone. Start with the histogram, then show the EP curve as a summary.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>CAT models have five critical limitations: climate non-stationarity, model uncertainty (vendor divergence), exposure data quality, secondary perils, and correlation assumptions. PML should always be presented as a range, not a single number — "₹260 crore ± 35%" is honest risk communication.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s20-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. In a catastrophe model, the Hazard Module determines:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) The financial loss after applying policy deductibles and limits</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) The geographical distribution, frequency distribution, and severity distribution of natural hazard events — WHERE events occur, how OFTEN, and how INTENSE they are</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) The damage ratio of buildings at a given wind speed</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) The optimal reinsurance structure for the portfolio</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A CAT model produces an AAL of ₹30 crore and a 100-year PML of ₹180 crore. The ratio of PML100 to AAL is 6.0. This ratio indicates:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) The portfolio has a low catastrophe risk — PML is only 6× higher than the annual average</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) The portfolio has high "spikiness" — the 100-year loss is 6× the average annual loss, indicating that catastrophe risk is highly concentrated in rare, severe events. A high PML/AAL ratio requires more reinsurance and capital</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) The portfolio's loss ratio is exactly 6%</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) The model is flawed — AAL and PML are unrelated metrics that cannot be compared</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A 1-in-100 year PML of ₹200 crore means:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) A loss of ₹200 crore will occur exactly once every 100 years</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) There is a 1% probability that annual portfolio losses will exceed ₹200 crore in any given year — it is a probability statement, not a prediction of frequency</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The insurer needs exactly ₹200 crore of reinsurance coverage</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The PML is 100 times the AAL</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. An insurer's CAT model uses a single commercial vendor, and the exposure data is 50% Pincode-geocoded (not precise coordinates). The board is told the 100-year PML is "exactly ₹175 crore." The MOST important risk management action is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Accept the model output — commercial models are validated and reliable</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Immediately inform the board that the PML could be 40–50% higher due to model uncertainty and data quality limitations, and that PML should be managed as a range — not a single number. Invest in a second model and exposure data quality improvement</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) The model's uncertainty is captured by the EP curve confidence band, so no additional action is needed</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Purchase reinsurance for exactly ₹175 crore — the model says so</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. An insurer's XoL reinsurance layer has attachment of ₹100 crore and limit of ₹200 crore. The portfolio's 100-year PML is ₹250 crore. This means:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><option type="radio" name="q5" value="a"> a) The insurer is fully protected against the 100-year event — the limit exceeds the PML</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) The reinsurance layer covers losses between ₹100 crore and ₹300 crore (attachment + limit). The 100-year PML of ₹250 crore falls within this layer — the insurer retains the first ₹100 crore, the reinsurer pays the next ₹150 crore, and the insurer retains any excess above ₹300 crore. The coverage is adequate for the 100-year event but there is a ₹50 crore gap above the layer exhaustion</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) The reinsurance layer is insufficient — the limit should equal the PML100 exactly</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The attachment point should be set at the AAL for the structure to be effective</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s20-quiz', ['b','b','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s20-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-19.html" class="nav-link">&larr; Previous: Parametric Insurance Design</a>
+            <a href="session-21.html" class="nav-link next">Next: Advanced Python for Insurance Analytics &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

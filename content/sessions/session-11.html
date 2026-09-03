@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 11: AI &amp; Machine Learning Fundamentals — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <!-- CHANGE-LOG (Session 11, source/citation enrichment pass):
+         - §1.2 Maturity Curve: converted informal "Sources" callout to IEEE in-text [1]-[3] + References section.
+         - §1.1 value table: added [4] citation for the impact ranges (McKinsey).
+         - §6.3/Hands-On: relabeled "credit score <650 = 40%" and cluster % (32/28/24/16%) as dataset-derived lab output.
+         - §7: added Financial & Risk Management callout (overfitting ↔ model-risk/reserving).
+         - Added References section + Task G5 further-reading flag.
+         - No content moved to "Additional Reading & Practice" (session still fits ~90 min).
+    -->
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-10.html" class="nav-link">&larr; Previous: Embedded &amp; Usage-Based Insurance</a>
+            <a href="session-12.html" class="nav-link next">Next: AI for Underwriting &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 4 &middot; Session 11 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 11: AI &amp; Machine Learning Fundamentals</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Map how machine learning creates value across the insurance value chain — underwriting, pricing, claims, fraud, retention, and marketing</li>
+                <li>Distinguish between supervised learning (regression and classification) and unsupervised learning (clustering), and identify when each is appropriate for insurance problems</li>
+                <li>Apply the Scikit-learn API pattern — import, instantiate, fit, predict, evaluate — consistently across all model types</li>
+                <li>Build and evaluate a linear regression model to predict claim amounts (RMSE, R²) and a logistic regression model to predict claim probability (accuracy, precision, recall, confusion matrix, ROC-AUC)</li>
+                <li>Apply K-means clustering to segment policyholders into risk groups and profile each cluster with business insights</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Machine Learning in Insurance — The Big Picture</h2>
+
+            <p>Machine learning is not a magic wand. It is a set of statistical and computational techniques that find patterns in data and use those patterns to make predictions or decisions. In insurance, ML is valuable because the industry has exactly the characteristics that ML thrives on: large datasets, well-defined prediction problems, clear feedback loops, and significant financial impact from even small improvements in prediction accuracy.</p>
+
+            <h3>1.1 Where ML Creates Value in Insurance</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Insurance Function</th><th>ML Application</th><th>Prediction Problem</th><th>Impact of Improvement</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Underwriting</strong></td><td>Risk scoring, automated decision-making</td><td>Predict claim probability and expected loss for each applicant</td><td>Better risk selection = 5–15% loss ratio improvement</td></tr>
+                    <tr><td><strong>Pricing</strong></td><td>Elasticity modeling, dynamic pricing</td><td>Predict willingness-to-pay and price sensitivity at individual level</td><td>2–8% revenue uplift from optimized pricing</td></tr>
+                    <tr><td><strong>Claims</strong></td><td>Severity prediction, triage, STP</td><td>Predict ultimate claim size, complexity, and optimal routing</td><td>5–10% claims leakage reduction</td></tr>
+                    <tr><td><strong>Fraud Detection</strong></td><td>Anomaly detection, fraud classification</td><td>Predict probability that a claim is fraudulent</td><td>10–25% improvement in fraud detection rate</td></tr>
+                    <tr><td><strong>Customer Retention</strong></td><td>Churn prediction, next-best-action</td><td>Predict probability that a policyholder will lapse</td><td>10–30% reduction in preventable churn</td></tr>
+                    <tr><td><strong>Marketing</strong></td><td>Customer segmentation, lead scoring</td><td>Predict which customers are most likely to buy</td><td>20–40% improvement in marketing ROI</td></tr>
+                </tbody>
+            </table>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); font-style: italic;">The impact ranges in the right-hand column are illustrative industry benchmarks drawn from McKinsey's AI-in-insurance research [4]; individual results depend heavily on data quality, product line, and implementation maturity.</p>
+
+            <h3>1.2 The Insurance ML Maturity Curve</h3>
+
+            <p>Most Indian insurers are at different stages of ML maturity. Understanding where an organisation sits on this curve is important for both internal strategy (what to invest in) and external analysis (what is a competitor capable of?):</p>
+            <ul>
+                <li><strong>Level 0 — Descriptive (30% of insurers):</strong> Reports on what happened. SQL queries and dashboards. No predictive capability.<br><em style="color: var(--text-light);">Typical examples: smaller regional and cooperative insurers, and a few smaller private general insurers that still rely on basic MIS reports rather than analytics teams. (Small players are hard to name individually — this tier is defined by limited data infrastructure, not by brand.)</em></li>
+                <li><strong>Level 1 — Diagnostic (40% of insurers):</strong> Why did it happen? Online Analytical Processing (OLAP), basic segmentation, root-cause analysis with simple Excel models. Most public and mid-size private Indian insurers are here.<br><em style="color: var(--text-light);">Typical examples: the public-sector giants — <strong>LIC</strong> (life) and the four PSU general insurers (<strong>New India Assurance, National Insurance, United India Insurance, Oriental Insurance</strong>) — plus several mid-size private players. They have large data warehouses and Excel/OLAP-driven MIS, but predictive models are still point projects rather than embedded systems.</em></li>
+                <li><strong>Level 2 — Predictive (20% of insurers):</strong> What will happen? ML models deployed for specific use cases — fraud detection, churn prediction, claims severity. Large private insurers and digital carriers.<br><em style="color: var(--text-light);">Typical examples: <strong>HDFC Ergo, Bajaj Allianz, SBI General, HDFC Life, Max Life</strong> — large private insurers running production fraud, churn, and claims-severity models in specific lines; and digital carriers like <strong>Digit</strong> (automated claims triage).</em></li>
+                <li><strong>Level 3 — Prescriptive (8% of insurers):</strong> What should we do about it? ML models integrated into decision systems — automated underwriting, dynamic pricing, next-best-action for agents. Leading-edge private insurers.<br><em style="color: var(--text-light);">Typical examples: <strong>ICICI Lombard</strong> (AI-driven motor claims and the IL TakeCare app — models now steer underwriting and claims decisions), <strong>Max Life / HDFC Life</strong> (agent next-best-action and predictive underwriting in term plans), and <strong>Digit</strong> (automated claims settlement).</em></li>
+                <li><strong>Level 4 — Autonomous (2% of insurers):</strong> ML models drive decisions in real-time without human intervention for most standard cases. Straight-through processing for claims, fully automated underwriting. Only a few digital carriers (Acko, Lemonade) are here.<br><em style="color: var(--text-light);">Typical examples: <strong>Acko</strong> (India — 3-minute policy issuance via VAHAN API, straight-through processing for standard motor claims) and <strong>Lemonade</strong> (global — AI "Jim" handles claims end-to-end in seconds for simple cases).</em></li>
+            </ul>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); font-style: italic; margin-top: var(--space-sm);">Note on the percentages: the level shares (30% / 40% / 20% / 8% / 2%) are illustrative estimates intended to convey the rough distribution across the industry — they are not drawn from a single published survey. The framework itself (Descriptive → Diagnostic → Predictive → Prescriptive → Autonomous) follows Gartner's analytics maturity model [1]; real maturity data from McKinsey shows EMEA insurers' analytics-maturity scores span 18–85% [2], and Deloitte's global digital-maturity study is the complementary industry view [3]. See the References section at the end of this session.</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> An insurer does not need to be at Level 4 to benefit from ML. Most high-impact opportunities in Indian insurance are at Levels 2 and 3 — targeted fraud detection, automated motor underwriting, churn prediction. The ROI from moving from Level 1 to Level 2 is often higher than from Level 3 to Level 4, because the low-hanging fruit is larger. Do not be seduced by the vision of full autonomy if your organisation cannot reliably produce clean data at Level 1.
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Supervised vs. Unsupervised Learning</h2>
+
+            <p>All machine learning falls into two broad categories. The distinction is simple: <strong>supervised learning</strong> has a target variable to predict; <strong>unsupervised learning</strong> does not. Each category contains multiple algorithm types suited to different insurance problems.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Supervised Learning</th><th>Unsupervised Learning</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>What you have</strong></td><td>Features (input variables) + Labels (target variable to predict)</td><td>Features only — no labels, no target</td></tr>
+                    <tr><td><strong>What the model does</strong></td><td>Learns the relationship between features and labels, then predicts labels for new data</td><td>Finds hidden patterns, groups, or structures in the data without being told what to look for</td></tr>
+                    <tr><td><strong>Regression</strong></td><td><strong>Predict a continuous number.</strong> Example: "What will this claim cost?"</td><td>N/A</td></tr>
+                    <tr><td><strong>Classification</strong></td><td><strong>Predict a category.</strong> Example: "Will this policyholder file a claim (yes/no)?" or "What type of claim is this?"</td><td>N/A</td></tr>
+                    <tr><td><strong>Clustering</strong></td><td>N/A</td><td><strong>Group similar items together.</strong> Example: "Segment policyholders into risk groups based on their characteristics."</td></tr>
+                    <tr><td><strong>Anomaly Detection</strong></td><td>N/A</td><td><strong>Identify unusual data points.</strong> Example: "Which claims look suspicious and should be investigated?"</td></tr>
+                    <tr><td><strong>Dimensionality Reduction</strong></td><td>N/A</td><td><strong>Simplify data while preserving information.</strong> Example: "Reduce 50 underwriting features to 10 composite features for easier modeling."</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> A common mistake beginners make is applying unsupervised learning when they actually have labels and should use supervised learning, or vice versa. The rule is: <strong>if you have historical data with known outcomes (a claim happened or didn't, fraud was confirmed or not), use supervised learning. If you want to explore the data structure without predefined categories, use unsupervised learning.</strong> In insurance, most business problems are supervised — but unsupervised techniques are invaluable for feature engineering (creating new variables for supervised models) and for detection of emerging patterns that do not have historical labels yet.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. The ML Workflow</h2>
+
+            <p>Every machine learning project in insurance follows the same six-step workflow. The details change — the features, the algorithm, the evaluation metric — but the structure is always the same. Mastering this workflow is more important than mastering any individual algorithm.</p>
+
+            <h3>3.1 The Six-Step ML Workflow</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│                    THE ML WORKFLOW                                  │
+│                                                                     │
+│  ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐ │
+│  │ 1. Problem  │   │ 2. Data    │   │ 3. Model   │   │ 4. Train   │ │
+│  │ Definition  │──→│ Preparation│──→│ Selection  │──→│ & Validate │ │
+│  └────────────┘   └────────────┘   └────────────┘   └────────────┘ │
+│                                                         │          │
+│  ┌────────────┐   ┌────────────┐                       │          │
+│  │ 6. Deploy  │←──│ 5. Evaluate│◄───────────────────────┘          │
+│  │ & Monitor  │   │            │                                    │
+│  └────────────┘   └────────────┘                                    │
+│                                                                     │
+│  Feedback loop: Model predictions → Business decisions →           │
+│  New data → Re-train → Better predictions                          │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>3.2 The Scikit-Learn API Pattern</h3>
+
+            <p>The Scikit-learn library provides a consistent API across all models. Once you learn this pattern, you can apply it to almost any algorithm with minimal code changes:</p>
+
+            <pre><code class="language-python"># The Universal Scikit-Learn Pattern:
+#
+# 1. Import the model class
+# 2. Instantiate the model (with parameters)
+# 3. Split data into training and test sets
+# 4. Fit the model on the training data
+# 5. Predict on the test data
+# 6. Evaluate the predictions
+
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
+
+# 1. Import
+from sklearn.linear_model import LinearRegression
+
+# Toy data so this pattern runs standalone (Section 4 replaces this with real
+# insurance data). X = one feature per row, y = the target value to predict.
+X = np.array([[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]])
+y = np.array([2.9, 6.1, 8.8, 12.2, 15.1, 18.0, 20.9, 24.1, 27.0, 30.2])  # ≈ 3x + noise
+
+# 2. Instantiate
+model = LinearRegression()
+
+# 3. Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size = 0.2, random_state = 0
+)
+
+# 4. Fit
+model.fit(X_train, y_train)
+
+# 5. Predict
+y_pred = model.predict(X_test)
+
+# 6. Evaluate
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+print(f"RMSE: {rmse:.2f}")
+print(f"R²: {r2:.3f}")</code></pre>
+
+            <h3>3.3 Train/Test Split — Why We Split</h3>
+
+            <p>In insurance, the train/test split serves a crucial purpose: <strong>an ML model that performs well on the data it was trained on but poorly on new data is useless — and dangerous.</strong> The split simulates the real world: the model will be deployed on new policyholders and claims it has never seen. If it only learned the patterns in the training data (including its random noise), it will fail on new data. This is called <strong>overfitting</strong>, and we explore it in Section 7.</p>
+
+            <pre><code class="language-python"># Always split before training — never train on your test data!
+# Common splits: 80/20 (large datasets), 70/30 (smaller), 60/20/20 (train/val/test)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,                # X, y are the toy data defined in §3.2 above
+    test_size=0.2,       # Hold back 20% for testing
+    random_state = 0      # For reproducible results
+)
+
+# For classification (categorical target), add stratify=y to preserve class
+# proportions in each split:
+# X_train, X_test, y_train, y_test = train_test_split(
+#     X, y, test_size = 0.2, random_state = 0, stratify = y
+# )</code></pre>
+
+            <div class="callout callout-danger" style="border-left-color: var(--danger); background: rgba(225, 112, 85, 0.08); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-lg); display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 1.25rem; flex-shrink: 0;">&#9888;</div>
+                <div><strong>Critical Warning:</strong> <strong>Never</strong> use test data for training. This is the single most common mistake in applied ML. If you train on your test data — even inadvertently (by looking at test set performance and then tweaking the model) — your reported accuracy will be optimistically biased. You will think your model is better than it really is. In insurance, this means: you deploy a model that performs worse than expected, underwriters lose trust, and the project fails. Use a separate validation set (train/val/test) if you need to iterate on model selection. Test data is sacred — it is used exactly once, at the very end.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Regression — Predicting Claim Amounts</h2>
+
+            <p>Regression predicts a continuous numeric value. In insurance, the most common regression task is predicting claim amounts — given policyholder characteristics, what is the expected claim amount? This is used for: pricing (what premium should we charge?), reserving (how much money should we set aside?), and underwriting (which applications should we accept?).</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128279;</div>
+                <div class="callout-content">
+                    <strong>How to run this section:</strong> the lab code lives in the <code>code/</code> folder as <strong>four separate scripts, one per section</strong>, each runnable on its own: <code>session_11</code> (§4 — data preparation + regression), <code>session_11_classification.py</code> (§5), <code>session_11_clustring.py</code> (§6), and <code>session_11_overfitting.py</code> (§7). Run them with the lab environment: <code>cd code &amp;&amp; .venv/bin/python session_11</code> (requires <code>pandas</code>, <code>scikit-learn</code>, <code>matplotlib</code>). Two data files sit in the same folder, next to the scripts: <code>insurance_cleaned.csv</code> (claim-level, ~20,500 rows — used by §4 regression) and <code>insurance_policy_cleaned.csv</code> (policy-level, 10,000 rows, includes no-claim policies — used by §5 classification and §6 clustering). <strong>Important:</strong> both files must contain the correlated target columns (<code>claim_amount</code>, <code>has_claim</code>) generated by <code>fix_data.py</code> — the lab copies and the GitHub copies below already do, so the models have real signal to learn. GitHub: <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/insurance_cleaned.csv" target="_blank" rel="noopener">insurance_cleaned.csv</a> · <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/insurance_policy_cleaned.csv" target="_blank" rel="noopener">insurance_policy_cleaned.csv</a> · <a href="https://github.com/afzalur7/insurtech-course-dataset/tree/master/session-11" target="_blank" rel="noopener">session-11 scripts</a>.
+                </div>
+            </div>
+
+            <h3>4.1 Preparing Data for Regression</h3>
+
+            <pre><code class="language-python"># Preparing Data for Regression
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importing the dataset
+dataset = pd.read_csv('insurance_cleaned.csv')
+
+# Filter target variable (keep rows with known claim amount)
+dataset = dataset[dataset['claim_amount'].notna()].copy()
+
+# Select required feature columns and create the new table with dependent variable as the last column
+selected_cols = ['age', 'income', 'credit_score', 'premium', 'sum_assured', 'policy_type', 'claim_amount']
+dataset = dataset[selected_cols].copy()
+
+# Separate features (X) and target (y)
+X = dataset.iloc[:, :-1]
+y = dataset.iloc[:, -1].values
+
+# Identify column types
+categorical_cols = X.select_dtypes(include=['object']).columns.tolist()
+numeric_cols = X.select_dtypes(include=[np.number]).columns.tolist()
+
+# Handle missing values using SimpleImputer
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+# Impute numeric features with mean and categorical features with most frequent value
+num_imputer = SimpleImputer(strategy='mean')
+cat_imputer = SimpleImputer(strategy='most_frequent')
+
+X[numeric_cols] = num_imputer.fit_transform(X[numeric_cols])
+X[categorical_cols] = cat_imputer.fit_transform(X[categorical_cols])
+
+print(f"Numeric features: {numeric_cols}")
+print(f"Categorical features: {categorical_cols}")
+print(f"Total observations: {len(dataset):,}")
+
+# Encoding categorical data
+ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(drop='first'), categorical_cols)], remainder='passthrough')
+X = np.array(ct.fit_transform(X))</code></pre>
+
+<p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">Numeric features: ['age', 'income', 'credit_score', 'premium', 'sum_assured']
+Categorical features: ['policy_type']
+Total observations: 20,548</code></pre>
+
+            <p><strong>How to read it:</strong> 20,548 claims have a known amount and survive the filters; five numeric features enter the model as-is, and <code>policy_type</code> is about to become three 0/1 dummy columns (the alphabetically first category — Health — is dropped as the baseline). After encoding, X has 8 columns; every one is now numeric and ready for scaling.</p>
+
+            <h3>4.2 Building the Regression Pipeline</h3>
+
+            <pre><code class="language-python"># Splitting the dataset into the Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+# Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+# Training the Multiple Linear Regression model on the Training set
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+# Predicting the Test set results
+y_pred = regressor.predict(X_test)
+np.set_printoptions(precision=2)
+print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
+
+# Evaluating the model
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("=" * 50)
+print("CLAIM AMOUNT REGRESSION RESULTS")
+print("=" * 50)
+print(f"RMSE:  ₹{rmse:,.0f}")
+print(f"MAE:   ₹{mae:,.0f}")
+print(f"R²:    {r2:.3f}")
+print(f"  (Context: average claim = ₹{y_test.mean():,.0f})")
+print(f"  The prediction error represents {mae/y_test.mean()*100:.1f}% of the average claim")</code></pre>
+
+            <p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">[[41667.3  30844.47]
+ [48933.01 57074.68]
+ [22723.66 25167.49]
+ ...
+ [32220.17 35442.06]
+ [17213.78 27812.02]
+ [30794.5  35325.34]]
+==================================================
+CLAIM AMOUNT REGRESSION RESULTS
+==================================================
+RMSE:  ₹10,214
+MAE:   ₹8,097
+R²:    0.745
+  (Context: average claim = ₹28,057)
+  The prediction error represents 28.9% of the average claim</code></pre>
+
+            <p><strong>How to read it:</strong> the first block is the two-column array printed by the script — <em>predicted</em> on the left, <em>actual</em> on the right, one row per test claim; eyeball a few rows and you see misses of a few thousand rupees in both directions. The results panel carries the verdict: R² = 0.745 means the model explains about three-quarters of the variation in claim amounts, and the typical miss (MAE ₹8,097) is roughly 29% of the average claim (₹28,057). <strong>What the viewer concludes:</strong> this is a solid portfolio-level predictor — good enough to rank and group policies for reserving and triage — but a 29% typical error is far too wide to price a single policy from. And remember: the lab generates claim amounts from exactly these features, so 0.745 is an <em>upper bound</em>; real severity models explain much less.</p>
+
+            <h3>4.3 Interpreting Coefficients</h3>
+
+            <pre><code class="language-python"># Interpreting the coefficients
+# After one-hot encoding, the feature names come from the ColumnTransformer
+feature_names = ct.get_feature_names_out()
+
+coeff_df = pd.DataFrame({
+    'feature': feature_names,
+    'coefficient': regressor.coef_
+}).sort_values('coefficient', key=abs, ascending=False)
+
+print("Top 10 Most Influential Features (by absolute coefficient):")
+print("=" * 60)
+print(f"{'Feature':35s} {'Coefficient':>15s} {'Direction':>12s}")
+print("-" * 60)
+for _, row in coeff_df.head(10).iterrows():
+    direction = "Increases claim" if row['coefficient'] > 0 else "Decreases claim"
+    print(f"{row['feature']:35s} {row['coefficient']:>+12,.0f}   {direction}")
+
+print(f"\n{'-' * 60}")
+print(f"Intercept: {regressor.intercept_:,.0f}")
+print(f"\nNote: because the features were standardised (mean 0, std 1), the")
+print(f"coefficients are comparable in RELATIVE magnitude (which feature matters")
+print(f"most), not in original rupee units. Categorical coefficients are relative")
+print(f"to the baseline (dropped) category.")</code></pre>
+
+<p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">Top 10 Most Influential Features (by absolute coefficient):
+============================================================
+Feature                                 Coefficient    Direction
+------------------------------------------------------------
+remainder__premium                       +14,096   Increases claim
+remainder__income                         +6,729   Increases claim
+remainder__sum_assured                    +5,850   Increases claim
+encoder__policy_type_Property             +5,803   Increases claim
+encoder__policy_type_Health               +4,830   Increases claim
+encoder__policy_type_Motor                +2,173   Increases claim
+remainder__credit_score                  -2,116   Decreases claim
+remainder__age                           -1,027   Decreases claim
+encoder__policy_type_Travel                -857   Decreases claim
+
+------------------------------------------------------------
+Intercept: 28,827</code></pre>
+
+            <p><strong>How to read it:</strong> because every feature was standardised, coefficient size = influence. Premium dominates (+14,096 per standard deviation), followed by income and sum assured; among products, Property and Health claims run above the baseline while Travel runs below; credit score and age pull claims <em>down</em> modestly. <strong>What the viewer concludes:</strong> expected claim size in this book is primarily a function of exposure (premium, sum assured) and product line — the levers an underwriter actually prices on. Note the intercept (₹28,827) is close to the average claim (₹28,057): at "average everything", the model predicts roughly the mean, exactly as it should.</p>
+
+            <h3>4.4 Diagnostic Plot</h3>
+
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# LEFT: Actual vs Predicted
+axes[0].scatter(y_test, y_pred, alpha=0.3, s=10, color='#6c5ce7')
+axes[0].plot([y_test.min(), y_test.max()],
+             [y_test.min(), y_test.max()],
+             'r--', linewidth=2, label='Perfect Prediction')
+axes[0].set_xlabel('Actual Claim Amount')
+axes[0].set_ylabel('Predicted Claim Amount')
+axes[0].set_title('Regression: Actual vs. Predicted', fontweight='bold')
+axes[0].legend()
+axes[0].spines['top'].set_visible(False)
+axes[0].spines['right'].set_visible(False)
+
+# RIGHT: Residuals
+residuals = y_test - y_pred
+axes[1].scatter(y_pred, residuals, alpha=0.3, s=10, color='#00d2d3')
+axes[1].axhline(y=0, color='red', linestyle='--', linewidth=1.5)
+axes[1].set_xlabel('Predicted Claim Amount')
+axes[1].set_ylabel('Residual (Actual − Predicted)')
+axes[1].set_title('Residual Plot', fontweight='bold')
+axes[1].spines['top'].set_visible(False)
+axes[1].spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+
+print("Residual analysis:")
+print(f"  Mean residual: {residuals.mean():.0f} (should be close to 0)")
+print(f"  Std of residuals: {residuals.std():.0f}")
+print(f"  Are residuals roughly evenly distributed above and below zero?")
+print(f"  If the residual plot shows a pattern (cone shape, curve), the linear model is inadequate.")</code></pre>
+
+<p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">Residual analysis:
+  Mean residual: -219 (should be close to 0)
+  Std of residuals: 10212</code></pre>
+
+            <p><strong>How to read it:</strong> the errors average out to −₹219 on claims averaging ₹28,057 — effectively zero, so the model is unbiased, neither systematically over- nor under-predicting. The spread (₹10,212) matches the RMSE, as it must. Combined with the flat, pattern-free residual fan in the figure below, this says: the straight-line form is adequate for this data.</p>
+
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-11/regression-diagnostics.png" alt="Two diagnostic plots for the claim-amount regression: actual vs predicted claims with a perfect-prediction diagonal, and residuals vs predicted values around a zero line" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> LEFT — every test claim as a dot (actual vs predicted amount); the red dashed diagonal is a perfect prediction. RIGHT — the error of each prediction (residual = actual − predicted) against the predicted amount; the red line marks zero error. <strong>What the viewer concludes:</strong> the dots hug the diagonal <em>on average</em> but in a wide band — predictions are unbiased (residuals sit evenly above and below zero; mean ≈ −₹219, close to 0) yet imprecise for any single policyholder (R² = 0.745, typical miss ≈ ₹8,100). The residuals show no cone and no curve, so a straight-line model is an acceptable shape for this data. <strong>Decision it supports:</strong> trust this model to split the portfolio into high / medium / low expected-severity groups for reserving and triage — not to price an individual claim. If the residual fan had widened to the right (cone), that would be the signal to model log(claim) instead, as real severity models do (Session 21).</figcaption>
+            </figure>
+
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> In practice, claim amount prediction is rarely done with simple linear regression because claim distributions are heavily right-skewed. A better approach (which you will see in Session 21) is to predict the <strong>logarithm</strong> of the claim amount, which transforms the skewed distribution into a roughly normal one. Or use a quantile regression to predict different points in the distribution (e.g., the 50th percentile for "typical" claims and the 95th percentile for tail risk). Linear regression on untransformed claim amounts is a learning exercise — the foundation for understanding more sophisticated models later.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Classification — Predicting Claim Probability</h2>
+
+            <p>Classification predicts a category. In insurance, the most common classification task is predicting whether a policyholder will file a claim (binary: yes or no). This is used for: underwriting (should we accept this risk?), renewal targeting (who is most likely to claim?), and fraud triage (is this claim suspicious?).</p>
+
+            <h3>5.1 Preparing Data for Classification</h3>
+
+            <pre><code class="language-python"># Preparing Data for Classification
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importing the dataset (policy-level: one row per policy, including no-claim policies)
+dataset = pd.read_csv('insurance_policy_cleaned.csv')
+
+# Check class balance
+claim_rate = dataset['has_claim'].mean()
+print(f"Claim rate: {claim_rate*100:.1f}%")
+print(f"  Claim filed (1): {(dataset['has_claim'] == 1).sum():,}")
+print(f"  No claim (0):    {(dataset['has_claim'] == 0).sum():,}")
+
+# Keep rows with known target value
+dataset = dataset[dataset['has_claim'].notna()].copy()
+
+# Select required feature columns and place dependent variable (has_claim) as the last column
+selected_cols = ['premium', 'age', 'income', 'credit_score', 'sum_assured', 'policy_type', 'has_claim']
+dataset = dataset[selected_cols].copy()
+
+# Separate features (X) and target (y)
+X = dataset.iloc[:, :-1]
+y = dataset.iloc[:, -1].values
+
+# Identify column types
+categorical_cols = X.select_dtypes(include=['object']).columns.tolist()
+numeric_cols = X.select_dtypes(include=[np.number]).columns.tolist()
+
+# Handle missing values using SimpleImputer
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+num_imputer = SimpleImputer(strategy='mean')
+cat_imputer = SimpleImputer(strategy='most_frequent')
+
+X[numeric_cols] = num_imputer.fit_transform(X[numeric_cols])
+X[categorical_cols] = cat_imputer.fit_transform(X[categorical_cols])
+
+# Encoding categorical data
+ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(drop='first'), categorical_cols)], remainder='passthrough')
+X = np.array(ct.fit_transform(X))</code></pre>
+
+<p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">Claim rate: 44.2%
+  Claim filed (1): 4,420
+  No claim (0):    5,580</code></pre>
+
+            <p><strong>How to read it:</strong> the two classes are moderately imbalanced — 44% of the 10,000 policies generated at least one claim. Not extreme, but imbalanced enough that plain accuracy flatters a lazy model: "always predict no-claim" would score 55.8% while catching nothing. That is why §5.2 uses <code>class_weight = 'balanced'</code> and reports precision/recall/AUC, not accuracy alone.</p>
+
+            <h3>5.2 Building the Classification Pipeline</h3>
+
+            <pre><code class="language-python"># Splitting the dataset into the Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0, stratify = y)
+
+# Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+# Training the Logistic Regression model on the Training set
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression(random_state = 0, class_weight = 'balanced')
+classifier.fit(X_train, y_train)
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
+
+# Making the Confusion Matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+print(accuracy_score(y_test, y_pred))
+
+# Evaluating with precision, recall, and ROC-AUC
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
+y_prob = classifier.predict_proba(X_test)[:, 1]
+print("=" * 60)
+print("CLAIM PROBABILITY CLASSIFICATION RESULTS")
+print("=" * 60)
+print(f"Accuracy:  {accuracy_score(y_test, y_pred):.3f}")
+print(f"Precision: {precision_score(y_test, y_pred):.3f}")
+print(f"Recall:    {recall_score(y_test, y_pred):.3f}")
+print(f"F1 Score:  {f1_score(y_test, y_pred):.3f}")
+print(f"ROC-AUC:   {roc_auc_score(y_test, y_prob):.3f}")</code></pre>
+
+            <p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">[[741 375]
+ [291 593]]
+0.667
+============================================================
+CLAIM PROBABILITY CLASSIFICATION RESULTS
+============================================================
+Accuracy:  0.667
+Precision: 0.613
+Recall:    0.671
+F1 Score:  0.640
+ROC-AUC:   0.737</code></pre>
+
+            <p><strong>How to read it:</strong> the 2×2 confusion matrix (rows = actual no-claim / claim, columns = predicted) holds the whole story: 741 no-claim policies correctly cleared, 593 claiming policies correctly flagged, but 375 false alarms and 291 missed claimers. <strong>What the viewer concludes:</strong> accuracy of 0.667 beats the 55.8% do-nothing baseline by 11 points, and the model is roughly equally good at both jobs (precision 0.613 ≈ recall 0.671 — of everything it flags, 61% really claim; of all claimers, it finds 67%). Moderate, symmetric, usable — a triage tool, not a verdict. The ranking quality (AUC 0.737, §5.4) is the number an underwriter would act on.</p>
+
+            <h3>5.3 Why Accuracy is Not Enough</h3>
+
+            <p>Our lab dataset is fairly balanced (44% of policies file a claim), so a naive "always predict no-claim" model would score 55.8% accuracy while catching zero claims — already useless. Real insurance problems are far more lopsided: in a fraud dataset where <strong>2%</strong> of claims are fraudulent, a model that predicts "not fraud" for every claim scores 98% accuracy and catches <em>nothing</em>. This is the <strong>class imbalance problem</strong> that pervades insurance ML, and it is why our lab uses <code>class_weight = 'balanced'</code> and reports precision, recall, and AUC alongside accuracy. Accuracy alone is dangerously misleading.</p>
+
+            <p>For insurance classification problems, the evaluation metric depends on the business context:</p>
+            <ul>
+                <li><strong>Fraud detection:</strong> Recall (catching fraud) matters more than precision (false accusations are expensive but catching fraud saves money). But if precision is too low, investigators waste time on false positives.</li>
+                <li><strong>Claims triage:</strong> Precision on high-severity claims is critical — you do not want to misclassify a catastrophic claim as low-severity. But recall on fast-track claims must be high enough to achieve efficiency gains.</li>
+                <li><strong>Underwriting:</strong> Both precision and recall matter because rejecting a good applicant loses revenue and accepting a bad applicant generates losses. The threshold must be calibrated to the insurer's risk appetite.</li>
+                <li><strong>ROC-AUC:</strong> This metric measures the model's ability to <em>rank</em> risks correctly — how well it separates the claim-filers from the non-claim-filers. A model with ROC-AUC of 0.85 means that 85% of the time, a randomly chosen claim-filer will have a higher predicted probability than a randomly chosen non-claim-filer. This is the most commonly reported classification metric in insurance ML.</li>
+            </ul>
+
+            <h3>5.4 ROC Curve</h3>
+
+            <pre><code class="language-python"># Plot ROC curve
+from sklearn.metrics import roc_curve, roc_auc_score
+fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+auc = roc_auc_score(y_test, y_prob)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.plot(fpr, tpr, color='#6c5ce7', linewidth=2.5,
+        label=f'ROC Curve (AUC = {auc:.3f})')
+ax.plot([0, 1], [0, 1], 'r--', linewidth=1.5, label='Random Classifier (AUC = 0.5)')
+ax.fill_between(fpr, tpr, alpha=0.15, color='#6c5ce7')
+ax.set_xlabel('False Positive Rate (1 − Specificity)')
+ax.set_ylabel('True Positive Rate (Recall)')
+ax.set_title('ROC Curve — Claim Prediction Model', fontweight='bold')
+ax.legend(loc='lower right')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Find the optimal threshold (Youden's J statistic)
+j_scores = tpr - fpr
+best_idx = np.argmax(j_scores)
+best_threshold = thresholds[best_idx]
+ax.annotate(f'Optimal threshold: {best_threshold:.2f}',
+            xy=(fpr[best_idx], tpr[best_idx]),
+            xytext=(fpr[best_idx] + 0.15, tpr[best_idx] - 0.1),
+            arrowprops=dict(arrowstyle='->', color='green'),
+            fontsize=10, color='green')
+ax.plot(fpr[best_idx], tpr[best_idx], 'go', markersize=10)
+
+plt.tight_layout()
+plt.show()
+
+print(f"\nOptimal threshold (Youden's J): {best_threshold:.3f}")
+print(f"  At this threshold: Sensitivity = {tpr[best_idx]:.3f}, Specificity = {1-fpr[best_idx]:.3f}")
+print(f"\nInterpretation: A model with AUC = {auc:.3f} can distinguish")
+print(f"claim-filers from non-claim-filers {auc*100:.1f}% of the time.")
+print(f"This is {'strong' if auc > 0.85 else 'moderate' if auc > 0.7 else 'weak'} predictive power.")</code></pre>
+
+<p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">Optimal threshold (Youden's J): 0.535
+  At this threshold: Sensitivity = 0.622, Specificity = 0.729
+
+Interpretation: A model with AUC = 0.737 can distinguish
+claim-filers from non-claim-filers 73.7% of the time.
+This is moderate predictive power.</code></pre>
+
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-11/roc-curve.png" alt="ROC curve for the claim-prediction model with AUC 0.737, the random-classifier diagonal, and the optimal threshold marked at 0.535" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> every possible operating point of the classifier — as the decision threshold slides from strict to lenient, the trade-off between catching claimers (y-axis, True Positive Rate) and false alarms (x-axis, False Positive Rate) traces this curve. The red diagonal is a coin-flip model. <strong>What the viewer concludes:</strong> the curve bows well clear of the diagonal — AUC 0.737 means a randomly chosen claim-filer receives a higher score than a randomly chosen non-claimer about 74% of the time. That is genuine, monetisable signal, but far from certain: this model ranks risks, it does not read them. The green dot (threshold ≈ 0.535, Youden's J) is where captured claims per false alarm are maximised. <strong>Decision it supports:</strong> slide the threshold deliberately — left to build an aggressive triage list (more claims caught, more false alarms), right for a conservative one — and let the business cost of each error choose the point. Never ship the default 0.5 unexamined.</figcaption>
+            </figure>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> When communicating classification model performance to business stakeholders, do not lead with precision, recall, or AUC. Lead with <strong>business impact</strong>. "Our model identifies 65% of fraudulent claims before payment, which would save ₹12 crore annually" is a statement the business will act on. "Our model has a recall of 0.65 and precision of 0.40" is a statement that will get you a blank stare. Always translate ML metrics into business outcomes before presenting to non-technical stakeholders.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Clustering — Segmenting Policyholders</h2>
+
+            <p>Clustering is an unsupervised learning technique that groups similar data points together. In insurance, clustering is used for customer segmentation, risk profiling, fraud detection (unusual clusters), and product design (identifying underserved segments). Unlike regression and classification, clustering does not use a target variable — it finds structure in the data purely from the features.</p>
+
+            <h3>6.1 When to Cluster</h3>
+
+            <p>Use clustering when you want to discover groups in your data that you did not know existed. Common insurance applications:</p>
+            <ul>
+                <li><strong>Customer segmentation:</strong> Group policyholders by demographics, policy behaviour, and claims history to create differentiated service, pricing, and marketing strategies.</li>
+                <li><strong>Risk profiling:</strong> Identify natural risk groups that may not align with traditional rating factors — revealing overpriced and underpriced segments.</li>
+                <li><strong>Fraud pattern discovery:</strong> Detect clusters of claims with unusual feature combinations that may indicate organised fraud rings.</li>
+                <li><strong>Product design:</strong> Identify underserved customer groups whose needs are not met by existing products.</li>
+            </ul>
+
+            <h3>6.2 K-Means Clustering in Python</h3>
+
+            <pre><code class="language-python"># K-Means Clustering
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importing the dataset (policy-level)
+dataset = pd.read_csv('insurance_policy_cleaned.csv')
+
+# Building a customer-level profile (one row per customer, including no-claim customers)
+customer_profile = dataset.groupby('customer_id').agg(
+    age = ('age', 'first'),
+    income = ('income', 'first'),
+    credit_score = ('credit_score', 'first'),
+    total_premium = ('premium', 'sum'),
+    total_claims = ('total_claim_amount', 'sum'),
+    claim_count = ('n_claims', 'sum'),
+    policy_count = ('policy_id', 'nunique')
+).reset_index()
+
+# Adding derived features
+customer_profile['loss_ratio'] = (customer_profile['total_claims'] / customer_profile['total_premium']).fillna(0)
+customer_profile['claims_per_policy'] = customer_profile['claim_count'] / customer_profile['policy_count']
+
+# Select features for clustering
+selected_cols = ['age', 'income', 'credit_score', 'total_premium', 'loss_ratio', 'claims_per_policy', 'policy_count']
+customer_profile = customer_profile[selected_cols].copy()
+
+# Handle missing values using SimpleImputer
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(strategy='mean')
+customer_profile[selected_cols] = imputer.fit_transform(customer_profile[selected_cols])
+
+X = customer_profile.values
+
+# Feature Scaling (K-means is distance-based, so scaling is critical)
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X = sc.fit_transform(X)
+
+# Using the elbow method to find the optimal number of clusters
+from sklearn.cluster import KMeans
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
+    kmeans.fit(X)
+    wcss.append(kmeans.inertia_)
+plt.plot(range(1, 11), wcss)
+plt.title('The Elbow Method')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')
+plt.show()</code></pre>
+
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-11/elbow-method.png" alt="Elbow method plot: within-cluster sum of squares against number of clusters from 1 to 10, falling steeply then flattening" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> how tightly customers are grouped (WCSS — within-cluster sum of squares, lower is tighter) as K increases from 1 to 10. Adding clusters <em>always</em> tightens groups, so the question is where tightening stops paying. <strong>What the viewer concludes:</strong> the line drops steeply from 1 to about 4, then visibly flattens — each cluster beyond K=4 splits an already-coherent group while buying almost no additional tightness. That bend is the "elbow", and it is the data's suggestion of K=4. Note the elbow is soft here, not a sharp corner — in real customer data it rarely is. <strong>Decision it supports:</strong> treat K=4 as the defensible default, then confirm it the only way that finally matters — do the four resulting profiles (§6.3) describe four groups a business would treat differently? A segmentation the marketing team cannot act on is wrong at any K.</figcaption>
+            </figure>
+
+            <h3>6.3 Profiling the Clusters</h3>
+
+            <pre><code class="language-python"># Training the K-Means model on the dataset
+kmeans = KMeans(n_clusters = 4, init = 'k-means++', random_state = 42)
+y_kmeans = kmeans.fit_predict(X)
+
+# Profiling the clusters
+customer_profile['cluster'] = y_kmeans
+cluster_profile = customer_profile.groupby('cluster').agg(
+    count = ('cluster', 'count'),
+    avg_age = ('age', 'mean'),
+    avg_income = ('income', 'mean'),
+    avg_credit = ('credit_score', 'mean'),
+    avg_premium = ('total_premium', 'mean'),
+    avg_loss_ratio = ('loss_ratio', 'mean'),
+    avg_claims_per_policy = ('claims_per_policy', 'mean'),
+    avg_policies = ('policy_count', 'mean')
+).round(1)
+
+# Sort by cluster size for readability
+cluster_profile = cluster_profile.sort_values('count', ascending=False)
+
+print("=" * 90)
+print("CUSTOMER SEGMENTATION — CLUSTER PROFILES")
+print("=" * 90)
+print(cluster_profile.to_string())
+
+# Give each cluster a meaningful name based on its profile
+print(f"\n{'='*90}")
+print("BUSINESS INTERPRETATION:")
+print(f"{'='*90}")
+for cluster_id in cluster_profile.index:
+    row = cluster_profile.loc[cluster_id]
+    share = row['count'] / cluster_profile['count'].sum() * 100
+    # Generate a descriptive label
+    if row['avg_loss_ratio'] &lt; 0.3 and row['avg_income'] > cluster_profile['avg_income'].median():
+        label = "Low-Risk, High-Value"
+    elif row['avg_loss_ratio'] > 0.6:
+        label = "High-Risk — Manage Carefully"
+    elif row['avg_claims_per_policy'] &lt; 0.1 and row['avg_policies'] > 2:
+        label = "Loyal, Low-Claim — ⭐ Protect"
+    elif row['avg_age'] > 50:
+        label = "Senior Segment — Growing"
+    else:
+        label = "Standard Risk — Optimize Service"
+    print(f"  Cluster {cluster_id} ({share:.0f}% of customers): {label}")
+    print(f"    Age: {row['avg_age']:.0f}, Income: ₹{row['avg_income']:,.0f}, Credit: {row['avg_credit']:.0f}")
+    print(f"    Loss Ratio: {row['avg_loss_ratio']*100:.1f}%, Policies: {row['avg_policies']:.1f}, Claims/Policy: {row['avg_claims_per_policy']:.2f}")
+    print()</code></pre>
+
+            <p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">==========================================================================================
+CUSTOMER SEGMENTATION — CLUSTER PROFILES
+==========================================================================================
+         count  avg_age  avg_income  avg_credit  avg_premium  avg_loss_ratio  avg_claims_per_policy  avg_policies
+cluster
+2         1761     49.0    130218.9       723.8      12459.0             0.9                    0.3           1.7
+0         1144     45.2    147323.9       705.2      34850.2             3.5                    1.2           3.9
+3         1024     40.7    144042.9       689.5      14724.7             7.6                    2.6           1.7
+1          401     49.8    393371.1       702.7      16057.2             1.2                    0.4           2.1
+
+==========================================================================================
+BUSINESS INTERPRETATION:
+==========================================================================================
+  Cluster 2 (41% of customers): High-Risk — Manage Carefully
+    Age: 49, Income: ₹130,219, Credit: 724
+    Loss Ratio: 90.0%, Policies: 1.7, Claims/Policy: 0.30
+  ... (identical auto-labels for Clusters 0, 3, 1)</code></pre>
+
+            <p><strong>How to read it:</strong> four segments of very different shape. <strong>Cluster 2 (41%)</strong> is the standard book: single-to-double-policy customers, modest premium, few claims. <strong>Cluster 0 (26%)</strong> is the depth segment: 3.9 policies and ₹34.850 average premium each — the multi-product core. <strong>Cluster 3 (24%)</strong> is the intensity segment: 2.6 claims per policy, seven times the standard book's rate — the tail that consumes claims-handling capacity. <strong>Cluster 1 (9%)</strong> is a small high-income elite (₹3.93L average income, credit ≈ 703) with light claims. <strong>One honest caveat:</strong> the auto-labels print "High-Risk — Manage Carefully" for all four because this lab generates claim amounts as multiples of premium, inflating every segment's loss ratio above the 60% rule — ignore the auto-label, read the profile table. The <em>relative</em> differences (depth, intensity, income) are the real story.</p>
+
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-11/clusters-scatter.png" alt="K-means clusters of policyholders plotted as total premium against claims per policy, four coloured clusters with yellow centroids" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> every policyholder as a dot, coloured by cluster, on two business axes — total premium paid (x) and claims per policy (y) — with each cluster's centre marked in yellow. <strong>What the viewer concludes:</strong> the segmentation separates customers mainly along the <em>intensity</em> axis (how often they claim): Cluster 3's dots sit high (2.6 claims/policy), Cluster 0 spreads to the right (premium depth up to ₹1L+), while Clusters 2 and 1 crowd the lower-left (modest premium, few claims). The yellow centroids summarise each group's "typical member". Note the clusters overlap in this view — K-means separated customers on all seven standardised features, and this 2-D picture is only a projection of that 7-D separation onto the two axes a manager can read. <strong>Decision it supports:</strong> different playbooks per cluster — service efficiency for the standard book, cross-sell for the depth segment, underwriting and fraud review for the intensity tail, retention protection for the high-income elite.</figcaption>
+            </figure>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Clustering results are not "true" in the sense that a classification label is true. Different K values produce different segmentations, all of which may be valid for different business purposes. K=4 might give you the right segmentation for marketing (four customer types with different needs). K=8 might give you a segmentation that reveals risk patterns useful for underwriting. The "right" K is the one that produces actionable insights for your specific business problem. Always evaluate clustering output against business utility, not against a statistical gold standard.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-core">
+            <h2>7. Overfitting, Underfitting, and Cross-Validation</h2>
+
+            <p>A model that memorizes the training data but fails on new data is overfitted. A model that is too simple to capture the patterns in the data is underfitted. Managing this tradeoff is the central challenge of applied machine learning — and it is especially acute in insurance, where the cost of a wrong prediction (an underpriced risk, a missed fraud) can be measured in crores.</p>
+
+            <h3>7.1 Overfitting vs. Underfitting</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Underfitting</th><th>Overfitting</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>What happens</strong></td><td>Model is too simple to capture the underlying pattern in the data</td><td>Model learns the training data too well, including noise and random fluctuations</td></tr>
+                    <tr><td><strong>Training performance</strong></td><td>Poor (high training error)</td><td>Excellent (very low training error)</td></tr>
+                    <tr><td><strong>Test performance</strong></td><td>Poor (high test error)</td><td>Poor (high test error — the gap between train and test is large)</td></tr>
+                    <tr><td><strong>Visual signature</strong></td><td>Line through data does not capture the trend</td><td>Line curves wildly to pass through every point</td></tr>
+                    <tr><td><strong>In insurance</strong></td><td>Using a flat premium for all policyholders regardless of risk factors</td><td>A pricing model that assigns a unique premium to each of 10,000 policyholders based on noise, not signal</td></tr>
+                    <tr><td><strong>Fix</strong></td><td>Use a more complex model; engineer better features; reduce regularization</td><td>Simplify the model; use regularization; get more training data; reduce feature count</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 Detecting Overfitting</h3>
+
+            <pre><code class="language-python"># Detecting Overfitting (continues from the regression model in Section 4)
+
+# Re-load and re-prepare the regression data so this section is self-contained
+# (Sections 5-6 redefined X and y, so re-establish the regression context here).
+import numpy as np
+import pandas as pd
+dataset = pd.read_csv('insurance_cleaned.csv')
+# Filter target variable (keep rows with known claim amount)
+dataset = dataset[dataset['claim_amount'].notna()].copy()
+
+# Select required feature columns and create the new table with dependent variable as the last column
+selected_cols = ['age', 'income', 'credit_score', 'premium', 'sum_assured', 'policy_type', 'claim_amount']
+dataset = dataset[selected_cols].copy()
+
+# Separate features (X) and target (y)
+X = dataset.iloc[:, :-1]
+y = dataset.iloc[:, -1].values
+
+# Identify column types
+categorical_cols = X.select_dtypes(include=['object']).columns.tolist()
+numeric_cols = X.select_dtypes(include=[np.number]).columns.tolist()
+
+# Handle missing values using SimpleImputer
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+# Impute numeric features with mean and categorical features with most frequent value
+num_imputer = SimpleImputer(strategy='mean')
+cat_imputer = SimpleImputer(strategy='most_frequent')
+
+X[numeric_cols] = num_imputer.fit_transform(X[numeric_cols])
+X[categorical_cols] = cat_imputer.fit_transform(X[categorical_cols])
+
+ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(drop='first'), categorical_cols)], remainder='passthrough')
+X = np.array(ct.fit_transform(X))
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+# Training a deliberately over-complex model (deep decision tree) on the Training set
+from sklearn.tree import DecisionTreeRegressor
+overfit_tree = DecisionTreeRegressor(max_depth = None, min_samples_leaf = 1, random_state = 0)
+overfit_tree.fit(X_train, y_train)
+
+# Evaluating the overfit model
+train_score = overfit_tree.score(X_train, y_train)
+test_score = overfit_tree.score(X_test, y_test)
+
+print("OVERFITTING DEMONSTRATION — Decision Tree (no depth limit)")
+print("=" * 55)
+print(f"  Training R²:  {train_score:.4f}  {'(unrealistically high — memorized training data)' if train_score > 0.95 else ''}")
+print(f"  Test R²:      {test_score:.4f}")
+print(f"  Gap:          {train_score - test_score:.4f}")
+print()
+if train_score > 0.95:
+    print("  ⚠ This model has memorized the training data. It will perform")
+    print("    poorly on new policyholders. The training R² is misleadingly high.")
+    print()
+    print("  Solution: Limit tree depth, increase min_samples_leaf, or use cross-validation.")
+else:
+    print("  The model shows modest overfitting. Consider regularization.")
+
+# Training a regularized model (limited depth) to avoid overfitting
+regularized_tree = DecisionTreeRegressor(max_depth = 5, min_samples_leaf = 20, random_state = 0)
+regularized_tree.fit(X_train, y_train)
+train_score_r = regularized_tree.score(X_train, y_train)
+test_score_r = regularized_tree.score(X_test, y_test)
+
+print(f"\nREGULARIZED DECISION TREE (max_depth=5, min_samples_leaf=20)")
+print(f"  Training R²:  {train_score_r:.4f}")
+print(f"  Test R²:      {test_score_r:.4f}")
+print(f"  Gap:          {train_score_r - test_score_r:.4f}")
+print(f"\nThe regularized model has a SMALLER gap between train and test,")
+print(f"which means it will generalize better to new data.")</code></pre>
+
+            <p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>Lab output</strong> — your run prints exactly this (the dataset is fixed-seed):</p>
+            <pre><code class="language-text">OVERFITTING DEMONSTRATION — Decision Tree (no depth limit)
+=======================================================
+  Training R²:  0.8918
+  Test R²:      0.6295
+  Gap:          0.2623
+
+  The model shows modest overfitting. Consider regularization.
+
+REGULARIZED DECISION TREE (max_depth=5, min_samples_leaf=20)
+  Training R²:  0.6497
+  Test R²:      0.6060
+  Gap:          0.0437
+
+The regularized model has a SMALLER gap between train and test,
+which means it will generalize better to new data.</code></pre>
+
+            <p><strong>How to read it:</strong> the diagnostic is the <strong>train-test gap</strong>, not the raw scores. The unlimited-depth tree earns 0.892 in training but only 0.630 on unseen data — 26 points of skill evaporate outside the training room. Clipping the tree (depth 5, at least 20 policies per leaf) drops training R² to 0.650 but nearly closes the gap (0.044): what it knows, it genuinely knows. <strong>And the deeper lesson:</strong> the regularized tree's test R² (0.606) still loses to the plain linear regression from §4 (0.745) — because this lab's claim amounts are generated by a near-linear rule. When the underlying relationship is linear, the simplest model wins on new data; complexity buys nothing but a flattering training score. Always benchmark a complex model against a simple baseline before shipping it.</p>
+
+            <h3>7.3 Cross-Validation</h3>
+
+            <p>Cross-validation evaluates model performance on multiple train/test splits, providing a more reliable estimate of how the model will perform on new data. It reduces the variance of the performance estimate — a single train/test split may be lucky or unlucky depending on which observations ended up in the test set.</p>
+
+            <pre><code class="language-python"># Cross-Validation
+
+from sklearn.model_selection import cross_val_score, KFold
+
+# Set up 5-fold cross-validation
+cv = KFold(n_splits = 5, shuffle = True, random_state = 0)
+
+# Evaluate the regression model with cross-validation
+cv_scores = cross_val_score(regressor, X, y, cv = cv, scoring = 'r2')
+
+print("CROSS-VALIDATION RESULTS (5-Fold)")
+print("=" * 40)
+print(f"  Fold 1 R²: {cv_scores[0]:.3f}")
+print(f"  Fold 2 R²: {cv_scores[1]:.3f}")
+print(f"  Fold 3 R²: {cv_scores[2]:.3f}")
+print(f"  Fold 4 R²: {cv_scores[3]:.3f}")
+print(f"  Fold 5 R²: {cv_scores[4]:.3f}")
+print(f"  ─────────────────────────")
+print(f"  Mean R²:   {cv_scores.mean():.3f}")
+print(f"  Std Dev:   {cv_scores.std():.3f}")
+print(f"\nIf the standard deviation is large (>0.1), the model's performance")
+print(f"varies significantly across data splits — investigate stability.")
+print(f"If mean R² is close to the single-test R² from our 80/20 split,")
+print(f"we can be more confident in the performance estimate.")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> In insurance ML, use stratified cross-validation when working with classification problems (fraud, churn, claim prediction). Stratified CV preserves the class proportion in each fold — so if 2% of claims are fraudulent, each fold will also have approximately 2% fraudulent claims. Without stratification, some folds may end up with zero fraud cases, and the model cannot learn anything useful from that fold. For regression, standard K-Fold CV is usually sufficient, but consider shuffling the data first if it is ordered by time (policies sold later are different from policies sold earlier).
+                </div>
+            </div>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#128200;</div>
+                <div class="callout-content">
+                    <strong>Financial &amp; Risk Management Implications — Overfitting is a reserving risk:</strong> For Finance-specialization students, "overfitting" is the same concept as <em>model risk</em> in banking and credit risk — a model that performs well in-sample but fails out-of-sample. In insurance, an overfit claims-severity model will <strong>under-reserve</strong>: IBNR and case reserves are set from the model's predictions, and a model that memorised noise will produce wrong central estimates, feeding directly into reserve adequacy and reported loss ratios. This is why actuarial and credit-risk model governance both mandate <strong>out-of-sample / back-testing</strong> — cross-validation is the ML name for exactly that discipline. A Finance student should read every "train/test gap" here as a proxy for the out-of-sample validation a model risk committee would require before signing off a model for capital or reserving purposes.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Three ML Models on One Insurance Dataset</h2>
+            <div class="project-brief">
+                <p>You are an insurance analytics intern and your manager wants you to demonstrate three fundamental ML techniques — regression, classification, and clustering — on the company's insurance dataset. Use the lab datasets from the <code>code/</code> folder (<code>insurance_cleaned.csv</code> for regression, <code>insurance_policy_cleaned.csv</code> for classification and clustering). Build all three models. Present a single-page summary comparing what each model taught you about the business.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Data preparation:</strong> Load the cleaned dataset. For regression and classification, use the policy-level aggregation (one row per policy). For clustering, use the customer-level aggregation (one row per customer).</li>
+                    <li><strong>Regression model:</strong> Predict total claim amount per policy. Use features: premium, age, income, credit_score, policy_type, sum_assured. Evaluate using RMSE, MAE, and R². Interpret the coefficients — which factor most increases claim amount?</li>
+                    <li><strong>Classification model:</strong> Predict whether a policy will have at least one claim. Use the same features. Evaluate using the full classification report: accuracy, precision, recall, F1, ROC-AUC. Plot the ROC curve. Report the optimal threshold.</li>
+                    <li><strong>Clustering model:</strong> Segment customers into 3–5 groups using K-means on features: age, income, credit_score, total_premium, loss_ratio, claims_per_policy. Profile each cluster with a descriptive business label. Recommend one action per cluster.</li>
+                    <li><strong>Summary table:</strong> Create a single-page table comparing the three models with columns: Model Type, Business Question, Key Metric, Performance, Actionable Insight (one sentence).</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Summary Table (Sample Output)</h4>
+
+                    <table>
+                        <thead>
+                            <tr><th>Model Type</th><th>Business Question</th><th>Key Metric</th><th>Performance</th><th>Actionable Insight</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Linear Regression</strong></td>
+                                <td>What claim amount should we expect from a policy?</td>
+                                <td>R²</td>
+                                <td>R² ≈ 0.745 (RMSE ≈ ₹10,214)</td>
+                                <td>Premium, income, and sum assured are the strongest predictors, and Property/Health policies carry systematically higher claims than the baseline. Caution: the lab's claim amounts are <em>generated</em> from these features, which is why R² reaches 0.75 — real claim severity is far noisier and typically explains much less. Treat this as an upper bound, not an industry benchmark.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Logistic Regression</strong></td>
+                                <td>Will this policy generate a claim?</td>
+                                <td>ROC-AUC</td>
+                                <td>AUC ≈ 0.737 (accuracy 0.667 vs 55.8% baseline)</td>
+                                <td>The model has moderate discriminatory power. Premium is the most influential feature, followed by policy type; higher credit score slightly reduces claim probability. With a 44.2% claim rate, accuracy of 0.667 beats the naive baseline but is no cause for celebration — the ranking (AUC), not the label, is what an underwriter would act on.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>K-Means Clustering</strong></td>
+                                <td>What natural customer segments exist in our portfolio?</td>
+                                <td>Silhouette Score / Cluster Profiles</td>
+                                <td>4 distinct clusters identified</td>
+                                <td>Four segments emerged from 4,330 customers: a 41% standard single-policy book (age ≈ 49, modest premium); a 26% multi-policy core holding 3.9 policies each with 1.2 claims/policy; a 24% claim-intensive tail at 2.6 claims/policy; and a 9% high-income segment (₹3.9L average income). Because the lab generates claim amounts as multiples of premium, absolute loss ratios are inflated — compare segments relatively, not absolutely. (All numbers are this lab's own output, not industry-wide findings.)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Key Business Insights</h4>
+                    <ol>
+                        <li><strong>Regression says:</strong> Expected claim amount is driven primarily by premium, income, and sum assured, with clear differences across policy types (Property and Health above the baseline, Travel below). Even a strong R² of 0.75 leaves a typical error near 29% of the average claim — enough for portfolio-level prioritisation (reserving, segment targeting), not for pricing an individual policy.</li>
+                        <li><strong>Classification says:</strong> Claim frequency is moderately predictable (AUC ≈ 0.74), led by premium and policy type, with credit score a weaker negative factor. A "premium-and-product-aware" triage list — policies the model ranks as most claim-likely — is the practical output, and any use of credit-like factors in pricing would need regulatory and ethical review before deployment.</li>
+                        <li><strong>Clustering says:</strong> The portfolio contains four natural segments with very different behaviour: a large standard book, a multi-policy heavy-usage core (3.9 policies, 1.2 claims/policy), a claim-intensive tail (2.6 claims/policy) that deserves underwriting and fraud attention, and a small high-income segment worth protecting with tailored service. The segments differ mainly in <em>depth</em> (premium, policies) and <em>intensity</em> (claims per policy) — exactly the two dials a retention programme pulls.</li>
+                    </ol>
+                    <p><strong>The overarching insight:</strong> Combining all three ML techniques produces a richer business understanding than any one alone. Regression and classification tell you what drives outcomes (predictive). Clustering tells you how customers naturally group (descriptive). Together, they provide the evidence base for underwriting, pricing, and retention strategies.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Machine learning creates value across the insurance value chain — underwriting, pricing, claims, fraud, retention, and marketing. Most Indian insurers are at Level 1–2 of ML maturity, meaning the highest-ROI opportunities are in moving from descriptive to predictive analytics.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Supervised learning (regression + classification) requires labelled historical outcomes. Unsupervised learning (clustering) finds hidden patterns without labels. The Scikit-learn API is consistent across all models: import, instantiate, fit, predict, evaluate.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Regression predicts continuous values (claim amount). Classification predicts categories (claim/no-claim). For imbalanced insurance data, accuracy is misleading — use precision, recall, F1, and ROC-AUC instead.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>Clustering with K-means reveals natural customer segments. The "right" number of clusters depends on business utility, not a statistical rule. A cluster with a low loss ratio and multi-policy tenure is the insurer's most valuable segment — protect it.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>Managing the overfitting-underfitting tradeoff is the central challenge of insurance ML. Cross-validation provides a more reliable performance estimate than a single train/test split. Never use test data for training — test data is used exactly once, at the very end.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section class="content-section stability-core">
+            <h2>References</h2>
+            <ol style="font-size: var(--font-size-sm); color: var(--text-light); line-height: 1.7; padding-left: 1.4em;">
+                <li>Gartner, "Data and Analytics Maturity Score," Gartner, Inc. [Online]. Available: <a href="https://www.gartner.com/en/data-analytics/research/data-analytics-maturity-score" target="_blank" rel="noopener">https://www.gartner.com/en/data-analytics/research/data-analytics-maturity-score</a></li>
+                <li>McKinsey &amp; Company, "On the brink: Realizing the value of analytics in insurance," McKinsey &amp; Company. [Online]. Available: <a href="https://www.mckinsey.com/industries/financial-services/our-insights/on-the-brink-realizing-the-value-of-analytics-in-insurance" target="_blank" rel="noopener">https://www.mckinsey.com/industries/financial-services/our-insights/on-the-brink-realizing-the-value-of-analytics-in-insurance</a></li>
+                <li>Deloitte, "Digital Insurance Maturity 2025," Deloitte. [Online]. Available: <a href="https://www.deloitte.com/ce/en/related-content/digital-insurance-maturity-2025.html" target="_blank" rel="noopener">https://www.deloitte.com/ce/en/related-content/digital-insurance-maturity-2025.html</a></li>
+                <li>McKinsey &amp; Company, "The future of AI in the insurance industry," 2025. [Online]. Available: <a href="https://www.mckinsey.com/industries/financial-services/our-insights/the-future-of-ai-in-the-insurance-industry" target="_blank" rel="noopener">https://www.mckinsey.com/industries/financial-services/our-insights/the-future-of-ai-in-the-insurance-industry</a></li>
+            </ol>
+            <p style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><em>Further reading (Task G5):</em> the applied-research anchor for this session's finance framing is McKinsey [4]. <strong>Flag for instructor review:</strong> a peer-reviewed Journal of Risk and Insurance / Geneva Papers article on analytics-maturity or ML-adoption business value was not verified during this pass and should be added before publication.</p>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s11-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. An insurer wants to predict the exact claim amount (in rupees) that a policyholder will file. This is a:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Classification problem — because "will claim" is a yes/no question</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Regression problem — because the target variable (claim amount) is a continuous numeric value</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Clustering problem — because claims naturally group by type</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Reinforcement learning — because the model learns from claim outcomes over time</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A fraud detection model has 98% accuracy but achieves this by predicting "Not Fraud" for 100% of cases in a dataset where 2% of claims are fraudulent. The problem is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Nothing — 98% accuracy is excellent for any model</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Accuracy is a misleading metric for imbalanced data — the model has 0% recall on fraud cases and is completely useless even though it appears 98% accurate</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) The model is overfitting on the training data</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) The model has high variance but low bias</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A linear regression model achieves R² = 0.72 on the training set but R² = 0.18 on the test set. The most likely diagnosis is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The model is working correctly — test performance is always lower</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) The data was not properly loaded into the notebook</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The model is significantly overfitted — it has captured noise specific to the training data and will not generalise to unseen data</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The loss function was incorrectly specified for regression</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. K-means clustering is classified as unsupervised learning because:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) It does not require the user to specify the number of clusters beforehand</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) It does not use a target variable — it finds natural groupings in the data based solely on feature similarity</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) It automatically evaluates its own performance without a test set</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) It runs without any human supervision — no parameters to set</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A model has ROC-AUC of 0.85. This means:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) The model is correct 85% of the time</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) 85% of the time, when presented with a randomly chosen positive case and a randomly chosen negative case, the model will assign a higher probability score to the positive case — it is a measure of ranking ability, not accuracy</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) The false positive rate is 15% (1 — AUC)</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) 85% of predictions are true positives</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s11-quiz', ['b','b','c','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s11-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-10.html" class="nav-link">&larr; Previous: Embedded &amp; Usage-Based Insurance</a>
+            <a href="session-12.html" class="nav-link next">Next: AI for Underwriting &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

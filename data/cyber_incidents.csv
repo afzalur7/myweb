@@ -1,0 +1,2001 @@
+incident_id,industry,breach_type,records_exposed,loss_amount_cr,ransomware_flag
+1,Healthcare,BEC,1000,2.49,0
+2,Retail,DDoS,0,4.06,0
+3,Manufacturing,Ransomware,1000,0.47,1
+4,Healthcare,DDoS,10000,7.88,0
+5,Retail,Data Breach,1000,3.45,0
+6,IT/ITeS,Ransomware,1000,1.76,1
+7,Retail,Ransomware,1000,0.18,1
+8,IT/ITeS,Insider Threat,1000,16.15,0
+9,Government,BEC,0,0.13,0
+10,Retail,Ransomware,1000000,4.81,1
+11,BFSI,BEC,100000,4.72,0
+12,BFSI,BEC,0,7.31,0
+13,Retail,Insider Threat,1000,15.01,0
+14,IT/ITeS,Ransomware,10000,11.88,1
+15,Retail,DDoS,1000000,28.74,0
+16,Government,Data Breach,1000,5.55,0
+17,BFSI,Ransomware,0,1.67,1
+18,Manufacturing,Data Breach,10000,3.32,0
+19,Manufacturing,Ransomware,1000,6.92,1
+20,IT/ITeS,Insider Threat,10000,0.99,0
+21,Manufacturing,Ransomware,0,11.01,1
+22,Manufacturing,Data Breach,10000,8.79,0
+23,Healthcare,BEC,1000,16.72,0
+24,Retail,Data Breach,10000,11.07,0
+25,IT/ITeS,Data Breach,0,4.27,0
+26,Retail,BEC,0,1.34,0
+27,Healthcare,Data Breach,1000,28.9,0
+28,IT/ITeS,Ransomware,1000000,0.55,1
+29,Manufacturing,BEC,10000,6.9,0
+30,BFSI,Insider Threat,0,318.42,0
+31,Retail,Ransomware,1000,5.03,1
+32,BFSI,Ransomware,1000000,6.73,1
+33,Healthcare,Data Breach,1000,2.17,0
+34,Retail,Data Breach,1000,7.82,0
+35,Retail,Data Breach,1000,6.56,0
+36,BFSI,Data Breach,1000,4.73,0
+37,Healthcare,BEC,1000,2.25,0
+38,Manufacturing,Ransomware,1000000,8.97,1
+39,Government,Ransomware,10000,2.0,1
+40,BFSI,Ransomware,0,0.62,1
+41,BFSI,Data Breach,0,37.71,0
+42,Retail,Data Breach,0,11.21,0
+43,BFSI,Ransomware,0,10.17,1
+44,Manufacturing,Data Breach,10000,1.3,0
+45,Retail,Ransomware,1000,15.65,1
+46,Manufacturing,Data Breach,100000,2.31,0
+47,Manufacturing,Insider Threat,0,0.45,0
+48,Government,Insider Threat,10000,1.35,0
+49,Manufacturing,Data Breach,1000,4.13,0
+50,Manufacturing,BEC,1000,1.02,0
+51,Manufacturing,Ransomware,0,1.79,1
+52,BFSI,Insider Threat,0,0.37,0
+53,BFSI,Ransomware,1000,7.3,1
+54,Healthcare,DDoS,0,10.71,0
+55,Government,Ransomware,100000,7.5,1
+56,Healthcare,Ransomware,10000,4.01,1
+57,Healthcare,BEC,1000000,6.73,0
+58,Healthcare,Ransomware,10000,28.36,1
+59,Government,Ransomware,100000,7.55,1
+60,Manufacturing,Data Breach,1000,9.86,0
+61,Retail,Data Breach,100000,0.61,0
+62,IT/ITeS,Data Breach,0,0.94,0
+63,IT/ITeS,Ransomware,10000,8.72,1
+64,IT/ITeS,Ransomware,10000,94.9,1
+65,Retail,Ransomware,1000,1.39,1
+66,BFSI,DDoS,10000,9.83,0
+67,Government,Data Breach,10000,12.28,0
+68,IT/ITeS,Ransomware,1000000,2.33,1
+69,Government,BEC,10000,39.85,0
+70,BFSI,Ransomware,10000,1.58,1
+71,Retail,Ransomware,0,14.44,1
+72,IT/ITeS,Insider Threat,0,2.4,0
+73,Retail,DDoS,1000,4.23,0
+74,Retail,Data Breach,1000,19.58,0
+75,Retail,Data Breach,0,4.18,0
+76,IT/ITeS,Ransomware,10000,33.39,1
+77,BFSI,Insider Threat,10000,4.59,0
+78,BFSI,DDoS,10000,1.79,0
+79,Manufacturing,Data Breach,10000,11.32,0
+80,BFSI,Insider Threat,10000,4.3,0
+81,Healthcare,BEC,100000,2.96,0
+82,IT/ITeS,Insider Threat,10000,0.96,0
+83,Healthcare,BEC,100000,17.82,0
+84,BFSI,Ransomware,0,2.56,1
+85,Government,Ransomware,1000,6.41,1
+86,Government,Ransomware,1000,5.23,1
+87,Manufacturing,Ransomware,100000,2.96,1
+88,Government,Ransomware,10000,6.91,1
+89,Government,Data Breach,0,10.14,0
+90,BFSI,BEC,100000,1.88,0
+91,BFSI,Ransomware,1000000,1.33,1
+92,Healthcare,Ransomware,0,11.13,1
+93,IT/ITeS,Data Breach,10000,0.74,0
+94,IT/ITeS,Data Breach,0,3.68,0
+95,Manufacturing,DDoS,0,0.95,0
+96,BFSI,Ransomware,0,4.14,1
+97,Government,Ransomware,1000,0.84,1
+98,Manufacturing,Insider Threat,1000,12.8,0
+99,Retail,Ransomware,0,33.02,1
+100,Government,DDoS,1000000,5.22,0
+101,Retail,Ransomware,1000,1.16,1
+102,IT/ITeS,Data Breach,1000,2.32,0
+103,IT/ITeS,Ransomware,0,5.78,1
+104,Manufacturing,Data Breach,0,6.22,0
+105,BFSI,BEC,1000,3.74,0
+106,Healthcare,DDoS,0,4.06,0
+107,Manufacturing,Data Breach,0,16.39,0
+108,Manufacturing,Ransomware,10000,6.14,1
+109,Manufacturing,Data Breach,10000,35.51,0
+110,Healthcare,Data Breach,1000,2.19,0
+111,Government,Insider Threat,10000,4.89,0
+112,Healthcare,Ransomware,1000,1.9,1
+113,BFSI,Ransomware,100000,10.44,1
+114,Healthcare,Ransomware,0,126.4,1
+115,Retail,BEC,10000,8.48,0
+116,Healthcare,Ransomware,10000,2.51,1
+117,IT/ITeS,Data Breach,1000,2.54,0
+118,Healthcare,Ransomware,1000,4.1,1
+119,Government,Ransomware,1000,1.77,1
+120,Manufacturing,Ransomware,0,10.06,1
+121,BFSI,DDoS,10000,0.9,0
+122,Manufacturing,Data Breach,1000,9.52,0
+123,Retail,Ransomware,100000,1.58,1
+124,Manufacturing,Data Breach,0,2.87,0
+125,IT/ITeS,Data Breach,10000,5.76,0
+126,Manufacturing,Ransomware,10000,6.21,1
+127,Government,Ransomware,0,0.36,1
+128,Retail,DDoS,100000,1.41,0
+129,Healthcare,Data Breach,0,0.83,0
+130,IT/ITeS,Ransomware,10000,3.64,1
+131,Government,Data Breach,1000000,0.47,0
+132,Government,Ransomware,10000,8.6,1
+133,Healthcare,Ransomware,1000,2.21,1
+134,BFSI,Ransomware,10000,2.84,1
+135,BFSI,BEC,10000,15.54,0
+136,Manufacturing,DDoS,1000,4.4,0
+137,Manufacturing,Ransomware,10000,1.26,1
+138,Healthcare,Data Breach,0,0.77,0
+139,Healthcare,Ransomware,10000,4.26,1
+140,Retail,BEC,10000,64.91,0
+141,Retail,DDoS,10000,0.42,0
+142,Manufacturing,Ransomware,100000,0.37,1
+143,Healthcare,Ransomware,0,13.92,1
+144,Retail,Insider Threat,10000,2.06,0
+145,IT/ITeS,Data Breach,0,1.01,0
+146,Retail,DDoS,1000000,0.54,0
+147,Government,Insider Threat,10000,1.32,0
+148,Retail,Ransomware,1000,8.86,1
+149,IT/ITeS,Insider Threat,1000000,35.09,0
+150,IT/ITeS,Ransomware,10000,3.12,1
+151,Manufacturing,Data Breach,0,2.61,0
+152,BFSI,DDoS,0,0.18,0
+153,Retail,Data Breach,0,0.29,0
+154,Manufacturing,Data Breach,1000,1.36,0
+155,IT/ITeS,Ransomware,0,6.26,1
+156,Government,DDoS,1000,4.7,0
+157,Healthcare,DDoS,100000,2.55,0
+158,Retail,BEC,10000,15.7,0
+159,BFSI,Data Breach,10000,11.66,0
+160,Manufacturing,DDoS,0,11.09,0
+161,BFSI,Data Breach,1000,5.25,0
+162,Retail,Data Breach,1000,6.91,0
+163,BFSI,Ransomware,0,2.44,1
+164,BFSI,Ransomware,1000,5.83,1
+165,IT/ITeS,Ransomware,0,3.43,1
+166,BFSI,Data Breach,0,6.48,0
+167,Government,Data Breach,10000,7.18,0
+168,Manufacturing,Insider Threat,1000,1.02,0
+169,BFSI,Insider Threat,0,0.86,0
+170,Retail,Ransomware,10000,36.77,1
+171,Retail,Ransomware,1000,0.51,1
+172,Government,BEC,1000,3.67,0
+173,BFSI,Data Breach,1000,3.98,0
+174,Government,DDoS,1000,0.6,0
+175,BFSI,Ransomware,10000,10.73,1
+176,Government,BEC,100000,1.68,0
+177,IT/ITeS,Data Breach,10000,0.84,0
+178,IT/ITeS,Data Breach,0,24.14,0
+179,Government,Data Breach,1000,2.52,0
+180,IT/ITeS,Ransomware,1000000,27.86,1
+181,Manufacturing,Data Breach,0,5.48,0
+182,BFSI,Ransomware,10000,0.2,1
+183,BFSI,Data Breach,0,1.99,0
+184,IT/ITeS,BEC,10000,1.16,0
+185,IT/ITeS,DDoS,10000,23.65,0
+186,Manufacturing,Ransomware,10000,9.35,1
+187,Healthcare,Data Breach,10000,12.0,0
+188,Manufacturing,Ransomware,1000,1.65,1
+189,BFSI,Data Breach,1000,8.95,0
+190,Manufacturing,Ransomware,10000,11.71,1
+191,Manufacturing,Data Breach,0,9.19,0
+192,Healthcare,Data Breach,10000,0.5,0
+193,BFSI,Ransomware,100000,0.6,1
+194,Healthcare,BEC,10000,3.19,0
+195,Government,DDoS,1000,4.81,0
+196,Healthcare,Insider Threat,100000,0.16,0
+197,Healthcare,Data Breach,10000,5.41,0
+198,BFSI,Ransomware,10000,23.45,1
+199,IT/ITeS,Insider Threat,10000,4.1,0
+200,BFSI,DDoS,0,8.84,0
+201,BFSI,Data Breach,1000,55.57,0
+202,BFSI,DDoS,10000,5.28,0
+203,Manufacturing,Ransomware,1000,16.85,1
+204,Manufacturing,Ransomware,1000,1.04,1
+205,Retail,DDoS,1000,6.36,0
+206,BFSI,Insider Threat,1000,0.44,0
+207,Healthcare,Insider Threat,0,1.88,0
+208,Healthcare,Ransomware,100000,1.92,1
+209,Healthcare,Ransomware,10000,1.37,1
+210,BFSI,Ransomware,1000000,13.18,1
+211,BFSI,BEC,0,0.72,0
+212,Retail,Data Breach,0,1.35,0
+213,Government,Ransomware,1000,13.93,1
+214,Retail,Insider Threat,1000,1.49,0
+215,Retail,BEC,1000,10.94,0
+216,Retail,Data Breach,100000,0.73,0
+217,Government,Ransomware,1000000,7.73,1
+218,BFSI,Insider Threat,10000,3.42,0
+219,Retail,Ransomware,0,3.95,1
+220,Healthcare,Ransomware,10000,0.59,1
+221,IT/ITeS,Data Breach,1000,0.45,0
+222,Government,DDoS,10000,1.44,0
+223,BFSI,Data Breach,10000,1.35,0
+224,IT/ITeS,BEC,0,2.99,0
+225,BFSI,Ransomware,0,10.66,1
+226,Retail,Data Breach,100000,3.73,0
+227,Healthcare,Data Breach,1000,0.21,0
+228,Retail,BEC,100000,3.11,0
+229,Manufacturing,Ransomware,1000,0.91,1
+230,Manufacturing,Ransomware,0,0.75,1
+231,Retail,Ransomware,1000000,3.67,1
+232,Government,Ransomware,100000,0.04,1
+233,Manufacturing,Data Breach,1000,10.79,0
+234,Manufacturing,Ransomware,0,0.67,1
+235,Healthcare,BEC,0,4.82,0
+236,Government,Ransomware,0,10.06,1
+237,Manufacturing,Insider Threat,1000,0.19,0
+238,IT/ITeS,Insider Threat,1000,1.68,0
+239,IT/ITeS,Ransomware,1000,2.85,1
+240,Manufacturing,Ransomware,100000,4.56,1
+241,Retail,Data Breach,100000,0.19,0
+242,Retail,Data Breach,1000,3.45,0
+243,Retail,Insider Threat,0,1.13,0
+244,Retail,Ransomware,1000000,71.89,1
+245,Government,Ransomware,10000,11.5,1
+246,Retail,Data Breach,1000,0.26,0
+247,Manufacturing,BEC,10000,1.66,0
+248,BFSI,BEC,1000,8.29,0
+249,Healthcare,Data Breach,1000,1.19,0
+250,Retail,DDoS,100000,3.71,0
+251,Government,Data Breach,100000,0.37,0
+252,Government,Ransomware,100000,16.86,1
+253,IT/ITeS,Data Breach,0,5.55,0
+254,Manufacturing,DDoS,10000,4.71,0
+255,BFSI,Insider Threat,100000,1.36,0
+256,Government,DDoS,10000,97.34,0
+257,BFSI,Ransomware,100000,0.59,1
+258,Retail,Data Breach,1000,1.23,0
+259,Retail,Data Breach,1000,0.42,0
+260,Manufacturing,Insider Threat,1000,1.21,0
+261,Government,Data Breach,0,0.7,0
+262,Manufacturing,Ransomware,1000000,1.76,1
+263,BFSI,Ransomware,1000,1.51,1
+264,Healthcare,BEC,100000,10.32,0
+265,Government,Ransomware,0,5.19,1
+266,Healthcare,Ransomware,10000,6.49,1
+267,Government,Data Breach,100000,0.53,0
+268,Manufacturing,Ransomware,1000,0.73,1
+269,Government,BEC,100000,6.82,0
+270,Healthcare,Ransomware,0,0.43,1
+271,Healthcare,Ransomware,10000,2.54,1
+272,Retail,Data Breach,1000,15.87,0
+273,IT/ITeS,Ransomware,1000,17.92,1
+274,Healthcare,DDoS,1000,2.25,0
+275,IT/ITeS,BEC,100000,12.29,0
+276,Government,Data Breach,1000,16.09,0
+277,BFSI,Ransomware,10000,2.75,1
+278,Healthcare,Ransomware,1000,2.1,1
+279,Retail,BEC,1000,1.21,0
+280,Government,Data Breach,10000,6.58,0
+281,Manufacturing,BEC,10000,42.01,0
+282,Retail,Data Breach,1000,2.54,0
+283,Manufacturing,BEC,0,8.67,0
+284,IT/ITeS,Ransomware,1000,2.3,1
+285,Retail,Ransomware,100000,6.72,1
+286,Government,Ransomware,100000,2.87,1
+287,Healthcare,Insider Threat,1000,8.5,0
+288,IT/ITeS,BEC,10000,3.7,0
+289,BFSI,Data Breach,1000,3.8,0
+290,BFSI,Data Breach,1000,5.22,0
+291,Healthcare,BEC,10000,3.72,0
+292,IT/ITeS,Data Breach,10000,12.02,0
+293,Manufacturing,Insider Threat,100000,14.07,0
+294,Government,Ransomware,10000,2.28,1
+295,Manufacturing,Ransomware,1000000,0.47,1
+296,Manufacturing,Data Breach,100000,10.75,0
+297,BFSI,Data Breach,0,0.6,0
+298,IT/ITeS,Data Breach,1000,28.97,0
+299,IT/ITeS,Insider Threat,1000,2.01,0
+300,IT/ITeS,Insider Threat,0,0.68,0
+301,Retail,Data Breach,10000,14.37,0
+302,Retail,Data Breach,100000,6.0,0
+303,BFSI,Ransomware,10000,2.44,1
+304,Healthcare,Ransomware,10000,2.03,1
+305,Manufacturing,BEC,10000,17.95,0
+306,BFSI,Data Breach,100000,4.07,0
+307,Government,Ransomware,10000,0.15,1
+308,Government,Data Breach,100000,1.1,0
+309,Manufacturing,Ransomware,1000,3.54,1
+310,Retail,BEC,10000,2.56,0
+311,Government,Data Breach,0,2.17,0
+312,Government,Insider Threat,10000,1.98,0
+313,Manufacturing,BEC,0,13.62,0
+314,BFSI,Data Breach,1000,20.57,0
+315,Healthcare,Data Breach,1000000,4.87,0
+316,BFSI,DDoS,1000,13.92,0
+317,BFSI,Data Breach,100000,0.35,0
+318,Healthcare,Ransomware,10000,34.11,1
+319,Retail,Ransomware,100000,24.66,1
+320,BFSI,Ransomware,1000000,2.82,1
+321,Healthcare,Ransomware,10000,8.75,1
+322,Healthcare,Data Breach,100000,1.82,0
+323,BFSI,Ransomware,1000,0.93,1
+324,IT/ITeS,Data Breach,1000000,3.27,0
+325,Government,BEC,10000,2.77,0
+326,IT/ITeS,BEC,100000,2.85,0
+327,Manufacturing,Ransomware,10000,2.36,1
+328,Manufacturing,Ransomware,1000000,1.77,1
+329,IT/ITeS,BEC,100000,4.26,0
+330,Manufacturing,Ransomware,0,1.76,1
+331,Government,Insider Threat,1000,6.78,0
+332,Healthcare,Insider Threat,100000,1.76,0
+333,Healthcare,Ransomware,0,30.82,1
+334,IT/ITeS,Ransomware,0,2.54,1
+335,IT/ITeS,DDoS,10000,2.69,0
+336,IT/ITeS,Ransomware,100000,2.25,1
+337,Retail,DDoS,100000,1.13,0
+338,Retail,Ransomware,10000,3.04,1
+339,IT/ITeS,Ransomware,1000000,0.75,1
+340,Retail,Insider Threat,1000,8.2,0
+341,Government,Ransomware,1000,1.13,1
+342,IT/ITeS,Data Breach,1000,4.49,0
+343,Retail,Insider Threat,100000,6.67,0
+344,BFSI,Data Breach,10000,0.68,0
+345,Healthcare,Ransomware,0,3.77,1
+346,Healthcare,Ransomware,10000,0.97,1
+347,BFSI,Ransomware,100000,2.93,1
+348,Government,BEC,1000,35.7,0
+349,Manufacturing,Ransomware,10000,3.26,1
+350,Government,Data Breach,10000,4.54,0
+351,Healthcare,DDoS,100000,2.97,0
+352,BFSI,Data Breach,100000,1.19,0
+353,Government,Data Breach,1000,15.43,0
+354,Manufacturing,DDoS,0,0.75,0
+355,Manufacturing,Ransomware,10000,2.74,1
+356,Retail,Ransomware,1000,19.76,1
+357,IT/ITeS,Ransomware,10000,1.25,1
+358,Government,Data Breach,1000000,2.11,0
+359,Retail,Data Breach,1000000,17.64,0
+360,Healthcare,Ransomware,10000,3.0,1
+361,Government,Ransomware,100000,2.37,1
+362,Government,Ransomware,10000,1.01,1
+363,BFSI,DDoS,100000,4.68,0
+364,Manufacturing,Ransomware,1000,0.29,1
+365,Manufacturing,BEC,10000,12.2,0
+366,Manufacturing,Ransomware,10000,2.57,1
+367,BFSI,Ransomware,1000000,0.29,1
+368,Manufacturing,Ransomware,100000,2.58,1
+369,Government,DDoS,0,4.85,0
+370,Government,Data Breach,10000,16.37,0
+371,Healthcare,Insider Threat,10000,67.17,0
+372,Retail,Ransomware,10000,2.41,1
+373,Healthcare,Ransomware,0,5.38,1
+374,Manufacturing,DDoS,100000,0.59,0
+375,BFSI,Insider Threat,1000000,1.88,0
+376,IT/ITeS,BEC,0,3.58,0
+377,Retail,Ransomware,0,9.2,1
+378,Healthcare,DDoS,100000,5.01,0
+379,Government,Ransomware,100000,34.49,1
+380,IT/ITeS,Data Breach,10000,11.08,0
+381,BFSI,DDoS,100000,0.92,0
+382,BFSI,Insider Threat,1000,1.04,0
+383,Retail,BEC,1000,0.37,0
+384,Manufacturing,Data Breach,10000,10.18,0
+385,Retail,Ransomware,0,3.59,1
+386,Government,Ransomware,1000,56.77,1
+387,IT/ITeS,Data Breach,0,14.87,0
+388,BFSI,Ransomware,1000,2.01,1
+389,Manufacturing,Ransomware,1000,1.31,1
+390,BFSI,Data Breach,1000,0.56,0
+391,Government,BEC,100000,2.34,0
+392,Government,BEC,10000,0.53,0
+393,Government,Ransomware,10000,0.83,1
+394,Retail,Data Breach,0,0.38,0
+395,Government,Data Breach,100000,0.71,0
+396,Manufacturing,Ransomware,10000,1.55,1
+397,Retail,Data Breach,10000,2.03,0
+398,Manufacturing,Data Breach,10000,2.57,0
+399,BFSI,BEC,0,7.97,0
+400,Manufacturing,Ransomware,1000,0.15,1
+401,Retail,Insider Threat,1000,4.97,0
+402,Retail,BEC,1000000,3.18,0
+403,Manufacturing,Ransomware,10000,5.78,1
+404,Healthcare,BEC,10000,0.45,0
+405,Government,Data Breach,0,20.8,0
+406,Healthcare,BEC,100000,21.72,0
+407,Government,DDoS,1000,8.43,0
+408,BFSI,Ransomware,100000,2.66,1
+409,Government,Insider Threat,100000,0.79,0
+410,BFSI,Data Breach,1000,9.79,0
+411,Retail,Ransomware,1000,0.18,1
+412,Retail,BEC,1000,0.38,0
+413,IT/ITeS,Data Breach,1000000,1.21,0
+414,Government,BEC,10000,5.05,0
+415,Manufacturing,Ransomware,1000,1.82,1
+416,Retail,Ransomware,1000,2.34,1
+417,Manufacturing,Ransomware,10000,3.22,1
+418,BFSI,Insider Threat,10000,27.67,0
+419,Manufacturing,DDoS,0,6.1,0
+420,Manufacturing,Ransomware,1000,0.5,1
+421,Manufacturing,Data Breach,1000,3.28,0
+422,Manufacturing,Ransomware,1000,8.89,1
+423,Healthcare,Ransomware,0,0.44,1
+424,Manufacturing,Ransomware,1000,0.31,1
+425,Healthcare,Ransomware,0,7.86,1
+426,Government,Ransomware,100000,0.31,1
+427,BFSI,Ransomware,100000,2.43,1
+428,BFSI,Insider Threat,0,2.19,0
+429,Manufacturing,Data Breach,100000,1.73,0
+430,Healthcare,BEC,10000,1.25,0
+431,IT/ITeS,Data Breach,100000,9.01,0
+432,Government,Data Breach,100000,6.36,0
+433,BFSI,Data Breach,10000,32.95,0
+434,Government,DDoS,10000,3.42,0
+435,Manufacturing,Ransomware,0,2.29,1
+436,Government,BEC,10000,0.96,0
+437,Retail,Data Breach,100000,1.93,0
+438,BFSI,Ransomware,10000,5.46,1
+439,Retail,Insider Threat,1000,13.63,0
+440,Healthcare,Ransomware,10000,6.2,1
+441,BFSI,Ransomware,1000,6.03,1
+442,BFSI,Data Breach,1000,7.53,0
+443,Government,Ransomware,10000,134.5,1
+444,Retail,Insider Threat,10000,3.27,0
+445,Government,Ransomware,100000,15.97,1
+446,Manufacturing,Ransomware,0,0.36,1
+447,Healthcare,Data Breach,1000,0.74,0
+448,Healthcare,Ransomware,10000,6.3,1
+449,IT/ITeS,BEC,100000,2.28,0
+450,Retail,Ransomware,1000,10.4,1
+451,Retail,Data Breach,0,26.36,0
+452,Manufacturing,Ransomware,10000,10.76,1
+453,IT/ITeS,BEC,0,0.76,0
+454,BFSI,Ransomware,0,8.64,1
+455,Retail,Data Breach,10000,18.9,0
+456,Healthcare,Data Breach,1000,29.78,0
+457,BFSI,Data Breach,1000,19.84,0
+458,BFSI,BEC,10000,16.36,0
+459,Manufacturing,Insider Threat,0,0.63,0
+460,Government,BEC,100000,2.36,0
+461,Healthcare,Data Breach,10000,3.98,0
+462,Retail,Data Breach,100000,1.81,0
+463,Retail,Data Breach,1000,5.32,0
+464,Manufacturing,Data Breach,10000,3.72,0
+465,Government,Data Breach,0,6.21,0
+466,Healthcare,BEC,0,28.07,0
+467,Manufacturing,Ransomware,0,5.96,1
+468,BFSI,Ransomware,1000,1.84,1
+469,Manufacturing,DDoS,100000,3.03,0
+470,IT/ITeS,Data Breach,1000,1.96,0
+471,Government,Insider Threat,0,8.99,0
+472,Manufacturing,BEC,0,2.08,0
+473,Healthcare,Ransomware,10000,13.55,1
+474,Government,Data Breach,10000,12.0,0
+475,Retail,Data Breach,0,1.85,0
+476,IT/ITeS,Ransomware,10000,0.36,1
+477,Manufacturing,Data Breach,0,4.92,0
+478,Government,Data Breach,10000,0.35,0
+479,Manufacturing,Ransomware,10000,1.3,1
+480,Healthcare,BEC,0,1.69,0
+481,Government,Data Breach,0,8.09,0
+482,Manufacturing,Ransomware,1000,8.89,1
+483,Healthcare,Data Breach,100000,1.98,0
+484,Healthcare,BEC,1000,4.32,0
+485,BFSI,Ransomware,10000,4.09,1
+486,Healthcare,Data Breach,0,1.18,0
+487,Government,BEC,100000,0.47,0
+488,Retail,Ransomware,100000,3.68,1
+489,Manufacturing,Ransomware,1000,1.13,1
+490,Manufacturing,Ransomware,10000,3.58,1
+491,BFSI,DDoS,10000,0.87,0
+492,BFSI,Data Breach,0,5.24,0
+493,Retail,Data Breach,100000,0.92,0
+494,Retail,Data Breach,10000,11.41,0
+495,Healthcare,BEC,100000,0.78,0
+496,Retail,DDoS,0,7.38,0
+497,Government,BEC,1000000,0.48,0
+498,Healthcare,Data Breach,10000,4.11,0
+499,Manufacturing,Ransomware,10000,0.78,1
+500,Manufacturing,Ransomware,100000,0.55,1
+501,Retail,Ransomware,1000,1.21,1
+502,Government,Ransomware,100000,6.1,1
+503,Retail,BEC,1000000,1.82,0
+504,Manufacturing,Ransomware,10000,4.71,1
+505,Retail,Data Breach,1000,0.96,0
+506,Government,BEC,1000,9.53,0
+507,IT/ITeS,DDoS,0,5.25,0
+508,Manufacturing,Data Breach,100000,1.61,0
+509,Manufacturing,Data Breach,1000000,0.19,0
+510,Manufacturing,Data Breach,10000,20.7,0
+511,Healthcare,DDoS,1000,39.4,0
+512,Government,Data Breach,100000,0.86,0
+513,IT/ITeS,Ransomware,0,6.03,1
+514,BFSI,Data Breach,1000,5.91,0
+515,Retail,Data Breach,10000,5.13,0
+516,Retail,Ransomware,1000000,2.65,1
+517,IT/ITeS,Ransomware,1000,0.28,1
+518,IT/ITeS,Ransomware,10000,6.18,1
+519,Manufacturing,BEC,1000,1.38,0
+520,BFSI,Insider Threat,100000,20.44,0
+521,Manufacturing,Ransomware,0,27.04,1
+522,Manufacturing,Ransomware,1000,12.27,1
+523,BFSI,BEC,100000,3.68,0
+524,Government,BEC,10000,1.76,0
+525,Manufacturing,DDoS,1000000,0.49,0
+526,Healthcare,Insider Threat,0,1.83,0
+527,Retail,Data Breach,1000,20.65,0
+528,IT/ITeS,Ransomware,1000,3.96,1
+529,Healthcare,Ransomware,1000,3.26,1
+530,Government,Insider Threat,10000,6.71,0
+531,Government,Data Breach,10000,5.41,0
+532,Manufacturing,Data Breach,10000,3.37,0
+533,BFSI,Data Breach,100000,0.5,0
+534,Government,Data Breach,0,5.27,0
+535,Healthcare,BEC,100000,0.85,0
+536,IT/ITeS,DDoS,10000,0.63,0
+537,IT/ITeS,Data Breach,0,4.78,0
+538,Healthcare,Ransomware,1000000,0.56,1
+539,Retail,BEC,100000,2.71,0
+540,Government,Ransomware,1000,0.99,1
+541,Manufacturing,Ransomware,10000,7.11,1
+542,Government,Data Breach,1000,1.78,0
+543,Healthcare,Data Breach,0,1.19,0
+544,Government,Ransomware,0,5.56,1
+545,BFSI,Data Breach,10000,4.68,0
+546,Healthcare,BEC,1000,28.03,0
+547,Government,Ransomware,10000,2.54,1
+548,Healthcare,Ransomware,10000,3.4,1
+549,BFSI,Insider Threat,1000,1.86,0
+550,BFSI,Ransomware,10000,7.81,1
+551,Healthcare,Ransomware,0,3.65,1
+552,Government,BEC,10000,1.51,0
+553,Retail,DDoS,0,17.56,0
+554,Retail,Data Breach,10000,2.43,0
+555,Retail,DDoS,10000,11.89,0
+556,Manufacturing,Ransomware,10000,15.2,1
+557,Manufacturing,Insider Threat,10000,4.93,0
+558,Healthcare,Insider Threat,0,19.49,0
+559,Healthcare,Ransomware,1000,7.4,1
+560,Manufacturing,Ransomware,100000,1.66,1
+561,IT/ITeS,DDoS,10000,9.33,0
+562,IT/ITeS,Data Breach,100000,0.92,0
+563,Retail,Ransomware,1000,1.15,1
+564,BFSI,Data Breach,1000,4.08,0
+565,IT/ITeS,Ransomware,1000,1.95,1
+566,BFSI,Ransomware,10000,0.9,1
+567,IT/ITeS,BEC,0,24.21,0
+568,Government,BEC,10000,2.43,0
+569,BFSI,Insider Threat,1000,22.22,0
+570,Healthcare,Ransomware,10000,0.16,1
+571,Manufacturing,BEC,1000,9.65,0
+572,Manufacturing,BEC,100000,2.81,0
+573,BFSI,DDoS,10000,67.69,0
+574,Healthcare,Ransomware,1000,7.63,1
+575,Manufacturing,Data Breach,10000,0.36,0
+576,Manufacturing,Data Breach,0,13.26,0
+577,Retail,Data Breach,1000,0.98,0
+578,Government,Data Breach,1000000,2.47,0
+579,Government,Data Breach,100000,5.83,0
+580,IT/ITeS,Ransomware,100000,0.96,1
+581,Government,DDoS,10000,2.88,0
+582,Healthcare,BEC,10000,24.75,0
+583,BFSI,Ransomware,1000,4.42,1
+584,Healthcare,Data Breach,0,27.23,0
+585,Healthcare,Insider Threat,10000,2.15,0
+586,Retail,Ransomware,1000,0.62,1
+587,Retail,Insider Threat,0,2.29,0
+588,Healthcare,BEC,100000,4.65,0
+589,Healthcare,Ransomware,1000,0.71,1
+590,Healthcare,BEC,10000,0.72,0
+591,IT/ITeS,Data Breach,10000,1.15,0
+592,Retail,Data Breach,10000,21.08,0
+593,BFSI,DDoS,1000,66.22,0
+594,Healthcare,BEC,1000,1.99,0
+595,Healthcare,Ransomware,10000,0.95,1
+596,BFSI,Data Breach,0,0.99,0
+597,Government,Data Breach,10000,0.88,0
+598,BFSI,Data Breach,10000,1.46,0
+599,IT/ITeS,Data Breach,10000,3.21,0
+600,Government,Data Breach,100000,1.83,0
+601,Retail,Data Breach,1000,4.6,0
+602,Healthcare,Data Breach,100000,1.45,0
+603,BFSI,Ransomware,10000,30.36,1
+604,Manufacturing,Ransomware,10000,1.8,1
+605,Government,Ransomware,1000,1.2,1
+606,IT/ITeS,Ransomware,10000,1.84,1
+607,Retail,Ransomware,10000,44.59,1
+608,Retail,Data Breach,1000000,0.95,0
+609,BFSI,Ransomware,1000,6.29,1
+610,Healthcare,Insider Threat,10000,6.86,0
+611,Manufacturing,DDoS,100000,9.25,0
+612,Manufacturing,Data Breach,10000,4.1,0
+613,Government,Ransomware,100000,2.09,1
+614,Manufacturing,Data Breach,1000000,5.5,0
+615,IT/ITeS,Ransomware,0,1.88,1
+616,BFSI,Ransomware,10000,7.85,1
+617,BFSI,Data Breach,10000,7.61,0
+618,BFSI,Data Breach,1000,0.46,0
+619,IT/ITeS,BEC,0,0.28,0
+620,Manufacturing,Ransomware,10000,10.6,1
+621,Government,Insider Threat,10000,1.94,0
+622,Healthcare,Ransomware,100000,1.09,1
+623,Retail,Ransomware,1000,1.1,1
+624,Retail,BEC,1000000,2.3,0
+625,Manufacturing,BEC,10000,4.53,0
+626,Retail,Data Breach,100000,41.45,0
+627,IT/ITeS,Data Breach,100000,10.94,0
+628,IT/ITeS,Ransomware,10000,4.75,1
+629,Manufacturing,BEC,1000,0.17,0
+630,Healthcare,Data Breach,10000,0.82,0
+631,Healthcare,BEC,1000,4.74,0
+632,Manufacturing,Ransomware,10000,7.27,1
+633,Manufacturing,DDoS,1000,1.22,0
+634,Manufacturing,DDoS,0,3.23,0
+635,IT/ITeS,DDoS,1000,1.36,0
+636,Manufacturing,Data Breach,100000,11.95,0
+637,BFSI,Ransomware,0,5.52,1
+638,Government,Ransomware,10000,0.39,1
+639,Government,Ransomware,10000,14.79,1
+640,Retail,Ransomware,0,1.1,1
+641,Government,DDoS,0,2.93,0
+642,Government,DDoS,1000,3.09,0
+643,Government,Insider Threat,1000,6.61,0
+644,Manufacturing,Data Breach,10000,3.81,0
+645,Government,Data Breach,10000,4.59,0
+646,Manufacturing,DDoS,100000,0.34,0
+647,Healthcare,Ransomware,1000,3.35,1
+648,IT/ITeS,Data Breach,1000,1.53,0
+649,IT/ITeS,Ransomware,10000,5.02,1
+650,Government,Insider Threat,100000,15.63,0
+651,Healthcare,DDoS,10000,1.48,0
+652,Retail,Ransomware,10000,0.58,1
+653,BFSI,Data Breach,1000,5.78,0
+654,Manufacturing,Ransomware,0,58.08,1
+655,Retail,Ransomware,0,1.74,1
+656,Healthcare,BEC,10000,1.83,0
+657,Healthcare,Data Breach,10000,28.89,0
+658,IT/ITeS,Ransomware,1000,4.72,1
+659,BFSI,Ransomware,10000,15.64,1
+660,Retail,Insider Threat,1000,2.0,0
+661,BFSI,Data Breach,10000,9.89,0
+662,IT/ITeS,DDoS,1000,19.3,0
+663,Government,BEC,0,1.16,0
+664,BFSI,DDoS,1000,43.48,0
+665,BFSI,Data Breach,100000,6.18,0
+666,IT/ITeS,Insider Threat,1000,10.55,0
+667,Retail,Data Breach,100000,1.18,0
+668,Healthcare,Insider Threat,1000,1.23,0
+669,Healthcare,BEC,0,1.76,0
+670,Government,Data Breach,1000,1.39,0
+671,BFSI,Ransomware,0,6.05,1
+672,Manufacturing,DDoS,100000,4.47,0
+673,Manufacturing,Insider Threat,100000,1.79,0
+674,Retail,BEC,0,2.84,0
+675,Retail,Ransomware,0,12.47,1
+676,IT/ITeS,Data Breach,1000,15.67,0
+677,Government,Ransomware,10000,5.76,1
+678,Healthcare,Data Breach,0,23.27,0
+679,Healthcare,Data Breach,0,3.71,0
+680,Manufacturing,Insider Threat,10000,34.23,0
+681,Retail,DDoS,0,3.04,0
+682,Government,BEC,1000,0.51,0
+683,BFSI,Ransomware,1000,1.18,1
+684,Government,Data Breach,1000,0.43,0
+685,Manufacturing,Ransomware,10000,8.1,1
+686,IT/ITeS,Ransomware,0,5.93,1
+687,BFSI,DDoS,1000000,6.3,0
+688,Retail,Ransomware,10000,5.73,1
+689,Healthcare,Ransomware,100000,12.05,1
+690,BFSI,Ransomware,1000000,9.46,1
+691,Retail,BEC,10000,10.32,0
+692,Government,Ransomware,100000,8.87,1
+693,BFSI,DDoS,100000,3.83,0
+694,Retail,DDoS,1000000,9.52,0
+695,Manufacturing,BEC,0,1.4,0
+696,BFSI,Data Breach,10000,8.31,0
+697,Healthcare,Ransomware,100000,4.01,1
+698,BFSI,Data Breach,10000,1.72,0
+699,IT/ITeS,Ransomware,1000,2.34,1
+700,IT/ITeS,Ransomware,0,3.28,1
+701,Manufacturing,Data Breach,10000,12.71,0
+702,IT/ITeS,Data Breach,10000,5.54,0
+703,Manufacturing,Data Breach,10000,11.94,0
+704,Government,Data Breach,10000,1.44,0
+705,Government,Ransomware,0,6.09,1
+706,BFSI,BEC,1000,7.21,0
+707,Manufacturing,Data Breach,10000,0.99,0
+708,Healthcare,Ransomware,100000,1.22,1
+709,Retail,DDoS,1000,0.98,0
+710,IT/ITeS,DDoS,100000,0.28,0
+711,IT/ITeS,Data Breach,10000,4.38,0
+712,BFSI,BEC,0,6.11,0
+713,Manufacturing,BEC,10000,11.65,0
+714,Healthcare,DDoS,1000,2.46,0
+715,Government,BEC,10000,13.04,0
+716,IT/ITeS,Insider Threat,0,6.96,0
+717,BFSI,Data Breach,1000,3.12,0
+718,Government,Insider Threat,1000,9.69,0
+719,IT/ITeS,Ransomware,100000,0.38,1
+720,Healthcare,Ransomware,10000,3.54,1
+721,Retail,Ransomware,0,2.17,1
+722,Retail,BEC,1000,1.53,0
+723,Manufacturing,BEC,10000,3.89,0
+724,Government,Insider Threat,10000,4.14,0
+725,Manufacturing,Data Breach,10000,6.94,0
+726,Government,Data Breach,1000000,23.82,0
+727,Retail,DDoS,10000,30.31,0
+728,BFSI,Ransomware,100000,3.82,1
+729,Healthcare,Data Breach,1000,2.51,0
+730,Manufacturing,Data Breach,10000,18.04,0
+731,BFSI,Ransomware,10000,27.07,1
+732,BFSI,Ransomware,10000,0.74,1
+733,IT/ITeS,Ransomware,10000,15.89,1
+734,BFSI,DDoS,1000,12.34,0
+735,BFSI,DDoS,10000,24.73,0
+736,BFSI,Data Breach,1000,3.51,0
+737,Healthcare,DDoS,1000000,8.23,0
+738,Healthcare,Insider Threat,10000,7.89,0
+739,Retail,BEC,10000,1.18,0
+740,Retail,BEC,1000000,2.38,0
+741,Retail,Insider Threat,100000,2.13,0
+742,IT/ITeS,Ransomware,1000,26.41,1
+743,Manufacturing,DDoS,10000,7.84,0
+744,Retail,DDoS,0,1.52,0
+745,BFSI,BEC,10000,12.78,0
+746,Government,Ransomware,0,24.67,1
+747,Healthcare,Ransomware,0,19.04,1
+748,Retail,BEC,1000,0.7,0
+749,Healthcare,Insider Threat,10000,0.2,0
+750,Healthcare,Ransomware,1000,1.66,1
+751,Healthcare,Data Breach,0,16.05,0
+752,IT/ITeS,Data Breach,0,13.01,0
+753,BFSI,Data Breach,1000,3.42,0
+754,Retail,Ransomware,100000,1.61,1
+755,Government,Ransomware,10000,1.07,1
+756,Healthcare,Data Breach,10000,11.03,0
+757,Retail,Data Breach,100000,1.16,0
+758,Government,Data Breach,0,4.49,0
+759,Government,Data Breach,1000,0.61,0
+760,IT/ITeS,Insider Threat,0,71.66,0
+761,BFSI,BEC,0,8.45,0
+762,Healthcare,Insider Threat,10000,0.9,0
+763,Healthcare,DDoS,0,98.22,0
+764,Government,Data Breach,0,21.77,0
+765,Manufacturing,DDoS,1000,3.61,0
+766,Retail,Ransomware,100000,2.43,1
+767,Government,Ransomware,10000,2.18,1
+768,IT/ITeS,Ransomware,0,1.33,1
+769,Manufacturing,Insider Threat,10000,1.27,0
+770,Retail,DDoS,0,5.79,0
+771,Retail,Data Breach,1000,3.65,0
+772,Retail,BEC,10000,4.38,0
+773,BFSI,Insider Threat,100000,1.57,0
+774,BFSI,Ransomware,10000,8.65,1
+775,Healthcare,Data Breach,1000,16.62,0
+776,Government,Ransomware,1000,6.26,1
+777,Government,Data Breach,10000,13.37,0
+778,IT/ITeS,Ransomware,10000,3.63,1
+779,IT/ITeS,Ransomware,10000,0.08,1
+780,IT/ITeS,Data Breach,100000,13.56,0
+781,BFSI,Data Breach,10000,3.81,0
+782,BFSI,Ransomware,10000,3.01,1
+783,Government,BEC,10000,7.38,0
+784,Manufacturing,Data Breach,1000,46.5,0
+785,Retail,Insider Threat,1000,9.15,0
+786,Healthcare,Data Breach,1000,0.1,0
+787,Retail,Ransomware,1000,0.66,1
+788,Healthcare,DDoS,0,0.19,0
+789,BFSI,Data Breach,10000,17.98,0
+790,Government,Data Breach,10000,0.49,0
+791,Government,BEC,1000,2.23,0
+792,IT/ITeS,BEC,10000,2.94,0
+793,Manufacturing,Insider Threat,0,5.54,0
+794,Healthcare,Data Breach,10000,2.55,0
+795,Healthcare,Insider Threat,1000,1.45,0
+796,Government,Ransomware,10000,0.7,1
+797,Manufacturing,Ransomware,100000,6.35,1
+798,Manufacturing,BEC,100000,0.47,0
+799,Retail,Insider Threat,1000,0.72,0
+800,Manufacturing,Ransomware,10000,4.73,1
+801,Retail,Insider Threat,1000,13.3,0
+802,BFSI,Data Breach,1000,41.18,0
+803,Manufacturing,DDoS,10000,69.09,0
+804,Government,Data Breach,0,25.97,0
+805,Government,BEC,100000,2.22,0
+806,Government,Data Breach,10000,8.12,0
+807,Retail,BEC,10000,12.32,0
+808,BFSI,Data Breach,100000,0.77,0
+809,Retail,Data Breach,10000,0.28,0
+810,Manufacturing,DDoS,1000,7.74,0
+811,IT/ITeS,Ransomware,100000,3.39,1
+812,IT/ITeS,DDoS,10000,39.93,0
+813,Healthcare,BEC,1000,0.61,0
+814,Healthcare,Ransomware,0,3.19,1
+815,IT/ITeS,Data Breach,10000,5.26,0
+816,IT/ITeS,Data Breach,1000,1.95,0
+817,Manufacturing,Ransomware,1000,0.22,1
+818,Government,BEC,0,15.12,0
+819,Retail,Ransomware,0,2.69,1
+820,Healthcare,Data Breach,10000,29.08,0
+821,Healthcare,Ransomware,100000,0.7,1
+822,Healthcare,Ransomware,0,0.47,1
+823,Healthcare,Ransomware,10000,5.27,1
+824,BFSI,Data Breach,10000,12.1,0
+825,IT/ITeS,Data Breach,100000,0.54,0
+826,Government,DDoS,10000,1.05,0
+827,IT/ITeS,Data Breach,100000,35.31,0
+828,Manufacturing,Data Breach,1000,3.32,0
+829,Retail,Data Breach,0,4.13,0
+830,Manufacturing,Ransomware,100000,4.57,1
+831,BFSI,Data Breach,10000,11.29,0
+832,IT/ITeS,BEC,10000,1.91,0
+833,IT/ITeS,DDoS,1000,5.55,0
+834,IT/ITeS,Insider Threat,1000,0.92,0
+835,Retail,BEC,1000,2.14,0
+836,BFSI,Data Breach,1000000,9.89,0
+837,BFSI,Insider Threat,1000000,3.44,0
+838,Retail,BEC,10000,0.4,0
+839,Retail,Data Breach,0,2.78,0
+840,Manufacturing,DDoS,1000000,1.94,0
+841,Healthcare,Data Breach,1000000,11.66,0
+842,BFSI,Data Breach,0,3.45,0
+843,Retail,BEC,0,1.53,0
+844,Manufacturing,Ransomware,10000,13.79,1
+845,Government,Insider Threat,10000,3.98,0
+846,BFSI,Data Breach,100000,3.35,0
+847,IT/ITeS,Ransomware,10000,18.97,1
+848,Retail,Insider Threat,100000,12.08,0
+849,Retail,Ransomware,1000,1.74,1
+850,Retail,Insider Threat,0,2.25,0
+851,Healthcare,Ransomware,100000,1.92,1
+852,IT/ITeS,DDoS,10000,13.75,0
+853,Retail,Ransomware,100000,1.89,1
+854,Manufacturing,Ransomware,100000,2.06,1
+855,BFSI,Data Breach,1000,1.64,0
+856,Healthcare,Insider Threat,0,0.84,0
+857,Manufacturing,Insider Threat,0,0.3,0
+858,Manufacturing,Data Breach,10000,1.36,0
+859,IT/ITeS,Insider Threat,0,2.99,0
+860,Government,Data Breach,10000,1.36,0
+861,Healthcare,Data Breach,1000,5.15,0
+862,Manufacturing,Data Breach,1000,9.52,0
+863,Retail,Data Breach,1000,2.48,0
+864,Retail,Ransomware,1000,2.14,1
+865,Healthcare,Data Breach,0,38.7,0
+866,Government,BEC,10000,4.68,0
+867,Manufacturing,Ransomware,0,16.06,1
+868,Manufacturing,Data Breach,1000,1.76,0
+869,Government,Data Breach,0,1.31,0
+870,IT/ITeS,BEC,0,3.37,0
+871,Retail,Data Breach,0,13.39,0
+872,BFSI,BEC,1000,25.01,0
+873,BFSI,Ransomware,100000,9.57,1
+874,BFSI,Ransomware,10000,6.83,1
+875,Retail,Data Breach,0,1.63,0
+876,Manufacturing,Ransomware,10000,3.58,1
+877,Retail,Ransomware,0,0.7,1
+878,IT/ITeS,Data Breach,10000,4.27,0
+879,BFSI,BEC,10000,5.88,0
+880,Retail,Ransomware,1000,3.67,1
+881,BFSI,Ransomware,100000,1.84,1
+882,Healthcare,Data Breach,10000,9.36,0
+883,Healthcare,Ransomware,10000,12.19,1
+884,Healthcare,BEC,100000,5.31,0
+885,Manufacturing,DDoS,0,0.58,0
+886,BFSI,Ransomware,1000,14.47,1
+887,Government,Ransomware,0,17.57,1
+888,BFSI,Ransomware,1000000,2.02,1
+889,Retail,Insider Threat,0,1.19,0
+890,Manufacturing,Ransomware,0,2.47,1
+891,Healthcare,Data Breach,10000,2.23,0
+892,Healthcare,Data Breach,1000000,23.84,0
+893,Retail,Insider Threat,100000,12.82,0
+894,BFSI,Ransomware,1000,2.85,1
+895,IT/ITeS,BEC,1000,0.63,0
+896,Government,BEC,0,0.81,0
+897,Healthcare,BEC,100000,41.98,0
+898,Healthcare,Ransomware,1000,19.54,1
+899,Manufacturing,DDoS,100000,3.17,0
+900,Manufacturing,Insider Threat,1000,3.09,0
+901,IT/ITeS,Data Breach,10000,14.57,0
+902,BFSI,DDoS,10000,2.61,0
+903,Government,DDoS,0,3.8,0
+904,Manufacturing,Ransomware,10000,8.67,1
+905,Manufacturing,Data Breach,1000,4.09,0
+906,Healthcare,Data Breach,1000,0.75,0
+907,IT/ITeS,DDoS,100000,6.19,0
+908,IT/ITeS,Data Breach,1000000,1.0,0
+909,Manufacturing,Ransomware,1000,0.39,1
+910,Manufacturing,Ransomware,10000,6.95,1
+911,Government,BEC,100000,1.38,0
+912,Healthcare,Data Breach,0,3.6,0
+913,Healthcare,Ransomware,10000,44.81,1
+914,Healthcare,Ransomware,0,9.86,1
+915,BFSI,Data Breach,1000,3.4,0
+916,Retail,Data Breach,1000,17.54,0
+917,Healthcare,Insider Threat,100000,1.83,0
+918,BFSI,Ransomware,1000,1.96,1
+919,BFSI,Ransomware,1000,5.9,1
+920,Manufacturing,Ransomware,10000,3.85,1
+921,Manufacturing,Ransomware,1000,15.15,1
+922,Healthcare,Data Breach,0,4.51,0
+923,Manufacturing,Ransomware,0,3.48,1
+924,Manufacturing,Ransomware,10000,2.05,1
+925,Retail,DDoS,100000,3.52,0
+926,Manufacturing,Insider Threat,1000,13.34,0
+927,Government,Ransomware,1000000,0.6,1
+928,IT/ITeS,Ransomware,10000,6.37,1
+929,Retail,Data Breach,10000,3.99,0
+930,BFSI,Data Breach,100000,2.59,0
+931,Healthcare,Data Breach,10000,1.09,0
+932,BFSI,Data Breach,1000,21.65,0
+933,Manufacturing,Ransomware,10000,8.31,1
+934,BFSI,Data Breach,10000,2.92,0
+935,Retail,Ransomware,100000,31.01,1
+936,IT/ITeS,Data Breach,10000,1.74,0
+937,Government,Ransomware,10000,2.99,1
+938,Healthcare,Ransomware,100000,0.7,1
+939,Manufacturing,BEC,10000,1.29,0
+940,Government,Data Breach,1000,1.48,0
+941,Government,Ransomware,0,0.97,1
+942,Healthcare,Data Breach,0,17.67,0
+943,Government,Data Breach,10000,3.75,0
+944,Manufacturing,Ransomware,10000,1.53,1
+945,Healthcare,BEC,100000,2.8,0
+946,BFSI,Data Breach,100000,3.5,0
+947,Retail,Data Breach,0,1.95,0
+948,Retail,Ransomware,10000,1.03,1
+949,Manufacturing,Data Breach,1000,1.73,0
+950,Government,BEC,1000,3.2,0
+951,IT/ITeS,Ransomware,0,6.44,1
+952,Government,Ransomware,10000,4.1,1
+953,Retail,Data Breach,1000,1.27,0
+954,BFSI,Ransomware,10000,1.41,1
+955,Manufacturing,DDoS,1000,3.91,0
+956,Government,Ransomware,100000,0.41,1
+957,Manufacturing,Ransomware,1000,29.96,1
+958,Government,Ransomware,10000,1.24,1
+959,Healthcare,Data Breach,1000,1.24,0
+960,Retail,Ransomware,0,0.85,1
+961,Manufacturing,BEC,1000,0.72,0
+962,Government,Ransomware,10000,12.38,1
+963,BFSI,Data Breach,1000,0.48,0
+964,Government,Ransomware,10000,0.74,1
+965,Retail,Data Breach,10000,2.95,0
+966,Manufacturing,Ransomware,0,31.81,1
+967,Government,Data Breach,1000,47.24,0
+968,BFSI,Insider Threat,1000000,3.07,0
+969,BFSI,Ransomware,10000,1.39,1
+970,IT/ITeS,BEC,0,47.87,0
+971,Manufacturing,Ransomware,10000,2.25,1
+972,Manufacturing,Ransomware,10000,1.59,1
+973,Manufacturing,Insider Threat,100000,3.0,0
+974,Healthcare,DDoS,0,2.07,0
+975,BFSI,Data Breach,10000,9.99,0
+976,BFSI,Data Breach,1000,2.76,0
+977,Government,Data Breach,0,0.79,0
+978,Healthcare,Insider Threat,100000,2.07,0
+979,BFSI,Data Breach,10000,0.72,0
+980,IT/ITeS,Data Breach,1000,0.9,0
+981,Healthcare,BEC,1000,7.24,0
+982,Retail,Data Breach,0,10.02,0
+983,Manufacturing,Data Breach,1000,11.21,0
+984,Retail,Ransomware,10000,1.73,1
+985,Retail,Data Breach,1000,6.26,0
+986,Retail,Data Breach,1000000,3.67,0
+987,BFSI,Data Breach,10000,65.79,0
+988,IT/ITeS,Ransomware,10000,3.83,1
+989,Retail,DDoS,10000,3.83,0
+990,Retail,Ransomware,100000,7.28,1
+991,Retail,DDoS,10000,2.5,0
+992,IT/ITeS,Data Breach,10000,2.65,0
+993,Retail,Data Breach,10000,2.77,0
+994,BFSI,BEC,10000,4.87,0
+995,Government,Ransomware,10000,26.3,1
+996,Retail,Data Breach,10000,12.59,0
+997,Retail,DDoS,100000,2.3,0
+998,Healthcare,Data Breach,100000,6.68,0
+999,BFSI,BEC,100000,10.78,0
+1000,Healthcare,Data Breach,0,8.65,0
+1001,IT/ITeS,Data Breach,1000,8.44,0
+1002,Retail,Ransomware,1000,0.28,1
+1003,Healthcare,Ransomware,10000,1.84,1
+1004,Manufacturing,Data Breach,100000,8.38,0
+1005,IT/ITeS,Data Breach,1000,1.62,0
+1006,BFSI,Ransomware,10000,56.88,1
+1007,Healthcare,Data Breach,10000,1.66,0
+1008,Government,DDoS,10000,0.36,0
+1009,Retail,Ransomware,100000,4.58,1
+1010,BFSI,Data Breach,1000,6.53,0
+1011,Manufacturing,Ransomware,1000000,1.7,1
+1012,Manufacturing,Data Breach,10000,2.26,0
+1013,IT/ITeS,Data Breach,1000,10.05,0
+1014,IT/ITeS,Ransomware,10000,0.84,1
+1015,Government,Insider Threat,100000,1.48,0
+1016,Healthcare,BEC,100000,3.34,0
+1017,Manufacturing,DDoS,100000,2.46,0
+1018,Healthcare,Data Breach,100000,1.41,0
+1019,Healthcare,Ransomware,1000,52.32,1
+1020,Retail,Ransomware,1000,2.03,1
+1021,Manufacturing,Ransomware,0,0.11,1
+1022,BFSI,Ransomware,0,0.22,1
+1023,Retail,Insider Threat,10000,3.24,0
+1024,IT/ITeS,Ransomware,100000,3.24,1
+1025,BFSI,Ransomware,1000,4.43,1
+1026,Healthcare,Ransomware,1000,5.7,1
+1027,Manufacturing,Data Breach,1000,1.39,0
+1028,Healthcare,Ransomware,1000,10.5,1
+1029,Healthcare,BEC,1000,12.05,0
+1030,Healthcare,BEC,1000000,5.81,0
+1031,Manufacturing,Data Breach,10000,2.6,0
+1032,BFSI,Ransomware,100000,2.03,1
+1033,Healthcare,Data Breach,10000,8.84,0
+1034,Retail,Ransomware,10000,6.48,1
+1035,Government,Ransomware,1000,0.07,1
+1036,Healthcare,BEC,0,0.4,0
+1037,Manufacturing,Data Breach,0,1.88,0
+1038,Government,Data Breach,1000,5.44,0
+1039,Healthcare,Ransomware,0,0.69,1
+1040,IT/ITeS,Ransomware,1000,3.0,1
+1041,Healthcare,DDoS,10000,6.46,0
+1042,Government,BEC,1000000,2.03,0
+1043,Manufacturing,Insider Threat,10000,1.88,0
+1044,Manufacturing,DDoS,0,1.92,0
+1045,IT/ITeS,BEC,1000,8.16,0
+1046,Government,DDoS,0,3.22,0
+1047,Government,Data Breach,10000,3.6,0
+1048,IT/ITeS,Insider Threat,1000,0.24,0
+1049,BFSI,Ransomware,10000,1.44,1
+1050,Healthcare,Ransomware,1000,22.07,1
+1051,BFSI,Ransomware,10000,3.64,1
+1052,IT/ITeS,Data Breach,0,32.53,0
+1053,IT/ITeS,Data Breach,10000,2.01,0
+1054,Healthcare,Data Breach,100000,3.01,0
+1055,Manufacturing,Data Breach,1000,3.79,0
+1056,Manufacturing,DDoS,10000,1.72,0
+1057,Healthcare,Ransomware,10000,10.77,1
+1058,IT/ITeS,Ransomware,1000,30.84,1
+1059,Retail,DDoS,100000,7.35,0
+1060,Manufacturing,Ransomware,1000,13.42,1
+1061,Manufacturing,Data Breach,0,1.89,0
+1062,Healthcare,Data Breach,10000,3.67,0
+1063,BFSI,Ransomware,0,0.43,1
+1064,IT/ITeS,Insider Threat,100000,0.78,0
+1065,Government,Insider Threat,0,1.23,0
+1066,Healthcare,BEC,0,3.16,0
+1067,Retail,Ransomware,1000,1.97,1
+1068,IT/ITeS,BEC,0,5.93,0
+1069,IT/ITeS,Data Breach,10000,1.71,0
+1070,Government,Ransomware,1000000,14.64,1
+1071,Manufacturing,Insider Threat,0,4.03,0
+1072,Manufacturing,Insider Threat,10000,0.9,0
+1073,Retail,BEC,10000,2.8,0
+1074,Retail,DDoS,1000,5.75,0
+1075,BFSI,Insider Threat,10000,0.33,0
+1076,Healthcare,Ransomware,0,6.76,1
+1077,BFSI,Data Breach,0,13.12,0
+1078,Healthcare,Data Breach,1000,0.8,0
+1079,Government,Data Breach,1000,0.99,0
+1080,Government,Ransomware,1000,2.79,1
+1081,Government,Ransomware,10000,0.29,1
+1082,BFSI,Data Breach,1000,4.8,0
+1083,Manufacturing,BEC,0,2.57,0
+1084,Government,Ransomware,1000,7.85,1
+1085,BFSI,Data Breach,100000,1.91,0
+1086,Retail,Ransomware,100000,0.8,1
+1087,Retail,BEC,10000,101.53,0
+1088,Manufacturing,BEC,1000,35.39,0
+1089,Retail,Ransomware,1000,7.95,1
+1090,Manufacturing,Ransomware,1000000,8.49,1
+1091,Government,BEC,100000,0.15,0
+1092,BFSI,Ransomware,0,5.56,1
+1093,Retail,BEC,1000,0.24,0
+1094,Government,DDoS,1000,5.02,0
+1095,Government,Ransomware,10000,1.23,1
+1096,IT/ITeS,DDoS,1000,1.47,0
+1097,IT/ITeS,DDoS,100000,6.16,0
+1098,IT/ITeS,Data Breach,100000,2.46,0
+1099,Healthcare,Ransomware,100000,3.21,1
+1100,Healthcare,Ransomware,1000,2.38,1
+1101,IT/ITeS,Ransomware,0,14.51,1
+1102,Healthcare,Insider Threat,10000,42.85,0
+1103,Government,Data Breach,100000,3.68,0
+1104,Manufacturing,Data Breach,10000,11.49,0
+1105,IT/ITeS,BEC,1000,1.28,0
+1106,IT/ITeS,Ransomware,0,6.08,1
+1107,Healthcare,DDoS,0,4.95,0
+1108,Government,Ransomware,1000,26.57,1
+1109,IT/ITeS,Ransomware,0,3.1,1
+1110,Manufacturing,Ransomware,1000,6.52,1
+1111,Retail,Ransomware,1000,0.78,1
+1112,Retail,BEC,1000,5.3,0
+1113,Retail,Ransomware,1000,64.62,1
+1114,IT/ITeS,DDoS,0,1.06,0
+1115,Healthcare,Data Breach,10000,2.86,0
+1116,BFSI,Ransomware,10000,5.62,1
+1117,IT/ITeS,BEC,100000,9.35,0
+1118,BFSI,DDoS,100000,1.54,0
+1119,Retail,BEC,10000,1.53,0
+1120,Government,BEC,10000,0.8,0
+1121,Manufacturing,BEC,0,0.86,0
+1122,BFSI,Data Breach,1000,4.46,0
+1123,IT/ITeS,Data Breach,0,0.66,0
+1124,Healthcare,BEC,1000,1.85,0
+1125,Manufacturing,Data Breach,1000,0.94,0
+1126,Healthcare,BEC,10000,1.09,0
+1127,Healthcare,Data Breach,1000000,0.16,0
+1128,Retail,Ransomware,10000,3.38,1
+1129,Manufacturing,DDoS,100000,2.1,0
+1130,Government,DDoS,10000,0.52,0
+1131,Government,Ransomware,0,4.7,1
+1132,Manufacturing,Data Breach,0,4.71,0
+1133,Manufacturing,Insider Threat,0,8.62,0
+1134,BFSI,Data Breach,1000,5.28,0
+1135,Healthcare,Ransomware,100000,4.36,1
+1136,BFSI,Ransomware,10000,12.31,1
+1137,Retail,BEC,1000000,57.55,0
+1138,IT/ITeS,Insider Threat,1000,2.49,0
+1139,IT/ITeS,Data Breach,0,1.29,0
+1140,Healthcare,Ransomware,100000,18.35,1
+1141,Government,Insider Threat,10000,17.58,0
+1142,IT/ITeS,Ransomware,1000,0.64,1
+1143,Government,DDoS,1000,3.84,0
+1144,IT/ITeS,Ransomware,10000,6.33,1
+1145,Retail,BEC,1000,3.68,0
+1146,Retail,Ransomware,0,4.57,1
+1147,Healthcare,Ransomware,1000,0.3,1
+1148,Manufacturing,Insider Threat,10000,2.6,0
+1149,Retail,Ransomware,100000,4.79,1
+1150,Retail,Ransomware,1000,6.3,1
+1151,Government,DDoS,0,3.67,0
+1152,BFSI,DDoS,100000,21.74,0
+1153,IT/ITeS,Ransomware,10000,14.45,1
+1154,Manufacturing,Insider Threat,10000,16.21,0
+1155,Manufacturing,BEC,100000,2.33,0
+1156,Healthcare,DDoS,1000000,11.37,0
+1157,BFSI,Data Breach,0,1.84,0
+1158,Retail,Data Breach,0,2.61,0
+1159,Government,BEC,10000,3.4,0
+1160,IT/ITeS,Insider Threat,0,0.23,0
+1161,Government,Data Breach,100000,2.49,0
+1162,Retail,Insider Threat,100000,4.45,0
+1163,Manufacturing,Ransomware,10000,0.32,1
+1164,BFSI,DDoS,10000,0.67,0
+1165,Manufacturing,Ransomware,1000,3.59,1
+1166,Retail,DDoS,1000,1.47,0
+1167,Retail,Data Breach,10000,1.5,0
+1168,Manufacturing,BEC,0,4.36,0
+1169,Retail,Data Breach,0,3.06,0
+1170,Manufacturing,Ransomware,100000,2.43,1
+1171,Government,Ransomware,1000,3.55,1
+1172,Manufacturing,Data Breach,1000,3.09,0
+1173,Retail,Data Breach,10000,3.3,0
+1174,Manufacturing,Data Breach,10000,16.04,0
+1175,Retail,Data Breach,1000,9.94,0
+1176,Government,Data Breach,1000,2.07,0
+1177,Manufacturing,BEC,1000,0.68,0
+1178,Government,Insider Threat,100000,1.96,0
+1179,Retail,Ransomware,10000,2.56,1
+1180,Retail,BEC,1000000,5.18,0
+1181,BFSI,DDoS,10000,1.9,0
+1182,Healthcare,BEC,0,1.35,0
+1183,Retail,Ransomware,10000,2.19,1
+1184,Healthcare,Ransomware,10000,20.5,1
+1185,Manufacturing,Data Breach,10000,15.2,0
+1186,BFSI,Ransomware,100000,1.21,1
+1187,Manufacturing,DDoS,1000,1.17,0
+1188,Manufacturing,Data Breach,100000,16.74,0
+1189,Retail,Data Breach,10000,0.1,0
+1190,Manufacturing,Ransomware,0,1.8,1
+1191,Government,Ransomware,100000,1.1,1
+1192,Retail,Data Breach,10000,7.66,0
+1193,BFSI,Data Breach,10000,5.94,0
+1194,Manufacturing,DDoS,100000,16.77,0
+1195,Retail,Insider Threat,0,0.59,0
+1196,Government,Ransomware,10000,2.9,1
+1197,Healthcare,Ransomware,0,1.8,1
+1198,Healthcare,DDoS,1000,5.03,0
+1199,IT/ITeS,Ransomware,1000,10.67,1
+1200,Government,Ransomware,1000,8.84,1
+1201,BFSI,Data Breach,100000,1.93,0
+1202,BFSI,Ransomware,0,4.58,1
+1203,Government,Data Breach,100000,4.14,0
+1204,Manufacturing,Data Breach,1000,0.27,0
+1205,Retail,Ransomware,10000,2.96,1
+1206,Healthcare,DDoS,100000,17.21,0
+1207,IT/ITeS,Data Breach,1000,1.17,0
+1208,Retail,Data Breach,1000,1.4,0
+1209,Manufacturing,BEC,1000,0.88,0
+1210,Retail,Ransomware,10000,2.97,1
+1211,Retail,Data Breach,100000,2.27,0
+1212,BFSI,Insider Threat,0,0.25,0
+1213,IT/ITeS,Ransomware,100000,0.72,1
+1214,Healthcare,Insider Threat,1000,6.3,0
+1215,IT/ITeS,Ransomware,1000,2.98,1
+1216,Manufacturing,Data Breach,1000,0.71,0
+1217,Healthcare,Data Breach,0,5.91,0
+1218,Healthcare,BEC,10000,1.81,0
+1219,Retail,Ransomware,1000,1.99,1
+1220,Manufacturing,BEC,1000000,1.36,0
+1221,Retail,BEC,1000,1.14,0
+1222,Government,BEC,1000,1.1,0
+1223,Retail,Data Breach,10000,11.6,0
+1224,Government,BEC,1000,5.67,0
+1225,Manufacturing,Data Breach,100000,1.16,0
+1226,Healthcare,DDoS,1000,1.93,0
+1227,IT/ITeS,Insider Threat,10000,43.69,0
+1228,Retail,Insider Threat,10000,1.7,0
+1229,Healthcare,Insider Threat,100000,5.86,0
+1230,Government,BEC,10000,0.41,0
+1231,BFSI,Data Breach,10000,3.24,0
+1232,Retail,Data Breach,0,1.05,0
+1233,Retail,Data Breach,1000,1.84,0
+1234,IT/ITeS,Data Breach,10000,0.07,0
+1235,IT/ITeS,Ransomware,1000,3.72,1
+1236,BFSI,Data Breach,1000,0.63,0
+1237,BFSI,Ransomware,1000,9.48,1
+1238,IT/ITeS,BEC,0,0.31,0
+1239,Manufacturing,Data Breach,0,12.73,0
+1240,IT/ITeS,Data Breach,0,6.44,0
+1241,Retail,Ransomware,0,2.55,1
+1242,Healthcare,BEC,10000,14.12,0
+1243,Government,DDoS,1000,4.01,0
+1244,IT/ITeS,BEC,10000,69.72,0
+1245,Manufacturing,DDoS,1000,3.97,0
+1246,Government,BEC,1000000,2.66,0
+1247,Manufacturing,Ransomware,100000,6.01,1
+1248,Healthcare,Insider Threat,0,1.65,0
+1249,Retail,DDoS,10000,1.29,0
+1250,Healthcare,Insider Threat,0,0.91,0
+1251,IT/ITeS,Data Breach,1000,0.92,0
+1252,Healthcare,Data Breach,10000,0.74,0
+1253,Retail,Data Breach,10000,3.69,0
+1254,Manufacturing,Data Breach,10000,24.59,0
+1255,Retail,Insider Threat,0,14.75,0
+1256,Government,Ransomware,10000,1.6,1
+1257,Manufacturing,Ransomware,10000,16.9,1
+1258,BFSI,Data Breach,1000,5.95,0
+1259,Healthcare,Data Breach,1000,8.4,0
+1260,Healthcare,Ransomware,10000,0.66,1
+1261,Retail,BEC,1000000,0.83,0
+1262,Government,Ransomware,1000,0.12,1
+1263,Manufacturing,BEC,10000,4.97,0
+1264,Healthcare,DDoS,10000,1.64,0
+1265,BFSI,Data Breach,100000,9.7,0
+1266,Retail,Ransomware,1000,1.37,1
+1267,BFSI,Data Breach,0,0.77,0
+1268,Healthcare,Data Breach,1000,3.64,0
+1269,IT/ITeS,BEC,1000,0.53,0
+1270,Retail,Insider Threat,100000,1.63,0
+1271,Manufacturing,DDoS,1000,2.98,0
+1272,Manufacturing,Ransomware,100000,2.5,1
+1273,Retail,BEC,1000,2.29,0
+1274,Retail,BEC,1000,0.99,0
+1275,IT/ITeS,Ransomware,1000,0.93,1
+1276,Healthcare,Ransomware,100000,1.89,1
+1277,IT/ITeS,Ransomware,1000,13.22,1
+1278,IT/ITeS,DDoS,1000,0.93,0
+1279,Healthcare,Data Breach,100000,1.28,0
+1280,Retail,Ransomware,10000,0.33,1
+1281,Government,Data Breach,100000,10.48,0
+1282,Retail,Ransomware,100000,1.17,1
+1283,BFSI,DDoS,1000,1.41,0
+1284,Manufacturing,Data Breach,0,1.65,0
+1285,Government,Ransomware,10000,2.07,1
+1286,IT/ITeS,BEC,1000000,14.99,0
+1287,BFSI,Data Breach,1000000,17.45,0
+1288,IT/ITeS,Data Breach,10000,0.6,0
+1289,IT/ITeS,Data Breach,10000,75.38,0
+1290,IT/ITeS,BEC,100000,1.07,0
+1291,BFSI,Data Breach,0,10.22,0
+1292,Retail,DDoS,1000000,5.94,0
+1293,BFSI,Ransomware,1000,3.27,1
+1294,IT/ITeS,Data Breach,10000,1.52,0
+1295,Manufacturing,Ransomware,10000,0.58,1
+1296,IT/ITeS,Insider Threat,1000,1.18,0
+1297,Healthcare,Ransomware,0,6.05,1
+1298,Healthcare,DDoS,0,16.01,0
+1299,Retail,DDoS,100000,0.89,0
+1300,Healthcare,DDoS,100000,3.12,0
+1301,Manufacturing,Insider Threat,10000,0.64,0
+1302,Government,BEC,100000,1.4,0
+1303,Government,Ransomware,1000,7.45,1
+1304,Government,Data Breach,0,6.66,0
+1305,Retail,BEC,10000,0.32,0
+1306,Retail,BEC,10000,2.03,0
+1307,IT/ITeS,Insider Threat,1000000,0.23,0
+1308,Manufacturing,Ransomware,0,1.25,1
+1309,Retail,Ransomware,0,3.9,1
+1310,Manufacturing,Data Breach,1000000,4.36,0
+1311,BFSI,Insider Threat,1000,7.65,0
+1312,BFSI,Ransomware,10000,2.19,1
+1313,Retail,Data Breach,1000000,3.45,0
+1314,Retail,BEC,1000000,7.05,0
+1315,Government,DDoS,100000,0.93,0
+1316,Healthcare,Ransomware,1000000,1.88,1
+1317,Manufacturing,Ransomware,100000,7.31,1
+1318,Manufacturing,Insider Threat,1000000,1.2,0
+1319,Manufacturing,Data Breach,0,21.44,0
+1320,Retail,Data Breach,10000,0.99,0
+1321,Healthcare,Data Breach,1000,0.37,0
+1322,Manufacturing,DDoS,10000,1.44,0
+1323,BFSI,Ransomware,1000,3.73,1
+1324,Retail,Ransomware,10000,3.86,1
+1325,IT/ITeS,Data Breach,1000,8.8,0
+1326,IT/ITeS,BEC,10000,4.87,0
+1327,BFSI,BEC,1000,0.36,0
+1328,BFSI,Insider Threat,0,36.14,0
+1329,IT/ITeS,Ransomware,10000,0.66,1
+1330,Manufacturing,Data Breach,1000,7.83,0
+1331,IT/ITeS,Ransomware,10000,17.59,1
+1332,Healthcare,Insider Threat,10000,0.39,0
+1333,Manufacturing,Data Breach,0,6.01,0
+1334,Retail,Ransomware,10000,0.98,1
+1335,Government,BEC,10000,3.77,0
+1336,IT/ITeS,BEC,100000,5.0,0
+1337,Healthcare,BEC,10000,2.99,0
+1338,Healthcare,Ransomware,100000,31.07,1
+1339,Government,BEC,10000,2.23,0
+1340,Retail,Ransomware,1000,5.98,1
+1341,IT/ITeS,BEC,1000000,3.05,0
+1342,BFSI,Data Breach,0,0.18,0
+1343,Healthcare,Data Breach,10000,3.05,0
+1344,Retail,DDoS,0,2.39,0
+1345,Manufacturing,DDoS,0,1.37,0
+1346,BFSI,Ransomware,0,1.67,1
+1347,BFSI,BEC,1000,5.5,0
+1348,IT/ITeS,DDoS,0,18.54,0
+1349,BFSI,Ransomware,10000,5.45,1
+1350,Government,Data Breach,10000,5.46,0
+1351,Manufacturing,DDoS,0,16.95,0
+1352,Government,Data Breach,1000,26.38,0
+1353,BFSI,BEC,10000,2.17,0
+1354,IT/ITeS,Data Breach,100000,1.72,0
+1355,BFSI,Ransomware,100000,3.1,1
+1356,Government,Data Breach,10000,5.91,0
+1357,BFSI,BEC,1000,0.28,0
+1358,Government,Data Breach,1000,0.99,0
+1359,Retail,BEC,10000,5.59,0
+1360,Government,Ransomware,10000,1.44,1
+1361,Government,Ransomware,100000,9.35,1
+1362,Government,Data Breach,10000,6.15,0
+1363,BFSI,Ransomware,1000000,5.74,1
+1364,Retail,BEC,0,6.85,0
+1365,Retail,BEC,1000,0.7,0
+1366,Government,Ransomware,10000,1.84,1
+1367,Retail,Data Breach,100000,17.48,0
+1368,Manufacturing,Ransomware,1000,3.18,1
+1369,Retail,Ransomware,0,15.58,1
+1370,Manufacturing,Ransomware,10000,23.79,1
+1371,Manufacturing,BEC,1000,24.12,0
+1372,IT/ITeS,BEC,10000,7.2,0
+1373,Government,Insider Threat,0,0.92,0
+1374,Government,Ransomware,1000,0.92,1
+1375,Manufacturing,Ransomware,100000,0.45,1
+1376,Healthcare,Ransomware,10000,1.8,1
+1377,Retail,Data Breach,0,3.4,0
+1378,BFSI,Ransomware,1000,6.36,1
+1379,Manufacturing,Data Breach,100000,0.47,0
+1380,IT/ITeS,Ransomware,1000,0.73,1
+1381,Healthcare,Data Breach,10000,3.86,0
+1382,IT/ITeS,Ransomware,10000,3.72,1
+1383,Retail,Ransomware,10000,2.15,1
+1384,IT/ITeS,BEC,1000,5.12,0
+1385,Government,Ransomware,1000,0.58,1
+1386,Manufacturing,Ransomware,10000,28.93,1
+1387,IT/ITeS,Ransomware,0,5.04,1
+1388,BFSI,Ransomware,1000,8.44,1
+1389,Manufacturing,Data Breach,0,5.88,0
+1390,Healthcare,Data Breach,10000,0.7,0
+1391,Healthcare,DDoS,1000,12.9,0
+1392,Manufacturing,Ransomware,100000,2.44,1
+1393,Government,BEC,10000,2.5,0
+1394,IT/ITeS,BEC,100000,0.48,0
+1395,Government,Ransomware,100000,3.33,1
+1396,Government,Ransomware,10000,1.03,1
+1397,Government,Data Breach,10000,4.09,0
+1398,Government,Data Breach,1000,3.37,0
+1399,Government,Data Breach,100000,17.35,0
+1400,IT/ITeS,Insider Threat,100000,6.31,0
+1401,Manufacturing,Data Breach,10000,1.08,0
+1402,BFSI,Ransomware,1000000,0.47,1
+1403,Government,BEC,1000,2.4,0
+1404,Government,Data Breach,1000,2.25,0
+1405,Manufacturing,BEC,10000,10.26,0
+1406,Healthcare,Ransomware,100000,7.08,1
+1407,Retail,Ransomware,1000,6.1,1
+1408,Manufacturing,Insider Threat,1000000,1.15,0
+1409,IT/ITeS,BEC,0,6.27,0
+1410,Retail,Data Breach,1000,1.81,0
+1411,Healthcare,Data Breach,1000,5.94,0
+1412,Manufacturing,DDoS,1000,4.67,0
+1413,Healthcare,Data Breach,10000,1.47,0
+1414,Government,Ransomware,10000,2.65,1
+1415,Government,Data Breach,0,0.44,0
+1416,Healthcare,Data Breach,10000,4.87,0
+1417,Manufacturing,Data Breach,10000,22.6,0
+1418,BFSI,Insider Threat,0,6.31,0
+1419,Government,BEC,1000,4.73,0
+1420,Healthcare,DDoS,10000,11.76,0
+1421,BFSI,BEC,1000,9.1,0
+1422,IT/ITeS,BEC,1000,2.61,0
+1423,Retail,DDoS,10000,22.82,0
+1424,Manufacturing,Ransomware,10000,27.02,1
+1425,Government,Data Breach,10000,0.5,0
+1426,Government,Ransomware,1000000,3.19,1
+1427,Retail,Ransomware,10000,0.79,1
+1428,BFSI,Ransomware,100000,0.53,1
+1429,Retail,BEC,0,0.87,0
+1430,Manufacturing,Data Breach,10000,18.64,0
+1431,BFSI,Insider Threat,0,0.47,0
+1432,Manufacturing,BEC,1000,4.03,0
+1433,BFSI,Data Breach,1000,0.6,0
+1434,Government,DDoS,1000,4.99,0
+1435,Healthcare,Ransomware,100000,1.38,1
+1436,Government,Data Breach,0,0.95,0
+1437,BFSI,Data Breach,1000,0.18,0
+1438,BFSI,Ransomware,1000,0.96,1
+1439,Government,Data Breach,100000,4.18,0
+1440,Government,DDoS,0,2.62,0
+1441,BFSI,DDoS,10000,26.48,0
+1442,Healthcare,DDoS,100000,4.74,0
+1443,Healthcare,Ransomware,0,3.32,1
+1444,BFSI,Ransomware,100000,19.32,1
+1445,Manufacturing,Ransomware,1000,7.76,1
+1446,Government,Data Breach,1000,37.25,0
+1447,Government,Data Breach,1000,3.76,0
+1448,Manufacturing,Data Breach,0,8.99,0
+1449,IT/ITeS,Ransomware,0,1.89,1
+1450,IT/ITeS,DDoS,1000,2.03,0
+1451,IT/ITeS,DDoS,1000000,21.77,0
+1452,BFSI,Ransomware,1000,63.89,1
+1453,Manufacturing,DDoS,1000,5.99,0
+1454,Retail,Data Breach,10000,8.32,0
+1455,Manufacturing,BEC,0,2.21,0
+1456,Retail,Data Breach,1000,2.8,0
+1457,IT/ITeS,Ransomware,0,0.46,1
+1458,Government,Ransomware,0,7.24,1
+1459,IT/ITeS,Ransomware,1000,16.19,1
+1460,Retail,Ransomware,1000,11.84,1
+1461,IT/ITeS,Ransomware,0,1.59,1
+1462,Manufacturing,DDoS,10000,4.01,0
+1463,Manufacturing,Data Breach,1000,0.77,0
+1464,Retail,DDoS,10000,3.93,0
+1465,BFSI,Data Breach,0,12.32,0
+1466,Healthcare,Ransomware,100000,0.87,1
+1467,Retail,Data Breach,1000,1.21,0
+1468,IT/ITeS,Insider Threat,10000,5.49,0
+1469,IT/ITeS,Data Breach,10000,1.9,0
+1470,Manufacturing,Data Breach,1000,2.15,0
+1471,IT/ITeS,Insider Threat,100000,61.43,0
+1472,BFSI,Ransomware,10000,36.59,1
+1473,Retail,DDoS,1000,1.5,0
+1474,BFSI,Data Breach,10000,31.3,0
+1475,Manufacturing,Ransomware,1000,12.02,1
+1476,Retail,Ransomware,1000,0.08,1
+1477,Healthcare,Data Breach,0,1.2,0
+1478,IT/ITeS,Ransomware,100000,2.97,1
+1479,Government,DDoS,1000,1.41,0
+1480,Government,Data Breach,100000,14.25,0
+1481,BFSI,Ransomware,0,26.09,1
+1482,IT/ITeS,Data Breach,1000,2.0,0
+1483,IT/ITeS,Data Breach,10000,4.54,0
+1484,Government,Ransomware,0,0.48,1
+1485,Retail,Ransomware,10000,4.7,1
+1486,IT/ITeS,Ransomware,1000000,15.31,1
+1487,Government,BEC,0,14.06,0
+1488,Manufacturing,Insider Threat,0,0.38,0
+1489,Retail,Ransomware,1000,86.62,1
+1490,Manufacturing,Data Breach,1000,0.7,0
+1491,Government,Insider Threat,0,5.09,0
+1492,IT/ITeS,Ransomware,100000,1.95,1
+1493,BFSI,Ransomware,100000,0.87,1
+1494,IT/ITeS,Ransomware,1000000,0.77,1
+1495,BFSI,Ransomware,10000,2.75,1
+1496,Government,Ransomware,10000,1.74,1
+1497,IT/ITeS,Ransomware,10000,27.53,1
+1498,BFSI,DDoS,10000,3.85,0
+1499,IT/ITeS,DDoS,1000,7.64,0
+1500,Government,Data Breach,10000,5.93,0
+1501,Healthcare,Data Breach,1000,4.03,0
+1502,Government,Ransomware,0,3.1,1
+1503,Government,Insider Threat,0,0.27,0
+1504,Manufacturing,Data Breach,0,1.0,0
+1505,Government,Data Breach,0,3.41,0
+1506,Healthcare,BEC,1000,2.62,0
+1507,BFSI,Insider Threat,0,13.66,0
+1508,Retail,Ransomware,1000,2.03,1
+1509,Manufacturing,DDoS,1000,3.18,0
+1510,Healthcare,Ransomware,100000,2.15,1
+1511,Retail,BEC,0,1.85,0
+1512,Government,Data Breach,100000,2.53,0
+1513,Retail,DDoS,1000,0.2,0
+1514,BFSI,Insider Threat,0,2.34,0
+1515,Retail,Data Breach,0,12.74,0
+1516,Government,Ransomware,1000,2.78,1
+1517,BFSI,Data Breach,10000,3.76,0
+1518,Manufacturing,Ransomware,1000,0.24,1
+1519,Retail,Data Breach,10000,6.19,0
+1520,BFSI,BEC,0,1.57,0
+1521,Government,Ransomware,1000,6.08,1
+1522,Retail,Data Breach,1000,0.1,0
+1523,Healthcare,Ransomware,1000,0.13,1
+1524,BFSI,DDoS,100000,1.42,0
+1525,IT/ITeS,Ransomware,10000,1.28,1
+1526,Retail,Ransomware,1000,2.19,1
+1527,Government,Data Breach,100000,1.52,0
+1528,Retail,Ransomware,100000,2.59,1
+1529,Healthcare,Ransomware,100000,5.33,1
+1530,Government,Data Breach,0,1.0,0
+1531,Healthcare,DDoS,10000,1.41,0
+1532,Manufacturing,Insider Threat,10000,6.95,0
+1533,Government,Insider Threat,10000,21.99,0
+1534,Healthcare,Ransomware,1000,0.96,1
+1535,Retail,Insider Threat,100000,2.45,0
+1536,Healthcare,Data Breach,10000,1.3,0
+1537,Healthcare,Ransomware,100000,0.46,1
+1538,Manufacturing,Ransomware,1000,5.4,1
+1539,Manufacturing,Insider Threat,1000,17.25,0
+1540,Manufacturing,Ransomware,1000000,4.29,1
+1541,Manufacturing,Ransomware,0,1.9,1
+1542,Retail,Ransomware,10000,45.56,1
+1543,Government,Ransomware,10000,3.28,1
+1544,BFSI,DDoS,1000,2.74,0
+1545,Healthcare,BEC,10000,2.29,0
+1546,Retail,Data Breach,100000,6.03,0
+1547,IT/ITeS,Ransomware,1000,6.15,1
+1548,IT/ITeS,Data Breach,1000,1.14,0
+1549,Government,Data Breach,100000,12.03,0
+1550,Manufacturing,Ransomware,10000,4.36,1
+1551,Manufacturing,Data Breach,1000,38.79,0
+1552,Government,Ransomware,1000,32.03,1
+1553,Healthcare,Data Breach,1000,16.6,0
+1554,Retail,Data Breach,10000,3.61,0
+1555,BFSI,DDoS,100000,13.82,0
+1556,IT/ITeS,Ransomware,1000,0.4,1
+1557,IT/ITeS,Data Breach,1000,3.49,0
+1558,Manufacturing,Insider Threat,10000,0.59,0
+1559,Government,DDoS,1000,1.89,0
+1560,Manufacturing,Ransomware,1000,8.28,1
+1561,BFSI,BEC,1000,13.14,0
+1562,IT/ITeS,BEC,10000,1.75,0
+1563,BFSI,Data Breach,10000,1.18,0
+1564,Manufacturing,BEC,10000,0.15,0
+1565,Government,BEC,0,1.16,0
+1566,Healthcare,Ransomware,10000,1.32,1
+1567,Healthcare,Data Breach,10000,58.47,0
+1568,Healthcare,Data Breach,1000,4.5,0
+1569,Retail,Ransomware,0,6.43,1
+1570,Healthcare,Data Breach,0,9.47,0
+1571,Healthcare,Ransomware,0,18.56,1
+1572,IT/ITeS,Ransomware,10000,7.25,1
+1573,BFSI,Ransomware,10000,18.07,1
+1574,Healthcare,Ransomware,10000,33.76,1
+1575,Retail,Data Breach,10000,2.14,0
+1576,Government,BEC,1000,1.3,0
+1577,Manufacturing,DDoS,10000,109.65,0
+1578,Retail,Ransomware,1000,7.77,1
+1579,Retail,DDoS,1000,7.9,0
+1580,IT/ITeS,Ransomware,100000,6.4,1
+1581,Government,Data Breach,10000,10.12,0
+1582,IT/ITeS,Data Breach,0,1.3,0
+1583,Retail,BEC,0,8.19,0
+1584,Government,Data Breach,10000,0.19,0
+1585,Manufacturing,Ransomware,10000,6.09,1
+1586,BFSI,Ransomware,1000,4.0,1
+1587,Government,Data Breach,1000,3.88,0
+1588,Manufacturing,DDoS,1000,14.99,0
+1589,BFSI,Ransomware,10000,2.21,1
+1590,Government,Data Breach,10000,3.38,0
+1591,Retail,BEC,0,3.41,0
+1592,Government,Insider Threat,0,1.71,0
+1593,Healthcare,Data Breach,1000,3.28,0
+1594,Retail,Ransomware,10000,0.51,1
+1595,BFSI,Data Breach,10000,0.84,0
+1596,BFSI,Insider Threat,10000,5.01,0
+1597,Government,Data Breach,0,6.39,0
+1598,Government,Ransomware,100000,0.34,1
+1599,Healthcare,BEC,1000,4.02,0
+1600,Government,Data Breach,100000,11.96,0
+1601,Retail,Data Breach,10000,0.61,0
+1602,BFSI,Ransomware,0,7.49,1
+1603,Healthcare,Insider Threat,1000000,1.23,0
+1604,Government,Data Breach,10000,2.55,0
+1605,BFSI,Data Breach,1000,7.32,0
+1606,IT/ITeS,BEC,10000,0.97,0
+1607,Retail,Ransomware,10000,2.0,1
+1608,Retail,Insider Threat,10000,4.05,0
+1609,Healthcare,Ransomware,100000,33.74,1
+1610,Retail,BEC,1000,8.16,0
+1611,Retail,Data Breach,1000,3.46,0
+1612,BFSI,DDoS,0,14.69,0
+1613,IT/ITeS,Ransomware,100000,2.68,1
+1614,Government,Data Breach,1000,14.59,0
+1615,BFSI,DDoS,1000,2.28,0
+1616,BFSI,DDoS,1000,7.04,0
+1617,IT/ITeS,Ransomware,1000000,0.31,1
+1618,IT/ITeS,Ransomware,10000,1.59,1
+1619,Healthcare,Ransomware,100000,5.02,1
+1620,Manufacturing,Data Breach,10000,1.76,0
+1621,Government,Data Breach,1000,0.3,0
+1622,Retail,Ransomware,0,1.32,1
+1623,Manufacturing,Ransomware,10000,0.76,1
+1624,Retail,Insider Threat,1000,2.72,0
+1625,IT/ITeS,Insider Threat,0,1.74,0
+1626,BFSI,BEC,1000,3.64,0
+1627,Healthcare,Ransomware,1000,5.61,1
+1628,BFSI,Data Breach,10000,3.33,0
+1629,Healthcare,Ransomware,100000,1.67,1
+1630,IT/ITeS,Data Breach,10000,0.37,0
+1631,Manufacturing,Insider Threat,1000,27.45,0
+1632,BFSI,DDoS,100000,2.73,0
+1633,Government,Data Breach,10000,0.43,0
+1634,IT/ITeS,Ransomware,10000,1.23,1
+1635,Government,Ransomware,100000,4.05,1
+1636,BFSI,Ransomware,0,1.57,1
+1637,BFSI,BEC,1000000,12.78,0
+1638,Manufacturing,Ransomware,1000,5.38,1
+1639,IT/ITeS,DDoS,10000,2.88,0
+1640,Healthcare,Ransomware,100000,9.79,1
+1641,Manufacturing,BEC,10000,9.41,0
+1642,IT/ITeS,Insider Threat,1000,12.96,0
+1643,Healthcare,BEC,1000000,11.32,0
+1644,Retail,Ransomware,10000,1.76,1
+1645,Healthcare,Data Breach,10000,9.35,0
+1646,BFSI,Ransomware,0,12.1,1
+1647,Manufacturing,Ransomware,1000,1.19,1
+1648,Healthcare,Ransomware,1000,7.17,1
+1649,IT/ITeS,Ransomware,1000,1.06,1
+1650,Retail,DDoS,1000,16.27,0
+1651,Retail,DDoS,1000,10.11,0
+1652,Healthcare,DDoS,10000,24.49,0
+1653,Retail,Ransomware,1000,4.54,1
+1654,BFSI,BEC,100000,2.12,0
+1655,Government,BEC,10000,1.38,0
+1656,IT/ITeS,BEC,0,6.81,0
+1657,IT/ITeS,Ransomware,0,3.31,1
+1658,Healthcare,Ransomware,1000,2.37,1
+1659,Healthcare,Data Breach,1000,8.31,0
+1660,Manufacturing,Data Breach,10000,7.5,0
+1661,Healthcare,BEC,10000,2.48,0
+1662,Retail,Data Breach,1000,57.79,0
+1663,Retail,Ransomware,1000,1.25,1
+1664,Retail,Ransomware,1000,0.27,1
+1665,Healthcare,Ransomware,100000,4.92,1
+1666,IT/ITeS,Ransomware,1000,16.53,1
+1667,BFSI,BEC,1000,21.36,0
+1668,Retail,Ransomware,1000,11.68,1
+1669,BFSI,Ransomware,1000,3.83,1
+1670,BFSI,Ransomware,1000,45.89,1
+1671,Manufacturing,BEC,100000,13.93,0
+1672,BFSI,Ransomware,1000,28.09,1
+1673,Manufacturing,Data Breach,100000,2.84,0
+1674,BFSI,BEC,1000,6.94,0
+1675,IT/ITeS,Data Breach,0,2.16,0
+1676,Manufacturing,Insider Threat,0,0.86,0
+1677,Manufacturing,Ransomware,1000,10.09,1
+1678,Government,DDoS,10000,5.24,0
+1679,BFSI,Data Breach,1000,3.23,0
+1680,IT/ITeS,Ransomware,10000,5.46,1
+1681,Manufacturing,Data Breach,1000,1.83,0
+1682,Manufacturing,DDoS,1000,16.17,0
+1683,Government,BEC,0,0.26,0
+1684,BFSI,Data Breach,10000,2.67,0
+1685,BFSI,Ransomware,1000000,0.7,1
+1686,Government,Insider Threat,10000,10.75,0
+1687,IT/ITeS,BEC,10000,17.63,0
+1688,Retail,Insider Threat,10000,1.44,0
+1689,IT/ITeS,Data Breach,100000,3.04,0
+1690,Retail,Ransomware,10000,10.97,1
+1691,Government,Data Breach,1000,4.85,0
+1692,Healthcare,Ransomware,10000,9.4,1
+1693,Manufacturing,Ransomware,100000,5.02,1
+1694,Retail,Ransomware,0,6.13,1
+1695,Government,Ransomware,0,0.18,1
+1696,BFSI,Ransomware,10000,3.59,1
+1697,Retail,Ransomware,1000,18.68,1
+1698,BFSI,Data Breach,1000,6.47,0
+1699,Government,Ransomware,1000,4.03,1
+1700,Manufacturing,Data Breach,0,36.5,0
+1701,Government,Insider Threat,10000,1.82,0
+1702,Healthcare,Data Breach,0,18.06,0
+1703,Government,BEC,100000,5.04,0
+1704,Manufacturing,Data Breach,1000,12.19,0
+1705,BFSI,Ransomware,1000,1.2,1
+1706,Government,Data Breach,10000,4.44,0
+1707,Government,Ransomware,10000,72.34,1
+1708,BFSI,Data Breach,10000,19.89,0
+1709,Manufacturing,Data Breach,10000,2.57,0
+1710,Manufacturing,Data Breach,10000,2.17,0
+1711,Healthcare,BEC,10000,9.63,0
+1712,Healthcare,Ransomware,1000,0.54,1
+1713,Retail,Insider Threat,100000,1.95,0
+1714,Retail,Data Breach,1000,3.15,0
+1715,Manufacturing,Data Breach,10000,1.32,0
+1716,IT/ITeS,DDoS,0,8.55,0
+1717,Retail,BEC,1000,5.19,0
+1718,BFSI,Ransomware,10000,64.14,1
+1719,BFSI,Ransomware,10000,1.04,1
+1720,Healthcare,Data Breach,10000,37.54,0
+1721,Manufacturing,Insider Threat,0,1.1,0
+1722,Retail,BEC,10000,6.67,0
+1723,Retail,Ransomware,1000,4.26,1
+1724,Healthcare,DDoS,1000,2.0,0
+1725,Government,Data Breach,10000,14.8,0
+1726,Manufacturing,Ransomware,1000,5.0,1
+1727,Government,BEC,1000000,5.66,0
+1728,IT/ITeS,Ransomware,0,7.29,1
+1729,Government,Data Breach,0,0.98,0
+1730,Manufacturing,Ransomware,1000000,0.51,1
+1731,Manufacturing,BEC,100000,3.68,0
+1732,Healthcare,Ransomware,10000,0.95,1
+1733,Government,DDoS,1000,5.87,0
+1734,Healthcare,Data Breach,10000,32.7,0
+1735,Retail,BEC,100000,21.19,0
+1736,BFSI,Insider Threat,10000,8.26,0
+1737,Manufacturing,Data Breach,1000,1.39,0
+1738,Government,Ransomware,1000,0.97,1
+1739,Manufacturing,Insider Threat,100000,7.65,0
+1740,IT/ITeS,Data Breach,0,5.43,0
+1741,Healthcare,Ransomware,1000,6.36,1
+1742,Government,Data Breach,100000,12.6,0
+1743,IT/ITeS,Ransomware,100000,1.11,1
+1744,IT/ITeS,Data Breach,0,0.28,0
+1745,Government,Ransomware,1000,4.26,1
+1746,Manufacturing,Data Breach,1000,1.55,0
+1747,Government,Ransomware,1000,0.41,1
+1748,Healthcare,Data Breach,1000,5.89,0
+1749,IT/ITeS,Data Breach,100000,3.54,0
+1750,Government,BEC,10000,0.37,0
+1751,IT/ITeS,Insider Threat,1000000,1.13,0
+1752,BFSI,Ransomware,100000,52.48,1
+1753,IT/ITeS,Data Breach,0,4.12,0
+1754,Government,BEC,0,37.36,0
+1755,IT/ITeS,DDoS,0,4.36,0
+1756,Government,BEC,1000,1.1,0
+1757,Retail,BEC,0,4.87,0
+1758,IT/ITeS,Ransomware,10000,3.17,1
+1759,Healthcare,Data Breach,10000,3.82,0
+1760,Retail,DDoS,1000,5.79,0
+1761,Healthcare,Ransomware,10000,21.93,1
+1762,Healthcare,Data Breach,1000000,3.18,0
+1763,Healthcare,Insider Threat,100000,1.3,0
+1764,Manufacturing,BEC,10000,1.09,0
+1765,Healthcare,Ransomware,100000,2.45,1
+1766,Retail,Data Breach,10000,8.63,0
+1767,Retail,Ransomware,1000000,2.43,1
+1768,Manufacturing,Data Breach,0,1.61,0
+1769,Government,Ransomware,0,0.18,1
+1770,BFSI,Ransomware,100000,3.81,1
+1771,BFSI,DDoS,10000,5.84,0
+1772,Retail,DDoS,10000,15.05,0
+1773,Manufacturing,DDoS,1000,8.41,0
+1774,Manufacturing,Data Breach,10000,0.57,0
+1775,BFSI,Data Breach,1000000,22.97,0
+1776,BFSI,Ransomware,0,6.31,1
+1777,Manufacturing,Data Breach,10000,0.11,0
+1778,Retail,Ransomware,1000000,4.42,1
+1779,BFSI,DDoS,1000,3.8,0
+1780,Manufacturing,Ransomware,10000,15.19,1
+1781,Healthcare,Ransomware,0,14.16,1
+1782,Retail,Ransomware,1000,2.44,1
+1783,Government,Ransomware,10000,5.16,1
+1784,IT/ITeS,Data Breach,100000,2.4,0
+1785,Retail,Data Breach,10000,2.14,0
+1786,IT/ITeS,Data Breach,1000,5.41,0
+1787,Retail,BEC,1000,1.92,0
+1788,BFSI,Data Breach,100000,0.42,0
+1789,IT/ITeS,Ransomware,0,8.94,1
+1790,Government,Data Breach,10000,3.63,0
+1791,Manufacturing,Ransomware,10000,2.43,1
+1792,Healthcare,DDoS,10000,1.04,0
+1793,BFSI,Data Breach,100000,0.86,0
+1794,Government,BEC,1000,2.77,0
+1795,Government,Data Breach,0,0.19,0
+1796,Manufacturing,BEC,100000,5.81,0
+1797,Retail,BEC,1000000,20.52,0
+1798,Healthcare,BEC,100000,10.18,0
+1799,Healthcare,Data Breach,1000,1.25,0
+1800,BFSI,Data Breach,10000,4.31,0
+1801,Retail,Data Breach,100000,5.88,0
+1802,Retail,Ransomware,1000,8.15,1
+1803,Government,BEC,100000,11.62,0
+1804,Retail,Data Breach,10000,0.82,0
+1805,BFSI,BEC,1000,4.32,0
+1806,Manufacturing,DDoS,100000,72.77,0
+1807,IT/ITeS,Ransomware,1000,2.26,1
+1808,BFSI,Data Breach,10000,8.08,0
+1809,BFSI,Data Breach,0,38.42,0
+1810,Healthcare,Ransomware,10000,9.21,1
+1811,Healthcare,Ransomware,10000,28.92,1
+1812,Government,Ransomware,1000000,3.13,1
+1813,Manufacturing,Ransomware,1000000,15.44,1
+1814,Healthcare,Ransomware,100000,0.99,1
+1815,IT/ITeS,BEC,100000,1.94,0
+1816,Manufacturing,BEC,1000,24.06,0
+1817,Manufacturing,Ransomware,100000,0.49,1
+1818,Retail,Ransomware,0,3.69,1
+1819,Government,BEC,0,0.54,0
+1820,BFSI,BEC,10000,4.43,0
+1821,Government,BEC,1000,12.74,0
+1822,Healthcare,Data Breach,0,0.8,0
+1823,Manufacturing,Ransomware,1000,3.7,1
+1824,Government,Data Breach,0,1.43,0
+1825,Healthcare,Ransomware,1000,1.35,1
+1826,Manufacturing,Data Breach,100000,5.12,0
+1827,Healthcare,Insider Threat,100000,3.59,0
+1828,Retail,BEC,1000,2.05,0
+1829,Manufacturing,Data Breach,1000,2.78,0
+1830,Manufacturing,Ransomware,0,26.85,1
+1831,Healthcare,Data Breach,1000,0.35,0
+1832,Retail,Ransomware,100000,10.24,1
+1833,IT/ITeS,Data Breach,1000,1.3,0
+1834,Manufacturing,DDoS,10000,2.48,0
+1835,IT/ITeS,Insider Threat,10000,14.04,0
+1836,IT/ITeS,Data Breach,1000,6.72,0
+1837,Retail,Data Breach,100000,4.69,0
+1838,Retail,BEC,1000,59.03,0
+1839,IT/ITeS,DDoS,100000,5.04,0
+1840,BFSI,Ransomware,1000,3.95,1
+1841,BFSI,Ransomware,1000,6.23,1
+1842,IT/ITeS,Data Breach,1000,12.33,0
+1843,Government,Insider Threat,100000,1.66,0
+1844,Healthcare,BEC,10000,2.28,0
+1845,IT/ITeS,Ransomware,0,0.47,1
+1846,Manufacturing,Ransomware,100000,1.11,1
+1847,Retail,Data Breach,0,14.25,0
+1848,IT/ITeS,Data Breach,1000,51.74,0
+1849,Manufacturing,Data Breach,1000,1.06,0
+1850,Government,Data Breach,1000,2.16,0
+1851,Government,Ransomware,100000,1.89,1
+1852,Healthcare,Data Breach,1000,0.87,0
+1853,Healthcare,Insider Threat,0,56.51,0
+1854,Manufacturing,Ransomware,10000,0.33,1
+1855,Healthcare,Data Breach,0,10.23,0
+1856,Government,Insider Threat,10000,2.11,0
+1857,Retail,Ransomware,10000,0.81,1
+1858,IT/ITeS,Ransomware,1000,2.44,1
+1859,BFSI,Ransomware,1000,8.6,1
+1860,Government,Data Breach,1000,2.84,0
+1861,IT/ITeS,DDoS,100000,9.29,0
+1862,Government,Ransomware,1000,0.83,1
+1863,Retail,Insider Threat,100000,2.02,0
+1864,Healthcare,Insider Threat,100000,7.6,0
+1865,Manufacturing,DDoS,0,1.01,0
+1866,Government,Ransomware,1000,1.25,1
+1867,Manufacturing,BEC,1000,4.4,0
+1868,BFSI,BEC,10000,4.45,0
+1869,Manufacturing,BEC,100000,2.05,0
+1870,Healthcare,Insider Threat,0,0.54,0
+1871,Healthcare,DDoS,0,2.81,0
+1872,IT/ITeS,Data Breach,1000,0.51,0
+1873,Government,BEC,10000,10.01,0
+1874,IT/ITeS,Data Breach,100000,6.41,0
+1875,Government,Ransomware,0,5.51,1
+1876,Government,DDoS,10000,19.94,0
+1877,Government,BEC,1000,39.13,0
+1878,BFSI,Ransomware,10000,37.05,1
+1879,Healthcare,Data Breach,0,16.24,0
+1880,BFSI,Insider Threat,1000,2.7,0
+1881,Retail,BEC,100000,27.41,0
+1882,BFSI,Data Breach,10000,0.72,0
+1883,Manufacturing,DDoS,0,6.82,0
+1884,BFSI,Ransomware,10000,0.65,1
+1885,IT/ITeS,DDoS,10000,4.5,0
+1886,BFSI,Data Breach,100000,13.76,0
+1887,Manufacturing,Ransomware,1000,6.54,1
+1888,BFSI,Ransomware,1000,0.61,1
+1889,Government,Ransomware,100000,1.3,1
+1890,IT/ITeS,Insider Threat,0,4.69,0
+1891,Government,Insider Threat,0,10.01,0
+1892,Government,Ransomware,0,1.21,1
+1893,Healthcare,Ransomware,1000,4.78,1
+1894,Government,Ransomware,0,1.17,1
+1895,Manufacturing,Insider Threat,0,3.17,0
+1896,Healthcare,Ransomware,1000,5.07,1
+1897,BFSI,BEC,10000,1.55,0
+1898,Retail,Ransomware,10000,0.13,1
+1899,BFSI,Data Breach,10000,15.75,0
+1900,IT/ITeS,DDoS,0,22.25,0
+1901,IT/ITeS,BEC,0,5.71,0
+1902,Healthcare,Ransomware,1000,0.25,1
+1903,IT/ITeS,DDoS,10000,0.31,0
+1904,Government,Ransomware,10000,7.88,1
+1905,Healthcare,Ransomware,0,0.33,1
+1906,Government,Data Breach,100000,5.2,0
+1907,Healthcare,DDoS,10000,1.95,0
+1908,BFSI,Ransomware,10000,6.98,1
+1909,Healthcare,Data Breach,1000,37.43,0
+1910,IT/ITeS,Data Breach,10000,1.5,0
+1911,Manufacturing,Data Breach,1000000,2.39,0
+1912,BFSI,DDoS,10000,2.72,0
+1913,BFSI,DDoS,10000,7.47,0
+1914,BFSI,BEC,100000,6.9,0
+1915,Healthcare,Ransomware,1000,2.26,1
+1916,Healthcare,Ransomware,10000,19.15,1
+1917,Healthcare,Data Breach,1000,3.0,0
+1918,Healthcare,Ransomware,1000000,2.83,1
+1919,Manufacturing,Insider Threat,10000,0.11,0
+1920,Manufacturing,Ransomware,1000,0.26,1
+1921,Government,BEC,1000,1.45,0
+1922,Retail,DDoS,1000,2.98,0
+1923,Manufacturing,Data Breach,10000,2.01,0
+1924,Healthcare,Insider Threat,10000,8.74,0
+1925,IT/ITeS,BEC,10000,12.7,0
+1926,Retail,Data Breach,0,12.88,0
+1927,Manufacturing,DDoS,0,2.82,0
+1928,BFSI,BEC,10000,1.44,0
+1929,Retail,BEC,10000,10.31,0
+1930,IT/ITeS,DDoS,100000,0.74,0
+1931,Healthcare,BEC,1000,0.59,0
+1932,Retail,Ransomware,1000,78.19,1
+1933,Healthcare,Ransomware,0,1.89,1
+1934,BFSI,BEC,1000,3.67,0
+1935,Retail,Data Breach,1000,5.94,0
+1936,IT/ITeS,DDoS,10000,4.97,0
+1937,Healthcare,BEC,0,7.47,0
+1938,Government,DDoS,0,4.02,0
+1939,IT/ITeS,Ransomware,10000,0.08,1
+1940,Government,Ransomware,1000,12.82,1
+1941,BFSI,Ransomware,1000,0.94,1
+1942,Government,BEC,0,0.39,0
+1943,Retail,Ransomware,1000000,2.62,1
+1944,Retail,DDoS,10000,0.59,0
+1945,Retail,DDoS,10000,38.06,0
+1946,Government,Insider Threat,1000,1.49,0
+1947,BFSI,Insider Threat,1000,3.74,0
+1948,IT/ITeS,Data Breach,100000,1.78,0
+1949,Retail,Data Breach,0,1.14,0
+1950,IT/ITeS,Ransomware,1000,7.63,1
+1951,Healthcare,Insider Threat,10000,2.68,0
+1952,BFSI,Data Breach,10000,8.85,0
+1953,Manufacturing,Ransomware,100000,1.83,1
+1954,Government,Data Breach,0,0.3,0
+1955,Government,Data Breach,10000,3.31,0
+1956,BFSI,Data Breach,10000,22.86,0
+1957,BFSI,Ransomware,0,7.02,1
+1958,Manufacturing,Insider Threat,10000,1.28,0
+1959,Healthcare,BEC,1000,19.89,0
+1960,Manufacturing,Data Breach,100000,5.06,0
+1961,Manufacturing,Data Breach,10000,2.05,0
+1962,Government,Ransomware,100000,4.28,1
+1963,Manufacturing,Ransomware,1000,3.29,1
+1964,Healthcare,DDoS,0,4.32,0
+1965,Manufacturing,Data Breach,0,19.82,0
+1966,IT/ITeS,Data Breach,0,2.93,0
+1967,Retail,Data Breach,100000,7.77,0
+1968,BFSI,Data Breach,0,1.8,0
+1969,IT/ITeS,Data Breach,0,1.43,0
+1970,Retail,BEC,0,4.54,0
+1971,Healthcare,Data Breach,1000000,10.4,0
+1972,IT/ITeS,Ransomware,10000,11.24,1
+1973,IT/ITeS,BEC,1000,2.35,0
+1974,Government,Insider Threat,100000,4.13,0
+1975,Retail,Ransomware,1000,7.18,1
+1976,BFSI,Insider Threat,0,37.7,0
+1977,BFSI,Data Breach,100000,8.43,0
+1978,Retail,Ransomware,1000,0.82,1
+1979,Manufacturing,Ransomware,10000,5.08,1
+1980,Healthcare,BEC,10000,6.23,0
+1981,Government,Insider Threat,1000,1.74,0
+1982,Manufacturing,Ransomware,100000,0.84,1
+1983,Healthcare,Ransomware,100000,0.73,1
+1984,BFSI,Data Breach,10000,8.97,0
+1985,BFSI,Data Breach,10000,1.73,0
+1986,Retail,DDoS,10000,17.64,0
+1987,Manufacturing,Data Breach,100000,1.78,0
+1988,Government,Ransomware,1000,0.85,1
+1989,Manufacturing,Ransomware,10000,1.54,1
+1990,Government,BEC,10000,0.9,0
+1991,Government,BEC,1000,14.6,0
+1992,IT/ITeS,Ransomware,100000,4.43,1
+1993,Retail,Insider Threat,1000,2.93,0
+1994,Retail,Ransomware,0,10.93,1
+1995,Healthcare,Data Breach,1000,0.21,0
+1996,BFSI,Data Breach,1000,0.56,0
+1997,Retail,BEC,10000,4.92,0
+1998,Retail,Ransomware,0,1.63,1
+1999,BFSI,Insider Threat,0,7.46,0
+2000,Healthcare,Data Breach,0,27.53,0

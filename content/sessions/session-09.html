@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 09: Digital Customer Acquisition — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* Editable answer fields — students can type directly in the page.
+           Input is NOT saved anywhere; it only lives in the browser session
+           so students can try their answer before revealing the solution. */
+        .write-in {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+            box-sizing: border-box;
+        }
+        .write-in:focus {
+            border-color: var(--primary);
+            border-style: solid;
+            background: var(--surface-hover);
+        }
+        .write-in::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .write-in-tall { min-height: 72px; }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-08.html" class="nav-link">&larr; Previous: Introduction to InsurTech</a>
+            <a href="session-10.html" class="nav-link next">Next: Embedded &amp; Usage-Based Insurance &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #1a1a3e 0%, #2c1f52 100%); color: #fff;">
+            <div class="chapter-badge">Module 3 &middot; Session 09 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 09: Digital Customer Acquisition</h1>
+            <div class="chapter-meta">
+                CILO-1, CILO-2 &middot; Domain Knowledge &amp; Analytics &middot; Lecture &amp; Lab (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Analyze the six-stage digital insurance acquisition funnel and identify where drop-off is highest</li>
+                <li>Calculate Customer Acquisition Cost by channel and interpret channel-level economics</li>
+                <li>Compute Customer Lifetime Value using annual premium, retention rate, and discount rate</li>
+                <li>Build a funnel visualization in Python showing conversion rates at each stage</li>
+                <li>Determine channel profitability ranking using LTV/CAC ratio and recommend budget allocation</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. The Digital Insurance Customer</h2>
+
+            <p>The digital insurance customer is not a demographic — it is a behaviour. Age, income, and location matter, but the most important characteristic is the <strong>preference for digital self-service</strong>. A wealthy 55-year-old who uses a smartphone to manage investments and order groceries is more likely to buy insurance online than a 25-year-old who still calls an agent for every financial decision. Understanding who the digital customer is — and is not — is the foundation of any InsurTech customer acquisition strategy.</p>
+
+            <h3>1.1 Who Buys Insurance Online?</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Characteristic</th><th>Digital Channel Dominance</th><th>Agent/Offline Dominance</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Age</td><td>25–45 (primary), 18–24 (emerging, lower insurance need)</td><td>45+ (especially life insurance and complex products)</td></tr>
+                    <tr><td>Income</td><td>₹5–25 Lakh annual household income</td><td>Above ₹25 Lakh (complex needs) and below ₹3 Lakh (access barrier)</td></tr>
+                    <tr><td>Location</td><td>Urban and semi-urban (Tier 1 and Tier 2 cities)</td><td>Rural and deep Tier 3+ (agent is primary financial touchpoint)</td></tr>
+                    <tr><td>Insurance product</td><td>Motor, term life (simple), travel, gadget, fixed-benefit health</td><td>Endowment/ULIP, whole life, complex health, liability, corporate</td></tr>
+                    <tr><td>Purchase behaviour</td><td>Compares 3–5 options online before buying. Mobile-first. Expects instant issuance.</td><td>Buys from trusted agent. Family/friend referrals dominate. Prefers physical policy document.</td></tr>
+                    <tr><td>Trust model</td><td>Platform trust (brand, reviews, ease of use, transparent pricing)</td><td>Personal trust (knowing the agent, company reputation, relationship history)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>1.2 The Mobile-First Reality</h3>
+
+            <p>In India, over 70% of insurance-related online activity — searches, quote requests, policy comparisons — starts on a mobile device. However, only about 30% of purchases are completed on mobile, with the rest shifting to desktop or agent assistance for the final transaction. This "mobile-first research, desktop/agent-first purchase" gap represents the single biggest UX opportunity in digital insurance. The purchase flow — especially the form-filling, payment, and document verification steps — must be redesigned for mobile, not simply shrunk from desktop. InsurTechs that solve the "mobile purchase gap" will have a structural conversion advantage.</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The digital vs. agent distinction is not binary. A growing segment — the "digital-assisted" customer — researches online but buys through an agent (or vice versa). Data from PolicyBazaar suggests that 40%+ of customers who buy through an agent have already compared quotes online. In a well-designed omnichannel strategy, digital and agent channels reinforce each other rather than compete.
+                </div>
+            </div>
+
+            <!-- Exercise 1.1 — Who Buys Online? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128101; Exercise 1.1 — Who Buys Online?</h4>
+                    <p>Classify each customer profile into the buying mode it best fits: <strong>Digital / Agent / Digital-assisted</strong> (researches online, buys offline — or vice versa).</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Customer Profile</th><th style="width: 190px;">Buying Mode</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A 28-year-old Bengaluru software engineer comparing motor quotes on her phone at 11 pm.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Digital</option><option>Agent</option><option>Digital-assisted</option></select></td></tr>
+                        <tr><td>2</td><td>A 58-year-old Chennai business owner buying an endowment policy from his agent of 20 years.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Digital</option><option>Agent</option><option>Digital-assisted</option></select></td></tr>
+                        <tr><td>3</td><td>A 34-year-old Gurugram professional who researched term-life on PolicyBazaar for 3 weeks, then bought through an agent.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Digital</option><option>Agent</option><option>Digital-assisted</option></select></td></tr>
+                        <tr><td>4</td><td>A 19-year-old college student with ₹2 lakh income browsing gadget cover on Instagram.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Digital</option><option>Agent</option><option>Digital-assisted</option></select></td></tr>
+                        <tr><td>5</td><td>A 52-year-old Delhi executive comparing health policies online but wanting help understanding exclusions.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Digital</option><option>Agent</option><option>Digital-assisted</option></select></td></tr>
+                        <tr><td>6</td><td>A farmer in rural Tamil Nadu buying crop insurance through the village agent.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Digital</option><option>Agent</option><option>Digital-assisted</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> 70% of insurance activity starts on mobile, but only ~30% completes on mobile. Who does the "mobile purchase gap" cost the most — and which product type can close it most easily?</p>
+                <textarea class="write-in write-in-tall" placeholder="Your reflection..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Classifications</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Digital</strong> — mobile-first comparison behaviour; matches the 25–45 digital profile.</li>
+                            <li><strong>Agent</strong> — complex product (endowment), long trust relationship, 45+ age band.</li>
+                            <li><strong>Digital-assisted</strong> — researched online, bought through the agent; part of the 40%+ who compare online before buying offline.</li>
+                            <li><strong>Digital</strong> — the 18–24 emerging segment; Instagram is where this generation is reached (low insurance need, but still a digital channel).</li>
+                            <li><strong>Digital-assisted</strong> — researches online but wants human help for complex exclusions.</li>
+                            <li><strong>Agent</strong> — rural/deep Tier 3+: the agent is the primary financial touchpoint.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Reflection note:</strong> the mobile purchase gap costs every insurer that optimises only for desktop checkout — the 70% who research on mobile are your best-qualified leads. Simple, standardised products (motor, term, gadget) can close the gap with pre-filled forms (VAHAN API, DigiLocker) and UPI payments; complex products (health, ULIP) still need a human handoff — which is exactly what the digital-assisted segment expects. Fix the purchase flow, not just the marketing.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. The Digital Acquisition Funnel</h2>
+
+            <p>The digital insurance acquisition funnel describes the stages a customer passes through from first awareness to policy purchase — and beyond, to renewal. Understanding conversion rates at each stage — and where drop-off is highest — is the most important analysis a digital insurance business can perform.</p>
+
+            <h3>2.1 The Six-Stage Funnel</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│              THE DIGITAL INSURANCE ACQUISITION FUNNEL               │
+│                                                                     │
+│   1. AWARENESS  ──→  2. CONSIDERATION  ──→  3. QUOTE              │
+│   (Sees an ad    │   (Visits website/   │   (Fills form,           │
+│    or search      │    reads content,     │    gets a price)         │
+│    result)        │    explores options)  │                          │
+│         │         │         │             │          │              │
+│         ▼         │         ▼             │          ▼              │
+│  Conv: 20-40%     │  Conv: 15-25%        │  Conv: 30-50%           │
+│                                                                     │
+│         ┌─────────┤                   ┌──┤                          │
+│         ▼         │                   ▼  │                          │
+│   4. PURCHASE     │          5. ONBOARDING  │   6. RENEWAL          │
+│   (Makes payment, │          (Activates   │   (Pays next year      │
+│    policy issued) │           policy, DL,  │    premium, stays      │
+│         │         │           welcome kit) │    as customer)        │
+│         ▼         │         ▼              │          ▼              │
+│  Conv: 30-50%     │  Conv: 70-90%        │  Conv: 60-85%           │
+│  (of quotes →     │  (of purchases →      │  (of policies due      │
+│   purchases)      │   successful activate) │   for renewal)          │
+└─────────────────────────────────────────────────────────────────────┘
+
+Note: "Conv" = Conversion rate from the PREVIOUS stage.
+E.g., 20-40% of people who see awareness content click through to consideration.
+The overall conversion from awareness to purchase = 0.30 × 0.20 × 0.40 = 2.4%</code></pre>
+
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-09/Chapter-9-Funnel.png" alt="Digital insurance acquisition funnel" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the digital insurance acquisition funnel — awareness, consideration, quote, purchase, onboarding, renewal — with the conversion ranges between stages. <strong>So what:</strong> the funnel's shape tells you where customers leave before buying. <strong>Now what:</strong> find the widest drop — fixing the middle of the funnel beats spending more at the top.</figcaption>
+            </figure>
+
+            <h3>2.2 Where the Funnel Leaks</h3>
+
+            <p>Industry data from Indian digital insurance channels shows a consistent pattern:</p>
+            <ul>
+                <li><strong>Consideration → Quote is the biggest leak (70–85% drop-off).</strong> A customer visits a website or app, starts a quote process, and abandons it. The reasons: the form takes too long (more than 3 minutes = 40%+ abandonment), asks for too much information upfront, requires documents the customer does not have readily available, or the customer was not ready to commit and just wanted a "ballpark" price.</li>
+                <li><strong>Quote → Purchase converts reasonably (30–50%).</strong> If a customer completes the quote process, they have revealed purchase intent. The drop-off at this stage is mostly price sensitivity — they went to the competition for a better quote — or comparison paralysis (checking too many insurers).</li>
+                <li><strong>First-year renewal is the silent killer.</strong> A digital carrier might spend ₹2,000 to acquire a first-year customer who pays ₹10,000 premium. If the customer does not renew, the carrier has likely lost money on that customer. Renewal rate is the single most important metric that separates sustainable InsurTechs from burning-cash ones.</li>
+            </ul>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The best way to improve the overall funnel conversion is NOT to invest in more top-of-funnel awareness (more ads). It is to <strong>fix the leak at Consideration → Quote.</strong> Shortening the quote form from 5 minutes to 2 minutes — by auto-filling vehicle data from the registration number (using the VAHAN API) and pre-filling customer data from DigiLocker — can double the quote completion rate from 15% to 30%, which doubles the overall conversion from 2.4% to 4.8%. Fixing the middle of the funnel is almost always more capital-efficient than spending more on the top.
+                </div>
+            </div>
+
+            <!-- Exercise 2.1 — Fix the Funnel -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128270; Exercise 2.1 — Fix the Funnel</h4>
+                    <p>Two jobs: compute the overall conversion, then decide where to invest.</p>
+                </div>
+                <p style="margin-top: var(--space-md);"><strong>Part A — calculate:</strong> A company achieves Awareness→Consideration 30%, Consideration→Quote 15%, Quote→Purchase 40%, Purchase→Onboarding 85%. What is the overall conversion from awareness to onboarding?</p>
+                <textarea class="write-in" placeholder="Overall conversion = __ × __ × __ × __ = ____%"></textarea>
+                <p style="margin-top: var(--space-md);"><strong>Part B — decide:</strong> The Pro Tip claims that fixing Consideration→Quote from 15% to 30% <em>doubles</em> overall conversion (2.4% → 4.8%). Rank these three fixes by their impact on overall conversion, then justify each in one line:</p>
+                <table>
+                    <thead>
+                        <tr><th>Fix</th><th style="width: 170px;">Rank (1 = biggest)</th><th style="width: 200px;">Why?</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>A — Auto-fill vehicle data via VAHAN API + pre-fill from DigiLocker</td>
+                            <td><input class="write-in" type="text" placeholder="1 / 2 / 3"></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                        <tr><td>B — Double top-of-funnel ad spend</td>
+                            <td><input class="write-in" type="text" placeholder="1 / 2 / 3"></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                        <tr><td>C — Add a second payment option at checkout</td>
+                            <td><input class="write-in" type="text" placeholder="1 / 2 / 3"></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                    </tbody>
+                </table>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Calculation &amp; Ranking</summary>
+                    <div class="solution-content">
+                        <p><strong>Part A:</strong> 0.30 × 0.15 × 0.40 × 0.85 = <strong>1.53%</strong> — fewer than 2 in 100 aware customers become onboarded customers. Note how each stage multiplies the previous: fixing any single stage has a compounding effect on the total.</p>
+                        <p style="margin-top: var(--space-md);"><strong>Part B ranking: A (1) → C (2) → B (3).</strong></p>
+                        <ol>
+                            <li><strong>A — VAHAN/DigiLocker prefill (1st):</strong> attacks the biggest leak (Consideration→Quote is 70–85% drop-off). Doubling 15% → 30% here <em>doubles everything downstream</em> — the compounding logic from Part A.</li>
+                            <li><strong>C — payment options (2nd):</strong> helps Quote→Purchase, but only ~30–50% of quote-completers buy anyway, so the gain is capped by the stage above it.</li>
+                            <li><strong>B — more ads (3rd):</strong> Awareness→Consideration passes 20–40%, but the product is then hit by the same leaks. More top-of-funnel spend without fixing the middle just buys more drop-off.</li>
+                        </ol>
+                        <p style="margin-bottom: 0;"><strong>The lesson:</strong> in a multiplicative funnel, the highest-leverage fix is the widest drop — not the most visible stage.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Customer Acquisition Cost (CAC)</h2>
+
+            <p>Customer Acquisition Cost is the total marketing and sales cost required to acquire one new paying customer. It is the single most important input to the unit economics calculation — and the metric where digital insurance differs most dramatically from traditional insurance.</p>
+
+            <h3>3.1 Calculating CAC</h3>
+
+            <pre><code class="language-python"># CAC by Channel — Framework
+# Total marketing spend for a channel in a period
+# Divided by the number of NEW paying customers acquired through that channel
+
+# Example: Paid Search (Google Ads) for Motor Insurance
+spend = {
+    'ad_spend': 1500000,      # ₹15 Lakhs on Google Ads in the month
+    'agency_fees': 150000,     # Agency management fees
+    'landing_page_cost': 50000, # Content/landing page creation (amortized)
+    'tracking_tools': 30000,   # Analytics and attribution tools
+}
+total_cost = sum(spend.values())  # ₹17,30,000
+
+new_customers = 450  # Policies issued through this channel
+
+cac_paid_search = total_cost / new_customers  # ₹3,844 per customer</code></pre>
+
+            <h3>3.2 CAC by Channel — Typical Indian InsurTech Benchmarks</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Channel</th><th>CAC Range (₹)</th><th>Volume Potential</th><th>Time to Scale</th><th>Best For</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Organic Search (SEO)</td><td>200–800</td><td>Medium (sustainable growth)</td><td>6–12 months</td><td>All products — long-term investment</td></tr>
+                    <tr><td>Paid Search (SEM)</td><td>2,000–5,000</td><td>High (but capped by keyword supply)</td><td>1–2 weeks</td><td>Motor, Term Life (high intent keywords)</td></tr>
+                    <tr><td>Social Media (Facebook/Instagram)</td><td>1,500–4,000</td><td>Very High</td><td>1–2 weeks</td><td>Health, Travel (targetable demographics)</td></tr>
+                    <tr><td>Aggregator (PolicyBazaar, etc.)</td><td>800–2,500</td><td>Very High</td><td>Immediate</td><td>Motor, Term (high volume, but aggregator takes commission)</td></tr>
+                    <tr><td>Referral / Word-of-Mouth</td><td>100–500</td><td>Low (but high quality)</td><td>6–24 months</td><td>All products (lowest CAC, highest retention)</td></tr>
+                    <tr><td>Embedded / API Partnership</td><td>100–800</td><td>Very High (platform dependant)</td><td>3–12 months (integration)</td><td>Motor, Travel, Gadget (contextual purchase)</td></tr>
+                    <tr><td>Content Marketing (Blog, Video)</td><td>500–1,500</td><td>Medium</td><td>6–18 months</td><td>All products (educational content drives qualified traffic)</td></tr>
+                    <tr><td>Agent / Field Sales</td><td>3,000–8,000</td><td>Medium</td><td>1–3 months (recruit)</td><td>Complex products (Health, ULIP, Corporate)</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> Do not compare your CAC to another InsurTech's CAC without understanding the <strong>attribution model</strong> behind it. One company may attribute a customer entirely to the last click before purchase (simplistic, inflates the last channel's effectiveness). Another may use a multi-touch attribution model that distributes credit across all channels in the customer journey (more accurate, but harder to implement). A "CAC" from two different companies can mean two completely different things. Always ask: "What attribution model did you use?"
+                </div>
+            </div>
+
+            <!-- Exercise 3.1 — CAC Clinic -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128176; Exercise 3.1 — CAC Clinic</h4>
+                    <p>Calculate a CAC, then choose the right channel for four products using the §3.2 benchmark table.</p>
+                </div>
+                <p style="margin-top: var(--space-md);"><strong>Part A — calculate:</strong> Sparrow Travel InsurTech spent ₹6,00,000 on Facebook ads, ₹80,000 on agency fees, and ₹40,000 on a landing page — and acquired 400 new customers. What is its CAC?</p>
+                <textarea class="write-in" placeholder="CAC = (₹6,00,000 + __ + __) ÷ 400 = ₹______"></textarea>
+                <p style="margin-top: var(--space-md);"><strong>Part B — decide:</strong> For each product, pick the BEST channel from the §3.2 table and justify in one line:</p>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Product &amp; Goal</th><th style="width: 185px;">Best Channel</th><th style="width: 185px;">Why?</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A term-life startup needing low CAC and long education cycles.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Organic Search (SEO)</option><option>Paid Search (SEM)</option><option>Social Media</option><option>Aggregator</option><option>Embedded / API</option><option>Agent / Field Sales</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                        <tr><td>2</td><td>A motor insurer needing high volume fast, before renewal season.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Organic Search (SEO)</option><option>Paid Search (SEM)</option><option>Social Media</option><option>Aggregator</option><option>Embedded / API</option><option>Agent / Field Sales</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                        <tr><td>3</td><td>A travel insurer whose customers book flights on an OTA.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Organic Search (SEO)</option><option>Paid Search (SEM)</option><option>Social Media</option><option>Aggregator</option><option>Embedded / API</option><option>Agent / Field Sales</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                        <tr><td>4</td><td>A health insurer targeting 30–45 urban women with a mid-premium product.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Organic Search (SEO)</option><option>Paid Search (SEM)</option><option>Social Media</option><option>Aggregator</option><option>Embedded / API</option><option>Agent / Field Sales</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="One line..."></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> Channel A reports CAC ₹900, Channel B reports CAC ₹2,200. What THREE questions would you ask before comparing them?</p>
+                <textarea class="write-in write-in-tall" placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your CAC &amp; Channels</summary>
+                    <div class="solution-content">
+                        <p><strong>Part A:</strong> (₹6,00,000 + ₹80,000 + ₹40,000) ÷ 400 = ₹7,20,000 ÷ 400 = <strong>₹1,800</strong> per customer — inside the social-media range (₹1,500–4,000), but above the embedded/referral range, which is exactly why travel InsurTechs push embedded distribution.</p>
+                        <p style="margin-top: var(--space-md);"><strong>Part B:</strong></p>
+                        <ol>
+                            <li><strong>Organic Search / Content</strong> — term-life buyers want to be educated over weeks; content captures existing demand at ₹200–800 CAC.</li>
+                            <li><strong>Aggregator (or Paid Search)</strong> — motor is high-intent and price-sensitive; aggregators deliver very high volume immediately (₹800–2,500), ideal for renewal-season spikes.</li>
+                            <li><strong>Embedded / API</strong> — contextual purchase at the moment of booking; standalone travel economics rarely work, so embedded (₹100–800) is the dominant channel.</li>
+                            <li><strong>Social Media</strong> — targetable demographics (age + gender + income) match this segment; health converts well on Facebook/Instagram (₹1,500–4,000).</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Three questions before comparing CACs (model answer):</strong></p>
+                        <ol>
+                            <li><strong>What attribution model was used?</strong> — last-click vs multi-touch changes the number entirely (the §3 Warning callout).</li>
+                            <li><strong>What counts as a "customer"?</strong> — issued policies, paid first premiums, or renewing customers? Same spend, very different CACs.</li>
+                            <li><strong>Same time period and product mix?</strong> — motor vs health CACs differ 2–3×, and a 2023 CAC is not comparable to a 2026 one.</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Customer Lifetime Value (LTV)</h2>
+
+            <p>Customer Lifetime Value is the total profit a customer generates over their entire relationship with the insurer. In insurance, LTV is particularly sensitive to three factors: the <strong>retention rate</strong> (what proportion of customers renew), the <strong>cross-sell rate</strong> (how many additional products a customer buys), and the <strong>claims experience</strong> (a customer who files a large claim has a very different LTV from one who never claims).</p>
+
+            <h3>4.1 The Insurance LTV Formula</h3>
+
+            <pre><code class="language-text">LTV = (Average Annual Premium × Profit Margin × Average Customer Tenure) + Cross-Sell Value
+
+Where:
+  Average Premium        = ₹8,000/year (motor insurance example)
+  Profit Margin          = 25% (1 − Loss Ratio − Variable Expenses)
+  Average Customer Tenure = 1 / (1 − Retention Rate)
+                           = 1 / (1 − 0.75) = 4 years (if 75% annual retention)
+
+Base LTV = ₹8,000 × 25% × 4 = ₹8,000
+
+  Cross-Sell Value        = ₹3,000 (additional products purchased over tenure)
+
+  Total LTV               = ₹11,000
+
+  LTV/CAC (at ₹2,500 CAC) = 11,000 / 2,500 = 4.4x  (Healthy!)</code></pre>
+
+            <p>Notice that LTV is incredibly sensitive to the retention rate:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Retention Rate</th><th>Avg Tenure (Years)</th><th>Base LTV (₹8K premium, 25% margin)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>50%</td><td>2.0</td><td>₹4,000</td></tr>
+                    <tr><td>60%</td><td>2.5</td><td>₹5,000</td></tr>
+                    <tr><td>70%</td><td>3.3</td><td>₹6,667</td></tr>
+                    <tr><td>75%</td><td>4.0</td><td>₹8,000</td></tr>
+                    <tr><td>80%</td><td>5.0</td><td>₹10,000</td></tr>
+                    <tr><td>85%</td><td>6.7</td><td>₹13,333</td></tr>
+                    <tr><td>90%</td><td>10.0</td><td>₹20,000</td></tr>
+                </tbody>
+            </table>
+
+            <p>An improvement from 70% to 80% retention doubles the LTV. This is why insurance companies obsess over retention — a 1-percentage-point improvement in retention can increase enterprise value by 5–10%. Every rupee spent on retention (service improvements, loyalty programmes, renewal incentives) must be evaluated against this LTV leverage.</p>
+
+            <h3>4.2 Calculating LTV in Python</h3>
+
+            <pre><code class="language-python">def calculate_ltv(annual_premium, loss_ratio, expense_ratio, retention_rate,
+                  discount_rate=0.10, years=10):
+    """
+    Calculate Customer Lifetime Value for an insurance policy.
+
+    Parameters:
+    -----------
+    annual_premium : float — Premium paid per year
+    loss_ratio : float — Proportion of premium paid as claims (0.0–1.0)
+    expense_ratio : float — Proportion of premium spent on expenses (0.0–1.0)
+    retention_rate : float — Probability customer renews each year (0.0–1.0)
+    discount_rate : float — Cost of capital for NPV calculation (default 10%)
+    years : int — Maximum projection horizon (default 10)
+
+    Returns:
+    --------
+    dict — LTV metrics
+    """
+    profit_margin = 1 - loss_ratio - expense_ratio
+    annual_profit = annual_premium * profit_margin
+
+    ltv = 0
+    retention_prob = 1.0
+
+    for year in range(1, years + 1):
+        if year > 1:
+            retention_prob *= retention_rate
+        discounted_profit = (annual_profit * retention_prob) / ((1 + discount_rate) ** (year - 1))
+        ltv += discounted_profit
+
+    avg_tenure = 1 / (1 - retention_rate) if retention_rate < 1 else years
+
+    return {
+        'annual_profit': annual_profit,
+        'profit_margin': profit_margin,
+        'avg_tenure_years': round(avg_tenure, 1),
+        'ltv': round(ltv, 0),
+        'cac_breakeven_at': round(annual_profit / (1 - retention_rate / (1 + discount_rate)), 0) if retention_rate > 0 else float('inf')
+    }
+
+# Example: Motor Insurance
+motor_ltv = calculate_ltv(
+    annual_premium=8000,
+    loss_ratio=0.68,
+    expense_ratio=0.12,
+    retention_rate=0.75
+)
+print(f"Motor Insurance LTV Analysis:")
+for k, v in motor_ltv.items():
+    if k == 'profit_margin':
+        print(f"  {k}: {v*100:.1f}%")
+    elif k == 'ltv':
+        print(f"  {k}: ₹{v:,.0f}")
+    else:
+        print(f"  {k}: {v}")
+
+# Example: Term Life Insurance
+life_ltv = calculate_ltv(
+    annual_premium=12000,
+    loss_ratio=0.45,
+    expense_ratio=0.25,
+    retention_rate=0.85
+)
+print(f"\nTerm Life LTV Analysis:")
+for k, v in life_ltv.items():
+    if k == 'profit_margin':
+        print(f"  {k}: {v*100:.1f}%")
+    elif k == 'ltv':
+        print(f"  {k}: ₹{v:,.0f}")
+    else:
+        print(f"  {k}: {v}")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> PolicyBazaar's unit economics provide a revealing case study. In its pre-IPO filings, the company disclosed that a customer acquired via the aggregator platform generates approximately ₹3,000–5,000 in lifetime commission (the LTV for PolicyBazaar — not the insurer). The CAC is approximately ₹1,500–2,500. The LTV/CAC ratio of ~2:1 is below the VC target of 3:1 but sustainable because PolicyBazaar does not carry underwriting risk — its cost of capital is lower than a carrier's. This highlights a critical point: "healthy" LTV/CAC depends on the business model and capital structure, not a universal threshold.
+                </div>
+            </div>
+
+            <!-- Exercise 4.1 — The LTV Lever -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128200; Exercise 4.1 — The LTV Lever</h4>
+                    <p>With premium ₹8,000 and profit margin 25%, use <strong>tenure = 1 ÷ (1 − retention)</strong> to see how retention drives LTV.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Retention</th><th>Avg Tenure (yrs)</th><th style="width: 190px;">Base LTV (₹)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>70%</strong></td><td>1 ÷ 0.30 = 3.33</td><td><input class="write-in" type="text" placeholder="₹8,000 × 25% × 3.33 = ?"></td></tr>
+                        <tr><td><strong>80%</strong></td><td>1 ÷ 0.20 = 5.00</td><td><input class="write-in" type="text" placeholder="₹8,000 × 25% × 5 = ?"></td></tr>
+                        <tr><td><strong>Increase</strong></td><td>—</td><td><input class="write-in" type="text" placeholder="+ ___%"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Part B — reverse:</strong> If CAC is ₹2,500, what is the LTV/CAC at 80% retention — and is it investable?</p>
+                <textarea class="write-in" placeholder="LTV/CAC = ₹____ ÷ ₹2,500 = ____× — healthy / marginal / failing?"></textarea>
+                <p style="margin-top: var(--space-md);"><strong>Part C — decide:</strong> "A claim is not a cost to minimize." For a motor insurer, propose ONE retention initiative tied to the claims experience.</p>
+                <textarea class="write-in write-in-tall" placeholder="Initiative: ...&#10;Why it lifts retention: ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your LTV</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>70% retention:</strong> tenure 3.33 → LTV = ₹8,000 × 25% × 3.33 = <strong>₹6,667</strong>.</li>
+                            <li><strong>80% retention:</strong> tenure 5.0 → LTV = ₹8,000 × 25% × 5 = <strong>₹10,000</strong>.</li>
+                            <li><strong>Increase:</strong> (10,000 − 6,667) ÷ 6,667 = <strong>+50%</strong> — a 10-point retention gain adds half the LTV again. This is the "1-point retention ≈ 5–10% enterprise value" leverage in action.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Part B:</strong> ₹10,000 ÷ ₹2,500 = <strong>4.0× — healthy</strong> (above the 3:1 VC target). Same CAC, same premium: the difference between "not investable" and "investable" was retention.</p>
+                        <p style="margin-top: var(--space-md);"><strong>Part C (model answer):</strong> Fast, transparent claims — e.g. a WhatsApp claim tracker with FNOL in under 2 minutes and settlement status updates (Digit's 24/7 claims promise lifted renewal by 22 points among claimants). Why it works: the claim is the moment the customer actually experiences the promise; a fast settlement converts a cost centre into the strongest retention moment in the lifecycle.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Funnel Analytics in Python</h2>
+
+            <p>Building a funnel analytics pipeline allows an InsurTech to track conversion rates, identify bottlenecks, and measure the impact of optimisation experiments. The analysis requires data from the company's analytics platform (Google Analytics, Mixpanel, or a custom event tracking system), structured as a sequence of events per customer session.</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128279;</div>
+                <div class="callout-content">
+                    <strong>How to run this section:</strong> the §5.1–§5.3 and §6.1–§6.2 blocks below are <em>one continuous script split across the page</em> — each block continues from the previous one, so copy them <strong>in order</strong> into the same Jupyter notebook cell sequence. The data file <code>data/funnel_data.csv</code> is provided in the lab folder (<code>InsuranceTech_code/data/funnel_data.csv</code>) — save your notebook in <code>InsuranceTech_code/</code> so the relative path works. A single complete runnable script is available at the end of §6 (and as <code>session_09_digital_acquisition.py</code> in <code>InsuranceTech_code/</code>): run <code>venv/bin/python session_09_digital_acquisition.py</code> to reproduce everything at once. All session-09 files are also on GitHub: <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-09/funnel_data.csv" target="_blank" rel="noopener">funnel_data.csv</a> · <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-09/session_09_digital_acquisition.py" target="_blank" rel="noopener">complete script</a> · <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-09/chapter9_funnel.png" target="_blank" rel="noopener">funnel chart</a> · <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-09/channel_economics_bubble.png" target="_blank" rel="noopener">bubble chart</a>.
+                </div>
+            </div>
+
+            <h3>5.1 Loading and Preparing Funnel Data</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load session-level funnel data
+# Each row represents a user session with columns for each stage
+funnel_data = pd.read_csv('data/funnel_data.csv')
+
+# Columns: session_id, stage_awareness (1/0), stage_consideration,
+#          stage_quote, stage_purchase, stage_onboarding, channel, product
+
+print(f"Total sessions tracked: {len(funnel_data):,}")
+print(f"\nColumns: {funnel_data.columns.tolist()}")
+print(f"\nChannels: {funnel_data['channel'].value_counts().to_dict()}")
+
+# Calculate stage-wise conversion
+funnel_stages = ['stage_awareness', 'stage_consideration',
+                 'stage_quote', 'stage_purchase', 'stage_onboarding']
+
+stage_counts = {}
+for stage in funnel_stages:
+    stage_counts[stage] = funnel_data[stage].sum()
+
+print("\nStage-wise user counts:")
+for stage, count in stage_counts.items():
+    print(f"  {stage:25s}: {count:6,.0f}")</code></pre>
+
+            <h3>5.2 Calculating Conversion Rates</h3>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);"><strong>&#9654; Prerequisite:</strong> run the §5.1 block first in the same notebook — <code>stage_counts</code> is defined there. This block will not run standalone.</p>
+
+            <pre><code class="language-python"># Overall conversion (top-of-funnel to end)
+overall_conv = stage_counts['stage_onboarding'] / stage_counts['stage_awareness']
+print(f"Overall conversion (Awareness → Onboarding): {overall_conv*100:.1f}%")
+
+# Stage-by-stage conversion
+stages_list = list(funnel_stages)
+conversion_rates = {}
+for i in range(len(stages_list) - 1):
+    from_stage = stages_list[i]
+    to_stage = stages_list[i + 1]
+    rate = stage_counts[to_stage] / stage_counts[from_stage] if stage_counts[from_stage] > 0 else 0
+    conversion_rates[f"{from_stage} → {to_stage}"] = rate
+    print(f"  {from_stage:25s} → {to_stage:20s}: {rate*100:.1f}%")
+
+# Conversion by channel
+print("\n\nPurchase conversion rate by channel:")
+channel_conv = funnel_data.groupby('channel').agg(
+    total_awareness=('stage_awareness', 'sum'),
+    total_purchase=('stage_purchase', 'sum')
+).reset_index()
+channel_conv['conversion'] = channel_conv['total_purchase'] / channel_conv['total_awareness']
+print(channel_conv.sort_values('conversion', ascending=False).to_string(index=False))</code></pre>
+
+            <h3>5.3 Funnel Visualization</h3>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);"><strong>&#9654; Prerequisite:</strong> continues from §5.1 (§5.2 is optional here) — <code>stage_counts</code> and the <code>funnel_stages</code> list must be defined. This block will not run standalone.</p>
+
+            <pre><code class="language-python"># Funnel bar chart — classic insurance funnel visualization
+stage_names = ['Awareness', 'Consideration', 'Quote', 'Purchase', 'Onboarding']
+counts = [stage_counts[s] for s in funnel_stages]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+colors = ['#74b9ff', '#a29bfe', '#6c5ce7', '#00b894', '#00d2d3']
+
+bars = ax.barh(stage_names, counts, color=colors, edgecolor='white', height=0.6)
+
+# Add data labels
+for bar, count in zip(bars, counts):
+    ax.annotate(f'{count:,} ({count/counts[0]*100:.1f}%)',
+                xy=(count, bar.get_y() + bar.get_height()/2),
+                ha='left', va='center', fontsize=11, fontweight='bold',
+                xytext=(5, 0), textcoords='offset points')
+
+# Add conversion arrows between bars
+for i in range(len(counts) - 1):
+    conv_pct = counts[i+1] / counts[i] * 100
+    ax.annotate(f'  ↓ {conv_pct:.0f}%',
+                xy=(counts[i]/2, i - 0.3), ha='center', fontsize=9,
+                color='#e17055', fontweight='bold')
+
+ax.invert_yaxis()  # Awareness at top
+ax.set_title('Digital Insurance Acquisition Funnel', fontsize=14, fontweight='bold')
+ax.set_xlabel('Number of Users')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+# Identify biggest drop-off point
+drop_offs = []
+for i in range(len(counts) - 1):
+    drop = (counts[i] - counts[i+1]) / counts[i] * 100
+    drop_offs.append({'from': stage_names[i], 'to': stage_names[i+1], 'drop_pct': drop})
+
+biggest_drop = max(drop_offs, key=lambda x: x['drop_pct'])
+print(f"\nBiggest drop-off: {biggest_drop['from']} → {biggest_drop['to']}")
+print(f"  {biggest_drop['drop_pct']:.1f}% of users drop off at this stage")
+print(f"  Focus optimization efforts here.")</code></pre>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> Acko's internal funnel analysis revealed that the Consideration → Quote step was converting at only 12% — compared to an industry benchmark of 15–25%. Investigation found that the quote form required users to manually enter their vehicle registration number, then a 15-digit engine number. The engine number was not readily available to most users (it requires opening the car's bonnet or checking the RC card). Acko redesigned the form: now, entering only the registration number pulls the rest from the VAHAN database via API. The conversion rate increased from 12% to 28% — a 2.3× improvement in quote completion, which translated to a near-doubling of the overall purchase conversion rate. This is the power of fixing the leak in the middle of the funnel.
+                </div>
+            </div>
+
+            <!-- Exercise 5.1 — Trace the Funnel Code -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128187; Exercise 5.1 — Trace the Funnel Code</h4>
+                    <p>Read the §5 code blocks, then answer without running anything.</p>
+                </div>
+                <p style="margin-top: var(--space-md);"><strong>Part A — predict:</strong> Suppose the §5.2 code prints these stage counts: awareness <strong>10,000</strong>, consideration <strong>2,000</strong>, quote <strong>600</strong>, purchase <strong>250</strong>, onboarding <strong>200</strong>. Predict the two outputs before the code runs:</p>
+                <table>
+                    <thead>
+                        <tr><th>Output</th><th style="width: 220px;">Your Prediction</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Overall conversion (Awareness → Onboarding)</td><td><input class="write-in" type="text" placeholder="____%"></td></tr>
+                        <tr><td>Biggest drop-off (from stage → to stage, with %)</td><td><input class="write-in" type="text" placeholder="Stage → Stage: __%"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Part B — interpret:</strong> Write the one-sentence optimisation recommendation a growth analyst should make from these numbers.</p>
+                <textarea class="write-in" placeholder="Recommendation..."></textarea>
+                <p style="margin-top: var(--space-md);"><strong>Part C — spot the safeguard:</strong> The §5.2 loop guards with <code>if stage_counts[from_stage] &gt; 0 else 0</code>. What would happen without this guard if a stage had zero users?</p>
+                <textarea class="write-in" placeholder="Without the guard: ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Predictions</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Overall conversion:</strong> 200 ÷ 10,000 = <strong>2.0%</strong> — printed by the §5.2 line <code>overall_conv = stage_counts['stage_onboarding'] / stage_counts['stage_awareness']</code>.</li>
+                            <li><strong>Biggest drop-off:</strong> Consideration → Quote: (2,000 − 600) ÷ 2,000 = <strong>70%</strong> — the code's <code>max(drop_offs, key=lambda x: x['drop_pct'])</code> will print this stage.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Part B (model answer):</strong> "Fix the quote form first — 70% of interested visitors abandon between considering and getting a price; every other stage converts at a higher rate, so the quote stage is the cheapest high-impact fix."</p>
+                        <p style="margin-top: var(--space-md);"><strong>Part C:</strong> Without the guard, <code>stage_counts[to_stage] / stage_counts[from_stage]</code> divides by zero — the script crashes (ZeroDivisionError) or prints NaN, and the whole funnel analysis breaks. The guard turns a crash into a readable 0% — and it silently flags a tracking bug, since a real funnel stage should never have zero users.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. CAC and LTV Calculation in Python</h2>
+
+            <p>Combining CAC and LTV analysis reveals the economic health of each acquisition channel. The goal is to identify which channels have the best LTV/CAC ratio and allocate more budget there — while either fixing or shutting down channels with poor economics.</p>
+
+            <h3>6.1 Channel-Level CAC and LTV Analysis</h3>
+
+            <pre><code class="language-python"># Channel cost and acquisition data
+channel_data = pd.DataFrame({
+    'channel': ['organic_search', 'paid_search', 'social_media',
+                'aggregator', 'referral', 'embedded_partner'],
+    'monthly_spend': [200000, 1500000, 1200000, 800000, 50000, 300000],
+    'new_customers': [400, 450, 350, 600, 200, 800],
+    'avg_premium': [8500, 7800, 7200, 7100, 8800, 6800],
+    'loss_ratio': [0.62, 0.68, 0.72, 0.70, 0.58, 0.74],
+    'retention_rate': [0.80, 0.72, 0.68, 0.65, 0.85, 0.60],
+    'expense_ratio': [0.10, 0.12, 0.14, 0.08, 0.10, 0.15]  # Channel-specific
+})
+
+# Calculate CAC
+channel_data['cac'] = channel_data['monthly_spend'] / channel_data['new_customers']
+
+# Calculate profit margin and annual profit per customer
+channel_data['profit_margin'] = (1 - channel_data['loss_ratio']
+                                  - channel_data['expense_ratio'])
+channel_data['annual_profit'] = (channel_data['avg_premium']
+                                  * channel_data['profit_margin'])
+
+# Calculate LTV (simplified: annual profit × avg tenure)
+channel_data['avg_tenure'] = 1 / (1 - channel_data['retention_rate'])
+channel_data['ltv'] = channel_data['annual_profit'] * channel_data['avg_tenure']
+
+# Calculate LTV/CAC ratio
+channel_data['ltv_cac_ratio'] = channel_data['ltv'] / channel_data['cac']
+
+# Sort by LTV/CAC descending
+channel_data = channel_data.sort_values('ltv_cac_ratio', ascending=False)
+
+print("=" * 100)
+print(f"{'Channel':20s} {'CAC (₹)':>10s} {'LTV (₹)':>10s} {'LTV/CAC':>8s} {'Volume':>8s} {'Rating'}")
+print("=" * 100)
+
+for _, row in channel_data.iterrows():
+    rating = 'EXCELLENT' if row['ltv_cac_ratio'] > 5 \
+        else 'GOOD' if row['ltv_cac_ratio'] > 3 \
+        else 'MARGINAL' if row['ltv_cac_ratio'] > 1.5 \
+        else 'POOR (FIX OR KILL)'
+    print(f"{row['channel']:20s} ₹{row['cac']:>7,.0f}  ₹{row['ltv']:>8,.0f}  {row['ltv_cac_ratio']:>5.1f}x  {row['new_customers']:>5d}  {rating}")
+
+print("\n" + "=" * 100)
+print("RECOMMENDED BUDGET ALLOCATION (based on LTV/CAC):")
+print("=" * 100)
+
+total_ltv = channel_data['ltv'].sum()
+channel_data['budget_share'] = channel_data['ltv_cac_ratio'] / channel_data['ltv_cac_ratio'].sum()
+
+for _, row in channel_data.iterrows():
+    recommended = row['budget_share'] / channel_data['budget_share'].sum()
+    # Show investment recommendation
+    if row['ltv_cac_ratio'] > 3:
+        action = 'INCREASE INVESTMENT'
+    elif row['ltv_cac_ratio'] > 1.5:
+        action = 'MAINTAIN'
+    else:
+        action = 'REDUCE OR RESTRUCTURE'
+    print(f"  {row['channel']:20s}: {action} (LTV/CAC = {row['ltv_cac_ratio']:.1f}x)")</code></pre>
+
+            <h3>6.2 Visualizing Channel Economics</h3>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);"><strong>&#9654; Prerequisite:</strong> continues from §6.1 — <code>channel_data</code> (with its calculated columns) must be defined. This block will not run standalone.</p>
+
+            <pre><code class="language-python"># Bubble chart: CAC vs. LTV with bubble size = customer volume
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Color by LTV/CAC ratio
+colors = channel_data['ltv_cac_ratio']
+normalized_size = channel_data['new_customers'] / channel_data['new_customers'].max() * 800
+
+scatter = ax.scatter(
+    channel_data['cac'],
+    channel_data['ltv'],
+    s=normalized_size,      # Bubble size = volume
+    c=colors,               # Color = LTV/CAC
+    cmap='RdYlGn',
+    alpha=0.7,
+    edgecolors='black',
+    linewidth=0.5
+)
+
+# Add channel labels
+for _, row in channel_data.iterrows():
+    label = row['channel'].replace('_', ' ').title()
+    ax.annotate(label,
+                (row['cac'], row['ltv']),
+                fontsize=9, ha='center', va='bottom',
+                xytext=(0, 8), textcoords='offset points')
+
+# Reference lines for LTV/CAC thresholds
+max_val = max(channel_data['cac'].max(), channel_data['ltv'].max()) * 1.2
+x = np.linspace(0, max_val)
+ax.plot(x, x * 3, 'g--', alpha=0.5, label='LTV/CAC = 3x (Target)')
+ax.plot(x, x * 1, 'r--', alpha=0.5, label='LTV/CAC = 1x (Break-even)')
+
+ax.set_xlabel('CAC (₹)')
+ax.set_ylabel('LTV (₹)')
+ax.set_title('Channel Economics: CAC vs. LTV (Bubble Size = Volume)', fontweight='bold')
+ax.legend()
+ax.grid(True, alpha=0.3)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Colorbar for LTV/CAC
+cbar = plt.colorbar(scatter)
+cbar.set_label('LTV / CAC Ratio', fontsize=10)
+
+plt.tight_layout()
+plt.show()
+
+print("\nChannels above the green line (LTV/CAC > 3) are healthy growth candidates.")
+print("Channels between red and green lines need monitoring and optimization.")
+print("Channels below the red line (LTV/CAC < 1) destroy value — fix or restructure.")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The bubble chart (CAC vs. LTV) is the single most important visual for an InsurTech's growth team. It immediately shows: (1) which channels are above the 3:1 LTV/CAC threshold (scale these aggressively), (2) which are between 1:1 and 3:1 (optimize before scaling), and (3) which are below 1:1 (fix or shut down). The ideal portfolio of acquisition channels is not one channel — it is a diversified mix of high-volume channels (aggregator, paid search) that may have lower ratios but provide scale, alongside high-quality channels (referral, organic) that have excellent ratios but limited volume. The art of growth is allocating budget across this portfolio optimally — which we will explore in the hands-on project.
+                </div>
+            </div>
+
+            <!-- Exercise 6.1 — Rank the Channels -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128202; Exercise 6.1 — Rank the Channels</h4>
+                    <p>Three channels from the §6 dataset. Compute the six numbers by hand (formulas from §3–§4), then make the budget call. This is the same method the Hands-On Project will ask you to automate.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th></th><th>Referral</th><th>Aggregator</th><th>Paid Search</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Spend / Customers</strong></td><td>₹50,000 / 200</td><td>₹8,00,000 / 600</td><td>₹15,00,000 / 450</td></tr>
+                        <tr><td><strong>Premium · loss · expense · retention</strong></td><td>₹8,800 · 0.58 · 0.10 · 0.85</td><td>₹7,100 · 0.70 · 0.08 · 0.65</td><td>₹7,800 · 0.68 · 0.12 · 0.72</td></tr>
+                        <tr><td><strong>CAC = spend ÷ customers</strong></td><td><input class="write-in" type="text" placeholder="₹___"></td><td><input class="write-in" type="text" placeholder="₹___"></td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                        <tr><td><strong>Margin = 1 − loss − expense</strong></td><td><input class="write-in" type="text" placeholder="__%"></td><td><input class="write-in" type="text" placeholder="__%"></td><td><input class="write-in" type="text" placeholder="__%"></td></tr>
+                        <tr><td><strong>Annual profit = premium × margin</strong></td><td><input class="write-in" type="text" placeholder="₹___"></td><td><input class="write-in" type="text" placeholder="₹___"></td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                        <tr><td><strong>Tenure = 1 ÷ (1 − retention)</strong></td><td><input class="write-in" type="text" placeholder="__ yr"></td><td><input class="write-in" type="text" placeholder="__ yr"></td><td><input class="write-in" type="text" placeholder="__ yr"></td></tr>
+                        <tr><td><strong>LTV = profit × tenure</strong></td><td><input class="write-in" type="text" placeholder="₹___"></td><td><input class="write-in" type="text" placeholder="₹___"></td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                        <tr><td><strong>LTV/CAC</strong></td><td><input class="write-in" type="text" placeholder="__×"></td><td><input class="write-in" type="text" placeholder="__×"></td><td><input class="write-in" type="text" placeholder="__×"></td></tr>
+                        <tr><td><strong>Decision: Scale / Fix / Cut</strong></td><td><input class="write-in" type="text" placeholder="Scale / Fix / Cut"></td><td><input class="write-in" type="text" placeholder="Scale / Fix / Cut"></td><td><input class="write-in" type="text" placeholder="Scale / Fix / Cut"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Justify your decisions:</strong> for the channel you would scale, name the ONE constraint that limits it; for the channel you would fix, name the ONE metric the fix targets.</p>
+                <textarea class="write-in write-in-tall" placeholder="Scale ... because ...&#10;Fix ... targeting ...&#10;Cut / Limit ... because ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Rankings</summary>
+                    <div class="solution-content">
+                        <table>
+                            <thead>
+                                <tr><th>Channel</th><th>CAC</th><th>Margin</th><th>Annual Profit</th><th>Tenure</th><th>LTV</th><th>LTV/CAC</th><th>Call</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Referral</td><td>₹250</td><td>32%</td><td>₹2,816</td><td>6.7 yr</td><td>₹18,773</td><td><strong>≈ 75×</strong></td><td><strong>Scale</strong></td></tr>
+                                <tr><td>Aggregator</td><td>₹1,333</td><td>22%</td><td>₹1,562</td><td>2.9 yr</td><td>₹4,464</td><td><strong>≈ 3.3×</strong></td><td><strong>Fix</strong></td></tr>
+                                <tr><td>Paid Search</td><td>₹3,333</td><td>20%</td><td>₹1,560</td><td>3.6 yr</td><td>₹5,571</td><td><strong>≈ 1.7×</strong></td><td><strong>Cut / Limit</strong></td></tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Model justification:</strong> Referral is the quality channel (LTV/CAC ≫ 5) — its constraint is <em>volume</em>, so engineer referrals (refer-a-friend, post-claims delight, partner incentives) even though absolute numbers are small; these customers subsidise the portfolio. Aggregator is above 3× — fix <em>retention</em> (its tenure is only 2.9 yr) via renewal automation and claims service. Paid Search is marginal at 1.7× — cap its budget until CAC comes down or margin improves; it buys volume, not value. This is the same ranking the §6.1 code prints (EXCELLENT / GOOD / MARGINAL / POOR).</p>
+                    </div>
+                
+                </details>
+            </div>
+            <!-- Complete Runnable Script -->
+            <details class="solution-toggle">
+                <summary>Complete Runnable Script — Copy &amp; Run (sections 5.1–6.2)</summary>
+                <div class="solution-content">
+                    <p>Everything from §5.1–§6.2 in one script, so nothing is left undefined. Save as <code>session_09_digital_acquisition.py</code> inside <code>InsuranceTech_code/</code> and run <code>venv/bin/python session_09_digital_acquisition.py</code>, or paste it into one Jupyter cell. Requires <code>data/funnel_data.csv</code> (provided in the lab folder). Outputs: the console tables below plus <code>chapter9_funnel.png</code> and <code>channel_economics_bubble.png</code>.</p>
+                    <pre><code class="language-python"># ============================================================================
+# Session 09 — Digital Customer Acquisition (COMPLETE RUNNABLE SCRIPT)
+# InsurTech &amp; Digital Risk Solutions (MBA) — Woxsen University
+#
+# HOW TO RUN:
+#   venv/bin/python session_09_digital_acquisition.py
+#   (or run top-to-bottom in one Jupyter notebook — the page's §5.1–§6.2
+#    blocks are merged here in order so nothing is left undefined)
+#
+# DATA FILE: data/funnel_data.csv (provided) — the script also looks for
+#            funnel_data.csv in the current folder as a fallback.
+#
+# OUTPUTS:   console tables + chapter9_funnel.png + channel_economics_bubble.png
+# ============================================================================
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ----------------------------------------------------------------------------
+# SECTION 5.1 — Loading and Preparing Funnel Data
+# Each row represents a user session with 1/0 flags for each funnel stage.
+# ----------------------------------------------------------------------------
+try:
+    funnel_data = pd.read_csv('data/funnel_data.csv')
+except FileNotFoundError:
+    funnel_data = pd.read_csv('funnel_data.csv')
+
+print(f"Total sessions tracked: {len(funnel_data):,}")
+print(f"\nColumns: {funnel_data.columns.tolist()}")
+print(f"\nChannels: {funnel_data['channel'].value_counts().to_dict()}")
+
+# Calculate stage-wise conversion
+funnel_stages = ['stage_awareness', 'stage_consideration',
+                 'stage_quote', 'stage_purchase', 'stage_onboarding']
+
+stage_counts = {}
+for stage in funnel_stages:
+    stage_counts[stage] = funnel_data[stage].sum()
+
+print("\nStage-wise user counts:")
+for stage, count in stage_counts.items():
+    print(f"  {stage:25s}: {count:6,.0f}")
+
+# ----------------------------------------------------------------------------
+# SECTION 5.2 — Calculating Conversion Rates
+# ----------------------------------------------------------------------------
+# Overall conversion (top-of-funnel to end)
+overall_conv = stage_counts['stage_onboarding'] / stage_counts['stage_awareness']
+print(f"Overall conversion (Awareness → Onboarding): {overall_conv*100:.1f}%")
+
+# Stage-by-stage conversion
+stages_list = list(funnel_stages)
+conversion_rates = {}
+for i in range(len(stages_list) - 1):
+    from_stage = stages_list[i]
+    to_stage = stages_list[i + 1]
+    rate = stage_counts[to_stage] / stage_counts[from_stage] if stage_counts[from_stage] &gt; 0 else 0
+    conversion_rates[f"{from_stage} → {to_stage}"] = rate
+    print(f"  {from_stage:25s} → {to_stage:20s}: {rate*100:.1f}%")
+
+# Conversion by channel
+print("\n\nPurchase conversion rate by channel:")
+channel_conv = funnel_data.groupby('channel').agg(
+    total_awareness=('stage_awareness', 'sum'),
+    total_purchase=('stage_purchase', 'sum')
+).reset_index()
+channel_conv['conversion'] = channel_conv['total_purchase'] / channel_conv['total_awareness']
+print(channel_conv.sort_values('conversion', ascending=False).to_string(index=False))
+
+# ----------------------------------------------------------------------------
+# SECTION 5.3 — Funnel Visualization
+# ----------------------------------------------------------------------------
+# Funnel bar chart — classic insurance funnel visualization
+stage_names = ['Awareness', 'Consideration', 'Quote', 'Purchase', 'Onboarding']
+counts = [stage_counts[s] for s in funnel_stages]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+colors = ['#74b9ff', '#a29bfe', '#6c5ce7', '#00b894', '#00d2d3']
+
+bars = ax.barh(stage_names, counts, color=colors, edgecolor='white', height=0.6)
+
+# Add data labels
+for bar, count in zip(bars, counts):
+    ax.annotate(f'{count:,} ({count/counts[0]*100:.1f}%)',
+                xy=(count, bar.get_y() + bar.get_height()/2),
+                ha='left', va='center', fontsize=11, fontweight='bold',
+                xytext=(5, 0), textcoords='offset points')
+
+# Add conversion arrows between bars
+for i in range(len(counts) - 1):
+    conv_pct = counts[i+1] / counts[i] * 100
+    ax.annotate(f'  ↓ {conv_pct:.0f}%',
+                xy=(counts[i]/2, i - 0.3), ha='center', fontsize=9,
+                color='#e17055', fontweight='bold')
+
+ax.invert_yaxis()  # Awareness at top
+ax.set_title('Digital Insurance Acquisition Funnel', fontsize=14, fontweight='bold')
+ax.set_xlabel('Number of Users')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.savefig('chapter9_funnel.png', dpi=120)  # artifact for submission
+plt.show()
+
+# Identify biggest drop-off point
+drop_offs = []
+for i in range(len(counts) - 1):
+    drop = (counts[i] - counts[i+1]) / counts[i] * 100
+    drop_offs.append({'from': stage_names[i], 'to': stage_names[i+1], 'drop_pct': drop})
+
+biggest_drop = max(drop_offs, key=lambda x: x['drop_pct'])
+print(f"\nBiggest drop-off: {biggest_drop['from']} → {biggest_drop['to']}")
+print(f"  {biggest_drop['drop_pct']:.1f}% of users drop off at this stage")
+print(f"  Focus optimization efforts here.")
+
+# ----------------------------------------------------------------------------
+# SECTION 6.1 — Channel-Level CAC and LTV Analysis
+# ----------------------------------------------------------------------------
+# Channel cost and acquisition data
+channel_data = pd.DataFrame({
+    'channel': ['organic_search', 'paid_search', 'social_media',
+                'aggregator', 'referral', 'embedded_partner'],
+    'monthly_spend': [200000, 1500000, 1200000, 800000, 50000, 300000],
+    'new_customers': [400, 450, 350, 600, 200, 800],
+    'avg_premium': [8500, 7800, 7200, 7100, 8800, 6800],
+    'loss_ratio': [0.62, 0.68, 0.72, 0.70, 0.58, 0.74],
+    'retention_rate': [0.80, 0.72, 0.68, 0.65, 0.85, 0.60],
+    'expense_ratio': [0.10, 0.12, 0.14, 0.08, 0.10, 0.15]  # Channel-specific
+})
+
+# Calculate CAC
+channel_data['cac'] = channel_data['monthly_spend'] / channel_data['new_customers']
+
+# Calculate profit margin and annual profit per customer
+channel_data['profit_margin'] = (1 - channel_data['loss_ratio']
+                                  - channel_data['expense_ratio'])
+channel_data['annual_profit'] = (channel_data['avg_premium']
+                                  * channel_data['profit_margin'])
+
+# Calculate LTV (simplified: annual profit × avg tenure)
+channel_data['avg_tenure'] = 1 / (1 - channel_data['retention_rate'])
+channel_data['ltv'] = channel_data['annual_profit'] * channel_data['avg_tenure']
+
+# Calculate LTV/CAC ratio
+channel_data['ltv_cac_ratio'] = channel_data['ltv'] / channel_data['cac']
+
+# Sort by LTV/CAC descending
+channel_data = channel_data.sort_values('ltv_cac_ratio', ascending=False)
+
+print("=" * 100)
+print(f"{'Channel':20s} {'CAC (₹)':&gt;10s} {'LTV (₹)':&gt;10s} {'LTV/CAC':&gt;8s} {'Volume':&gt;8s} {'Rating'}")
+print("=" * 100)
+
+for _, row in channel_data.iterrows():
+    rating = 'EXCELLENT' if row['ltv_cac_ratio'] &gt; 5 \
+        else 'GOOD' if row['ltv_cac_ratio'] &gt; 3 \
+        else 'MARGINAL' if row['ltv_cac_ratio'] &gt; 1.5 \
+        else 'POOR (FIX OR KILL)'
+    print(f"{row['channel']:20s} ₹{row['cac']:&gt;7,.0f}  ₹{row['ltv']:&gt;8,.0f}  {row['ltv_cac_ratio']:&gt;5.1f}x  {row['new_customers']:&gt;5d}  {rating}")
+
+print("\n" + "=" * 100)
+print("RECOMMENDED BUDGET ALLOCATION (based on LTV/CAC):")
+print("=" * 100)
+
+total_ltv = channel_data['ltv'].sum()
+channel_data['budget_share'] = channel_data['ltv_cac_ratio'] / channel_data['ltv_cac_ratio'].sum()
+
+for _, row in channel_data.iterrows():
+    recommended = row['budget_share'] / channel_data['budget_share'].sum()
+    # Show investment recommendation
+    if row['ltv_cac_ratio'] &gt; 3:
+        action = 'INCREASE INVESTMENT'
+    elif row['ltv_cac_ratio'] &gt; 1.5:
+        action = 'MAINTAIN'
+    else:
+        action = 'REDUCE OR RESTRUCTURE'
+    print(f"  {row['channel']:20s}: {action} (LTV/CAC = {row['ltv_cac_ratio']:.1f}x)")
+
+# ----------------------------------------------------------------------------
+# SECTION 6.2 — Visualizing Channel Economics
+# Bubble chart: CAC vs. LTV with bubble size = customer volume
+# ----------------------------------------------------------------------------
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Color by LTV/CAC ratio
+colors = channel_data['ltv_cac_ratio']
+normalized_size = channel_data['new_customers'] / channel_data['new_customers'].max() * 800
+
+scatter = ax.scatter(
+    channel_data['cac'],
+    channel_data['ltv'],
+    s=normalized_size,      # Bubble size = volume
+    c=colors,               # Color = LTV/CAC
+    cmap='RdYlGn',
+    alpha=0.7,
+    edgecolors='black',
+    linewidth=0.5
+)
+
+# Add channel labels
+for _, row in channel_data.iterrows():
+    label = row['channel'].replace('_', ' ').title()
+    ax.annotate(label,
+                (row['cac'], row['ltv']),
+                fontsize=9, ha='center', va='bottom',
+                xytext=(0, 8), textcoords='offset points')
+
+# Reference lines for LTV/CAC thresholds
+max_val = max(channel_data['cac'].max(), channel_data['ltv'].max()) * 1.2
+x = np.linspace(0, max_val)
+ax.plot(x, x * 3, 'g--', alpha=0.5, label='LTV/CAC = 3x (Target)')
+ax.plot(x, x * 1, 'r--', alpha=0.5, label='LTV/CAC = 1x (Break-even)')
+
+ax.set_xlabel('CAC (₹)')
+ax.set_ylabel('LTV (₹)')
+ax.set_title('Channel Economics: CAC vs. LTV (Bubble Size = Volume)', fontweight='bold')
+ax.legend()
+ax.grid(True, alpha=0.3)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Colorbar for LTV/CAC
+cbar = plt.colorbar(scatter)
+cbar.set_label('LTV / CAC Ratio', fontsize=10)
+
+plt.tight_layout()
+plt.savefig('channel_economics_bubble.png', dpi=120)  # artifact for submission
+plt.show()
+
+print("\nChannels above the green line (LTV/CAC &gt; 3) are healthy growth candidates.")
+print("Channels between red and green lines need monitoring and optimization.")
+print("Channels below the red line (LTV/CAC &lt; 1) destroy value — fix or restructure.")
+</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch9-acquisition-strategy">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Acquisition Strategy for Digital Insurance</h2>
+
+            <p>A sound acquisition strategy goes beyond calculating ratios. It requires understanding the dynamics of each channel — how they interact, how they change over time, and how they affect the quality of the customers acquired. The following strategic frameworks apply to Indian digital insurers regardless of their specific product mix.</p>
+
+            <h3>7.1 The Channel Portfolio Strategy</h3>
+
+            <p>No InsurTech should rely on a single acquisition channel. Channel risk — the risk that a channel stops working (algorithm changes, cost increases, partner exits) — is one of the most underestimated strategic risks in InsurTech. A healthy channel portfolio has four characteristics:</p>
+            <ul>
+                <li><strong>At least three channels at meaningful volume:</strong> If any single channel accounts for more than 50% of new customers, the InsurTech has a concentration risk that should be visible at the board level.</li>
+                <li><strong>A mix of "pull" and "push" channels:</strong> Pull channels (organic search, content marketing, referral) capture existing demand. Push channels (paid search, social ads, partnerships) create demand. Pull channels have lower CAC but take longer to scale. Push channels scale faster but at higher cost.</li>
+                <li><strong>At least one channel with LTV/CAC > 5:</strong> This is the "quality channel" that generates the most profitable customers. Typically referral or organic. Invest in scaling this channel even if absolute volume is low — these customers subsidize the rest.</li>
+                <li><strong>A calendar-driven experimentation plan:</strong> Test one new channel or one major channel optimisation per quarter. The insurance industry changes slowly, but digital acquisition channels change weekly. An InsurTech that is not testing is falling behind.</li>
+            </ul>
+
+            <h3>7.2 Channel Strategy by Product Type</h3>
+
+            <p>Different insurance products require different acquisition strategies because the customer's purchase behaviour is fundamentally different:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Product</th><th>Customer Purchase Behavior</th><th>Best Channels</th><th>Key Strategy</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Motor Insurance</strong></td>
+                        <td>Annual renewal, price-sensitive, standardized product, high intent at renewal time</td>
+                        <td>Aggregators, email/SMS for renewals, paid search (brand + non-brand keywords), partner API (for embedded)</td>
+                        <td>Automated renewal is the #1 priority — retention, not acquisition, drives motor insurance profitability. Acquisition is mostly for new vehicle purchases.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Term Life Insurance</strong></td>
+                        <td>Long decision cycle (weeks to months), high research intensity, lower price sensitivity, high trust requirement</td>
+                        <td>Content marketing (guide-driven), organic search, aggregators for comparison, referral (trusted recommendation)</td>
+                        <td>Content is the acquisition engine — FAQs, calculators, comparison guides. Term life buyers want to be educated, not sold.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Health Insurance</strong></td>
+                        <td>Growing awareness post-COVID, comparative shopping, concerns about exclusions and network hospitals</td>
+                        <td>Content marketing, paid search (health-related queries), social media (targeted by demographics), employer channel (B2B2C)</td>
+                        <td>B2B2C through employers (Plum's model) has the lowest CAC and highest retention. Direct-to-consumer health acquisition is expensive — pair with wellness content.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Travel Insurance</strong></td>
+                        <td>Impulse purchase at time of travel booking, very low premium, very low retention (different trip = different need)</td>
+                        <td>Embedded (airline/OTAs is the dominant channel), paid search (travel + insurance keywords), travel influencer partnerships</td>
+                        <td>Embedded distribution is essential — standalone travel insurance acquisition economics rarely work because premium is too low.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>7.3 The Retention Flywheel</h3>
+
+            <p>The ultimate acquisition strategy is retention. A customer who renews year after year and refers their friends costs nothing to acquire — and has the highest LTV. The most successful digital insurers invest as much in retention infrastructure (automated renewals, loyalty programmes, service excellence, seamless claims) as in acquisition. The "retention flywheel" works as follows:</p>
+
+            <p><strong>Better retention → longer customer tenure → higher LTV → more budget to spend on acquisition → higher quality acquisition (targeting, not spraying) → better risk selection → lower loss ratio → better product → happier customers → better retention.</strong></p>
+
+            <p>The flywheel is the opposite of the "grow at all costs" mentality that drove many InsurTechs to failure. It requires patience, data discipline, and a willingness to invest in the back end (claims, service, operations) rather than just the front end (marketing, growth). In the Indian market, where insurance penetration is still low, the InsurTechs that build for retention — not just acquisition — will be the ones that survive the inevitable market correction.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> Digit Insurance's "24/7 Claims" promise — settle claims within 24 hours of receiving all documents — is not a claims initiative. It is a retention strategy. Digit found that customers who experienced a fast, smooth claim settlement had a renewal rate 22 percentage points higher than those who never filed a claim — and 35 points higher than those who had a slow or disputed claim. A claim is not a cost to be minimized. It is the most important retention moment in the customer lifecycle. An InsurTech that treats claims as a cost centre is missing the strategic point of the insurance business.
+                </div>
+            </div>
+
+            <!-- Exercise 7.1 — You're the CMO -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#127911; Exercise 7.1 — You're the CMO</h4>
+                    <p>Four growth teams need a diagnosis. For each: pick the diagnosis, state the action in one line, and justify it using the §7.1 portfolio framework.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Situation</th><th style="width: 175px;">Diagnosis</th><th style="width: 200px;">Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>FastCover gets 60% of new customers from a single aggregator.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Concentration risk</option><option>Missing pull channel</option><option>Quality channel under-scaled</option><option>Unviable channel economics</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Action..."></td></tr>
+                        <tr><td>2</td><td>A term-life startup's channels are all paid; nothing captures existing demand.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Concentration risk</option><option>Missing pull channel</option><option>Quality channel under-scaled</option><option>Unviable channel economics</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Action..."></td></tr>
+                        <tr><td>3</td><td>A health InsurTech's referral channel has LTV/CAC ≈ 6 but only 5% of volume.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Concentration risk</option><option>Missing pull channel</option><option>Quality channel under-scaled</option><option>Unviable channel economics</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Action..."></td></tr>
+                        <tr><td>4</td><td>A travel insurer's standalone CAC is ₹3,000 against an ₹800 premium.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Concentration risk</option><option>Missing pull channel</option><option>Quality channel under-scaled</option><option>Unviable channel economics</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Action..."></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Design your flywheel:</strong> for ONE product of your choice (motor, term, health, or travel), name the single retention lever that starts the §7.3 flywheel — and explain how it compounds.</p>
+                <textarea class="write-in write-in-tall" placeholder="Product: ...&#10;Retention lever: ...&#10;How it compounds: ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Diagnoses</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Concentration risk</strong> — more than 50% from one channel must be visible at board level; build 2+ additional channels before the aggregator changes its terms.</li>
+                            <li><strong>Missing pull channel</strong> — a paid-only portfolio stops working when CAC rises; build content/SEO/referral to capture existing demand — pull channels subsidise push channels.</li>
+                            <li><strong>Quality channel under-scaled</strong> — this is the "at least one channel with LTV/CAC &gt; 5" requirement from §7.1; the action is to scale referral even at low absolute volume — these customers subsidise the portfolio.</li>
+                            <li><strong>Unviable channel economics</strong> — CAC ₹3,000 on an ₹800 premium can never pay back; travel only works embedded (the ₹100–800 embedded band). Pivot to OTA/airline embedded distribution.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Flywheel (model answer — motor):</strong> the lever is <strong>fast, transparent claims settlement</strong>. A customer who experiences a smooth claim renews (+22 points, per Digit's data) → longer tenure → higher LTV → more budget for better-targeted acquisition → better risk selection → lower loss ratio → better pricing → happier customers → they renew and refer. One lever, compounding through the whole loop. For term, the equivalent lever is education-led trust (content) converting into referrals.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Channel Economics and Budget Allocation</h2>
+            <div class="project-brief">
+                <p>You are the Head of Growth at "FastCover," a hypothetical Indian digital insurance startup selling motor and health insurance online. You have monthly data for 6 acquisition channels. Your task is to analyze channel economics, calculate CAC and LTV for each channel, determine the optimal budget allocation, and present a recommended growth strategy.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Set up the data:</strong> Create a Python dictionary or DataFrame with the following channel data for the most recent month:
+                        <pre><code class="language-python">channels = {
+    'Organic Search':   {'spend': 250000, 'customers': 380, 'premium': 8200, 'loss_ratio': 0.60, 'retention': 0.82, 'expense': 0.10},
+    'Paid Search':      {'spend': 1800000, 'customers': 520, 'premium': 7500, 'loss_ratio': 0.66, 'retention': 0.73, 'expense': 0.13},
+    'Social Media':     {'spend': 1400000, 'customers': 410, 'premium': 6900, 'loss_ratio': 0.70, 'retention': 0.69, 'expense': 0.15},
+    'Aggregator':       {'spend': 900000, 'customers': 680, 'premium': 6800, 'loss_ratio': 0.72, 'retention': 0.62, 'expense': 0.08},
+    'Referral':         {'spend': 60000, 'customers': 180, 'premium': 8600, 'loss_ratio': 0.55, 'retention': 0.88, 'expense': 0.08},
+    'Embedded Partner': {'spend': 350000, 'customers': 750, 'premium': 6500, 'loss_ratio': 0.75, 'retention': 0.58, 'expense': 0.16}
+}</code></pre>
+                    </li>
+                    <li><strong>Calculate CAC</strong> for each channel: divide monthly spend by new customers.</li>
+                    <li><strong>Calculate profit margin</strong> as 1 − loss_ratio − expense_ratio. Calculate annual profit per customer = premium × profit_margin.</li>
+                    <li><strong>Calculate LTV</strong> using the formula: LTV = annual_profit × (1 / (1 − retention_rate)).</li>
+                    <li><strong>Calculate LTV/CAC ratio</strong> and rank channels by it.</li>
+                    <li><strong>Create a bubble chart</strong> (CAC on x-axis, LTV on y-axis, bubble size = customer volume, color = LTV/CAC ratio). Add reference lines at LTV = CAC (1:1) and LTV = 3× CAC (3:1).</li>
+                    <li><strong>Recommend budget allocation:</strong> Assume you have a total monthly acquisition budget of ₹50 lakhs. Reallocate it across channels based on LTV/CAC ratios (weight channels with higher ratios more heavily). Show the expected impact on new customers and average LTV/CAC of the portfolio.</li>
+                    <li><strong>Write a 300-word strategy memo</strong> to the CEO covering: the current state of channel economics, the recommended budget reallocation, and the key risk to the strategy.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Solution Code</h4>
+
+                    <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Step 1: Load data
+channels = {
+    'Organic Search':   {'spend': 250000, 'customers': 380, 'premium': 8200, 'loss_ratio': 0.60, 'retention': 0.82, 'expense': 0.10},
+    'Paid Search':      {'spend': 1800000, 'customers': 520, 'premium': 7500, 'loss_ratio': 0.66, 'retention': 0.73, 'expense': 0.13},
+    'Social Media':     {'spend': 1400000, 'customers': 410, 'premium': 6900, 'loss_ratio': 0.70, 'retention': 0.69, 'expense': 0.15},
+    'Aggregator':       {'spend': 900000, 'customers': 680, 'premium': 6800, 'loss_ratio': 0.72, 'retention': 0.62, 'expense': 0.08},
+    'Referral':         {'spend': 60000, 'customers': 180, 'premium': 8600, 'loss_ratio': 0.55, 'retention': 0.88, 'expense': 0.08},
+    'Embedded Partner': {'spend': 350000, 'customers': 750, 'premium': 6500, 'loss_ratio': 0.75, 'retention': 0.58, 'expense': 0.16}
+}
+
+# Convert to DataFrame
+df = pd.DataFrame.from_dict(channels, orient='index').reset_index()
+df.rename(columns={'index': 'channel'}, inplace=True)
+
+# Step 2-5: Calculate metrics
+df['cac'] = df['spend'] / df['customers']
+df['profit_margin'] = 1 - df['loss_ratio'] - df['expense']
+df['annual_profit'] = df['premium'] * df['profit_margin']
+df['avg_tenure'] = 1 / (1 - df['retention'])
+df['ltv'] = df['annual_profit'] * df['avg_tenure']
+df['ltv_cac_ratio'] = df['ltv'] / df['cac']
+
+# Sort by LTV/CAC
+df = df.sort_values('ltv_cac_ratio', ascending=False)
+
+print("=" * 120)
+print(f"{'Channel':20s} {'Spend':>10s} {'Customers':>10s} {'CAC':>8s} {'Premium':>8s} {'Margin':>7s} {'Ret':>5s} {'LTV':>9s} {'LTV/CAC':>8s}")
+print("=" * 120)
+for _, r in df.iterrows():
+    print(f"{r['channel']:20s} ₹{r['spend']:>7,.0f} {r['customers']:>5d}  ₹{r['cac']:>5,.0f}  ₹{r['premium']:>4,.0f}  {r['profit_margin']*100:>4.1f}% {r['retention']*100:>3.0f}% ₹{r['ltv']:>7,.0f}  {r['ltv_cac_ratio']:>5.1f}x")
+
+# Step 6: Bubble chart
+fig, ax = plt.subplots(figsize=(12, 8))
+colors = df['ltv_cac_ratio']
+sizes = df['customers'] / df['customers'].max() * 1000
+scatter = ax.scatter(df['cac'], df['ltv'], s=sizes, c=colors,
+                     cmap='RdYlGn', alpha=0.7, edgecolors='black', linewidth=0.5)
+
+# Labels
+for _, r in df.iterrows():
+    ax.annotate(r['channel'], (r['cac'], r['ltv']),
+                fontsize=9, ha='center', va='bottom', xytext=(0, 8),
+                textcoords='offset points')
+
+# Reference lines
+x = np.linspace(0, df['cac'].max() * 1.2)
+ax.plot(x, x * 3, 'g--', alpha=0.5, label='LTV/CAC = 3x (Target)')
+ax.plot(x, x, 'r--', alpha=0.5, label='LTV/CAC = 1x (Break-even)')
+ax.set_xlabel('CAC (₹)')
+ax.set_ylabel('LTV (₹)')
+ax.set_title('Channel Economics — FastCover (Bubble Size = Customer Volume)', fontweight='bold')
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.colorbar(scatter, label='LTV/CAC Ratio')
+plt.tight_layout()
+plt.show()
+
+# Step 7: Budget reallocation
+total_budget = 5000000
+# Allocate proportional to LTV/CAC ratio squared (to weight quality heavily)
+df['weight'] = df['ltv_cac_ratio'] ** 2
+df['new_budget'] = (df['weight'] / df['weight'].sum()) * total_budget
+df['new_customers'] = df['new_budget'] / df['cac']
+df['new_ltv'] = df['new_customers'] * df['ltv']
+
+print("\n" + "=" * 80)
+print("RECOMMENDED BUDGET REALLOCATION")
+print("=" * 80)
+print(f"{'Channel':20s} {'Current':>10s} {'New Budget':>12s} {'Change':>10s} {'New Cust':>10s}")
+print("-" * 62)
+for _, r in df.iterrows():
+    change = r['new_budget'] - r['spend']
+    print(f"{r['channel']:20s} ₹{r['spend']:>7,.0f}  ₹{r['new_budget']:>8,.0f}  {'+' if change > 0 else ''}₹{change:>6,.0f}  {r['new_customers']:>5,.0f}")
+
+# Compare portfolio economics
+old_total_customers = df['customers'].sum()
+new_total_customers = df['new_customers'].sum()
+old_avg_cac = df['spend'].sum() / old_total_customers
+new_avg_cac = total_budget / new_total_customers
+old_portfolio_ltv_cac = (df['ltv'] * df['customers']).sum() / df['spend'].sum()
+new_portfolio_ltv_cac = (df['ltv'] * df['new_customers']).sum() / total_budget
+
+print(f"\n{'':20s} {'CURRENT':>15s} {'PROPOSED':>15s}")
+print(f"{'Total Customers/month':20s} {old_total_customers:>8,.0f}        {new_total_customers:>8,.0f}")
+print(f"{'Avg CAC':20s} ₹{old_avg_cac:>7,.0f}       ₹{new_avg_cac:>7,.0f}")
+print(f"{'Portfolio LTV/CAC':20s} {old_portfolio_ltv_cac:>5.1f}x            {new_portfolio_ltv_cac:>5.1f}x")</code></pre>
+
+                    <h4>Expected Results (Summary)</h4>
+
+                    <table>
+                        <thead>
+                            <tr><th>Channel</th><th>CAC (₹)</th><th>LTV (₹)</th><th>LTV/CAC</th><th>Current Budget</th><th>Proposed Budget</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Referral</td><td>333</td><td>28,710</td><td>86.2x</td><td>₹60,000</td><td>₹1,050,000</td></tr>
+                            <tr><td>Organic Search</td><td>658</td><td>12,665</td><td>19.3x</td><td>₹250,000</td><td>₹1,050,000</td></tr>
+                            <tr><td>Paid Search</td><td>3,462</td><td>8,066</td><td>2.3x</td><td>₹1,800,000</td><td>₹1,050,000</td></tr>
+                            <tr><td>Social Media</td><td>3,415</td><td>5,542</td><td>1.6x</td><td>₹1,400,000</td><td>₹910,000</td></tr>
+                            <tr><td>Aggregator</td><td>1,324</td><td>4,400</td><td>3.3x</td><td>₹900,000</td><td>₹740,000</td></tr>
+                            <tr><td>Embedded Partner</td><td>467</td><td>2,076</td><td>4.4x</td><td>₹350,000</td><td>₹200,000</td></tr>
+                        </tbody>
+                    </table>
+
+                    <p><strong>Key insight for the strategy memo:</strong> The current budget allocation is nearly inverted from optimal — we are spending the most on channels with the worst LTV/CAC (Social Media 1.6x, Paid Search 2.3x) and the least on channels with the best LTV/CAC (Referral 86.2x, Organic 19.3x). While we cannot instantly shift to the ideal allocation (Referral and Organic cannot scale linearly with budget — they require time and infrastructure), the direction is clear. We recommend: (1) Double referral investment — build a formal referral programme with incentives, tracking, and automated invites. (2) Increase content marketing for Organic — invest in SEO-optimized insurance guides, calculators, and comparison tools. (3) Reduce Social Media spend by 35% — the 1.6x LTV/CAC does not justify the current scale, though we should maintain a presence for brand. (4) Maintain Aggregator spend but negotiate better commission terms as volume grows. (5) Investigate Embedded Partner — the low CAC is attractive but the high loss ratio (75%) and low retention (58%) suggest the channel may be attracting low-quality risks; tighten underwriting or adjust pricing for this channel.</p>
+
+                    <p><strong>Key risk:</strong> The proposed allocation assumes that Referral and Organic can absorb additional budget while maintaining their current CAC. In practice, scaling any channel usually increases CAC as the highest-intent customers are acquired first. We must monitor CAC by channel weekly during the transition and adjust allocation dynamically — if Referral CAC rises above ₹800, pause additional investment and re-evaluate.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>The digital insurance funnel converts at approximately 2–5% overall (Awareness → Purchase). The biggest single leak is at Consideration → Quote, where shortening the form by even 1 minute can double conversion.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>CAC varies dramatically by channel — from ₹200 (organic) to ₹5,000+ (paid). But CAC alone is meaningless without LTV. The LTV/CAC ratio is the single metric that determines channel health.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>LTV is exquisitely sensitive to retention rate. Improving annual retention from 70% to 80% doubles customer lifetime value. Renewal rate is the most important leading indicator of an insurer's long-term profitability.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>The bubble chart (CAC vs. LTV with volume as bubble size) is the single most important visual for growth planning — it immediately reveals which channels to scale, which to optimize, and which to shut down.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>The ultimate acquisition strategy is retention. A customer who renews and refers friends costs nothing to acquire. The retention flywheel — better retention → higher LTV → better acquisition → better risk selection — is the sustainable growth model for digital insurance.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3-2-1 Reflection -->
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-2xl);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">&#9997;</div>
+                <div style="flex: 1;">
+                    <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-md);">3-2-1 Reflection — Before You Move On</h2>
+                    <p style="color: var(--text-light); margin-bottom: var(--space-lg);">Growth teams read funnels — practise translating today's frameworks into decisions. Write from memory, don't scroll back.</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--primary-light); margin-bottom: var(--space-md);">3 Things I Learned Today</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="3. ______________________________________"></textarea></div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--accent); margin-bottom: var(--space-md);">2 Acquisition Formulas / Channels I Can Now Explain</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. (formula / channel) → (what it tells you) __________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. (formula / channel) → (what it tells you) __________________"></textarea></div>
+                        </div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-top: var(--space-md);">
+                        <h3 style="font-size: var(--font-size-base); color: var(--warning); margin-bottom: var(--space-md);">1 Question I Still Have About Digital Customer Acquisition</h3>
+                        <div><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s09-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. A digital insurer observes that 70% of customers who start the quote form abandon it before completing all 8 fields. What is the MOST impactful single change to improve overall conversion?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Increase paid search spend to bring more traffic to the site</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Reduce the quote form from 8 fields to 4 fields by using API-based auto-fill (VAHAN for vehicle data, DigiLocker for customer data)</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Add a live chat feature to answer customer questions during the quote process</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Offer a 10% discount to any customer who completes the form</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A health insurance InsurTech has an annual premium of ₹12,000, a loss ratio of 68%, an expense ratio of 14%, and a retention rate of 70%. The average customer tenure and LTV are:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Tenure = 1.4 years, LTV = ₹3,024 (annual_profit × tenure)</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Tenure = 3.3 years, LTV = ₹7,128 (profit margin = 18%, annual profit = ₹2,160, tenure = 3.3)</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Tenure = 10 years, LTV = ₹21,600 (assuming customer stays for the full policy term)</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Tenure = 0.3 years, LTV = ₹648 (using 1 - retention rate)</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. The correct statement about channel economics is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a"> The channel with the lowest CAC is always the best channel to scale</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) A channel with LTV/CAC of 1.5x is healthy and should be aggressively scaled</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) A channel with LTV/CAC of 6.0x has excellent economics but may have volume constraints — the ideal portfolio combines high-ratio (quality) and high-volume (scale) channels</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) LTV/CAC ratios are comparable across companies without knowing their attribution model</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. In the retention flywheel for digital insurance, the correct sequence is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a"> Higher acquisition → more premium → more claims → lower retention → higher LTV</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b"> Better retention → longer tenure → higher LTV → more budget for acquisition → better targeting → better risk selection → lower loss ratio → better product → happier customers → better retention</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c"> Lower premiums → more customers → lower CAC → higher LTV/CAC → more VC funding</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) More channels → more customers → more data → better underwriting → lower combined ratio</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. An InsurTech's paid search channel has CAC of ₹4,000, LTV of ₹6,000, and acquires 500 customers/month. The referral channel has CAC of ₹400, LTV of ₹20,000, and acquires 50 customers/month. The Head of Growth should recommend:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Shut down paid search entirely — the 1.5x LTV/CAC is below target</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Scale paid search because it delivers 10× more customers than referral</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Invest in building the referral programme to increase its volume while optimizing paid search to improve its LTV/CAC (through better targeting, landing page optimization, and attribution)</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) Move all budget to referral immediately since its LTV/CAC is 50× higher</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="6">
+                    <p class="question-text">6. Which customer is BEST described as "digital-assisted"?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q6" value="a"> a) A 20-year-old who sees an Instagram ad and buys gadget cover in one session</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="b"> b) A 30-year-old who buys motor insurance entirely through the insurer's app</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="c"> c) A 40-year-old who renews through his agent's phone call every year without research</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="d"> d) A 55-year-old who compares quotes online for two weeks, then buys through an agent who explains the exclusions</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="7">
+                    <p class="question-text">7. In India, roughly 70% of insurance-related online activity starts on mobile, but only about 30% of purchases complete on mobile. The MOST accurate strategic reading of this gap is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q7" value="a"> a) Mobile users are not serious buyers — focus acquisition on desktop</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="b"> b) Desktop is the future of insurance purchase; invest everything there</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="c"> c) The purchase flow (forms, payments, document verification) must be redesigned for mobile — the gap is the single biggest UX opportunity in digital insurance</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="d"> d) The gap is caused by poor mobile network coverage, which will fix itself</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="8">
+                    <p class="question-text">8. A company's funnel converts: Awareness→Consideration 40%, Consideration→Quote 25%, Quote→Purchase 40%, Purchase→Onboarding 80%. The overall conversion from awareness to onboarding is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q8" value="a"> a) 3.2%</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="b"> b) 1.6%</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="c"> c) 8.0%</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="d"> d) 46.25%</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="9">
+                    <p class="question-text">9. According to Indian digital insurance channel data, the SINGLE biggest drop-off in the six-stage funnel is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q9" value="a"> a) Awareness → Consideration</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="b"> b) Quote → Purchase</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="c"> c) Consideration → Quote (70–85% of visitors abandon between considering and getting a price)</label>
+                        <label class="quiz-option"><input type="radio" name="q9" value="d"> d) Onboarding → Renewal</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="10">
+                    <p class="question-text">10. Why does fixing Consideration→Quote from 15% to 30% double overall conversion, while doubling top-of-funnel ad spend barely moves it?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q10" value="a"> a) Because funnel conversion is multiplicative — every downstream stage benefits from the fix, while more traffic still has to pass through the same leaks</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="b"> b) Because quote-stage users are inherently more profitable than awareness-stage users</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="c"> c) Because paid ad inventory is capped by keyword supply</label>
+                        <label class="quiz-option"><input type="radio" name="q10" value="d"> d) Because the awareness stage converts at 100%, so more ads can't help</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="11">
+                    <p class="question-text">11. An InsurTech spent ₹12,00,000 on paid ads, ₹1,20,000 on agency fees, and ₹80,000 on a landing page in a month, and issued 400 new policies. The CAC is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q11" value="a"> a) ₹3,000</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="b"> b) ₹2,500</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="c"> c) ₹3,500</label>
+                        <label class="quiz-option"><input type="radio" name="q11" value="d"> d) ₹4,000</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="12">
+                    <p class="question-text">12. According to the §3.2 benchmark table, which channel typically has the LOWEST CAC range?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q12" value="a"> a) Referral / Word-of-Mouth (₹100–500)</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="b"> b) Paid Search (SEM)</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="c"> c) Agent / Field Sales</label>
+                        <label class="quiz-option"><input type="radio" name="q12" value="d"> d) Social Media</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="13">
+                    <p class="question-text">13. Channel A reports CAC ₹900 using last-click attribution; Channel B reports CAC ₹2,200 using multi-touch attribution. The correct conclusion is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q13" value="a"> a) Channel A is 2.4× more efficient — shift budget there immediately</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="b"> b) The two CACs are not directly comparable without knowing the attribution model, time period, product mix, and definition of "customer"</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="c"> c) Channel B is broken — shut it down</label>
+                        <label class="quiz-option"><input type="radio" name="q13" value="d"> d) Multi-touch attribution always overstates CAC, so Channel A's number is the truth</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="14">
+                    <p class="question-text">14. An insurer has premium ₹10,000, profit margin 20%, and retention 80%. Using tenure = 1 ÷ (1 − retention), the LTV is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q14" value="a"> a) ₹10,000</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="b"> b) ₹8,000</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="c"> c) ₹12,500</label>
+                        <label class="quiz-option"><input type="radio" name="q14" value="d"> d) ₹16,000</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="15">
+                    <p class="question-text">15. According to the session, a 1-percentage-point improvement in annual retention can increase an insurer's enterprise value by:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q15" value="a"> a) 0.5–1%</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="b"> b) 20–30%</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="c"> c) 5–10%</label>
+                        <label class="quiz-option"><input type="radio" name="q15" value="d"> d) 50%+</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="16">
+                    <p class="question-text">16. A funnel analysis prints: awareness 10,000, consideration 4,000, quote 1,000, purchase 400, onboarding 320. Using the §5.2/§5.3 logic, the biggest drop-off printed is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q16" value="a"> a) Awareness → Consideration (60%)</label>
+                        <label class="quiz-option"><input type="radio" name="q16" value="b"> b) Consideration → Quote (75%)</label>
+                        <label class="quiz-option"><input type="radio" name="q16" value="c"> c) Quote → Purchase (60%)</label>
+                        <label class="quiz-option"><input type="radio" name="q16" value="d"> d) Purchase → Onboarding (20%)</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="17">
+                    <p class="question-text">17. In the §6.1 rating logic (EXCELLENT &gt; 5, GOOD &gt; 3, MARGINAL &gt; 1.5, else POOR), a channel with LTV/CAC of 1.2 is classified as:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q17" value="a"> a) POOR (FIX OR KILL)</label>
+                        <label class="quiz-option"><input type="radio" name="q17" value="b"> b) GOOD</label>
+                        <label class="quiz-option"><input type="radio" name="q17" value="c"> c) MARGINAL</label>
+                        <label class="quiz-option"><input type="radio" name="q17" value="d"> d) EXCELLENT</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="18">
+                    <p class="question-text">18. In the §6.2 bubble chart, a channel positioned BELOW the red reference line (LTV = CAC, i.e., LTV/CAC &lt; 1) should be:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q18" value="a"> a) Scaled aggressively — it brings volume</label>
+                        <label class="quiz-option"><input type="radio" name="q18" value="b"> b) Monitored — it sits between the thresholds</label>
+                        <label class="quiz-option"><input type="radio" name="q18" value="c"> c) Moved to the portfolio's quality segment</label>
+                        <label class="quiz-option"><input type="radio" name="q18" value="d"> d) Fixed or restructured — it destroys value</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="19">
+                    <p class="question-text">19. A healthy channel portfolio should not let any single channel account for more than ___ of new customers, otherwise the concentration risk should be visible at board level:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q19" value="a"> a) 25%</label>
+                        <label class="quiz-option"><input type="radio" name="q19" value="b"> b) 50%</label>
+                        <label class="quiz-option"><input type="radio" name="q19" value="c"> c) 75%</label>
+                        <label class="quiz-option"><input type="radio" name="q19" value="d"> d) 90%</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="20">
+                    <p class="question-text">20. A travel InsurTech's standalone acquisition costs ₹3,000 per customer against an ₹800 average premium. The correct strategic verdict is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q20" value="a"> a) Shift to embedded distribution (airline/OTA checkout) where acquisition is contextual and cheap</label>
+                        <label class="quiz-option"><input type="radio" name="q20" value="b"> b) Scale standalone acquisition — CAC will fall with volume</label>
+                        <label class="quiz-option"><input type="radio" name="q20" value="c"> c) Raise the premium to ₹3,000 to make the economics work</label>
+                        <label class="quiz-option"><input type="radio" name="q20" value="d"> d) Accept the loss — travel is a loss leader for cross-sell</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s09-quiz', ['b','b','c','b','c','d','c','a','c','a','c','a','b','a','c','b','a','d','b','a'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s09-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-08.html" class="nav-link">&larr; Previous: Introduction to InsurTech</a>
+            <a href="session-10.html" class="nav-link next">Next: Embedded &amp; Usage-Based Insurance &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

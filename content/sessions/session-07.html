@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 07: Power BI for Insurance Analytics — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-06.html" class="nav-link">&larr; Previous: Data Visualization for Insurance</a>
+            <a href="session-08.html" class="nav-link next">Next: Introduction to InsurTech &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 2 &middot; Session 07 &middot; 120 min &middot; Power BI Lab</div>
+            <h1>Session 07: Power BI for Insurance Analytics</h1>
+            <div class="chapter-meta">
+                CILO-2 &middot; Analytics Tools &middot; Lab-based, Hands-on (Power BI) &middot; Power BI Desktop required (free)
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Understand when to use Power BI versus Python for insurance data visualization and build a decision framework for tool selection</li>
+                <li>Import the cleaned insurance dataset into Power BI Desktop and establish correct table relationships</li>
+                <li>Write DAX measures for the seven essential insurance KPIs — Total Premium, Total Claims, Loss Ratio, Expense Ratio, Combined Ratio, Claim Settlement Ratio, and YoY Growth</li>
+                <li>Build a 3-page interactive insurance dashboard covering Claims Overview, Policy Analytics, and Customer Segmentation with slicers, drill-throughs, and KPI cards</li>
+                <li>Apply dashboard design principles to create a clean, interpretable, boardroom-ready dashboard that passes the 5-second test</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Power BI vs. Python Visualization</h2>
+
+            <p>Power BI and Python are complementary tools for insurance data visualization. Each has strengths and weaknesses, and knowing which to use for which task is a mark of a mature insurance analytics professional. The answer is rarely "always use X" — it depends on the audience, the complexity of the analysis, and the need for interactivity vs. reproducibility.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Power BI</th><th>Python (Matplotlib/Seaborn)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Best for</strong></td>
+                        <td>Interactive dashboards, self-service analytics, business user consumption, recurrent reporting</td>
+                        <td>Custom visualizations, statistical charting, production of publication figures, ad-hoc analysis</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interactivity</strong></td>
+                        <td>Native — slicers, filters, cross-filtering, drill-through, tooltips, bookmarks</td>
+                        <td>Requires additional libraries (Plotly, Bokeh, Dash) or manual HTML/JS integration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reproducibility</strong></td>
+                        <td>Manual steps required — can be version-controlled (.pbip) but scripted ETL separate</td>
+                        <td>Fully reproducible — a Jupyter notebook with well-ordered cells produces the same output every time</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Statistical charting</strong></td>
+                        <td>Basic statistical visuals — box plots, funnel charts, decomposition trees. Advanced (violin, pairplot, heatmap) requires custom visuals.</td>
+                        <td>Full statistical charting — Seaborn, built-in statistical transformations, distribution fitting</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sharing &amp; governance</strong></td>
+                        <td>Enterprise-grade — Power BI Service, row-level security, scheduled refresh, mobile apps</td>
+                        <td>Requires separate distribution — PDF, HTML, Dash app, or integration into an application</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning curve</strong></td>
+                        <td>Moderate — DAX is the most challenging part, drag-and-drop for basic visuals</td>
+                        <td>Steep — requires programming fundamentals, but consistent API across libraries</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>1.1 The Decision Framework</h3>
+
+            <p>Use this simple three-question framework when deciding between Power BI and Python:</p>
+            <ol>
+                <li><strong>Does the audience need interactivity?</strong> (slicers, drill-down, cross-filtering) → If yes, use Power BI. If a static chart is sufficient, Python may be faster.</li>
+                <li><strong>Is this a recurring dashboard or a one-off analysis?</strong> → If recurring (monthly board report, weekly claims monitoring), invest in Power BI. If one-off (a single chart for a paper or presentation), use Python.</li>
+                <li><strong>Does the analysis require statistical transformations?</strong> (smoothing, clustering, regression residuals, distribution fitting) → If yes, Python. If the analysis is aggregations and comparisons, Power BI.</li>
+            </ol>
+
+            <p>The best insurance analytics teams <strong>use both</strong> — Power BI for the interactive dashboards that business teams consume daily, and Python for the ad-hoc analysis and model development that feeds into those dashboards.</p>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Power BI Interface &amp; Data Loading</h2>
+
+            <p>This section assumes you have Power BI Desktop installed (free download from Microsoft), and you have the cleaned dataset (`insurance_cleaned.csv`) from Session 05.</p>
+
+            <h3>2.1 Initial Setup and Data Import</h3>
+
+            <p><strong>Step 1 — Open Power BI Desktop:</strong> You will see a blank canvas with three tabs at the bottom: Report (where you build visuals), Data (where you view tables), and Model (where you manage relationships).</p>
+
+            <p><strong>Step 2 — Import the CSV:</strong> Click "Get Data" → "Text/CSV" → navigate to `insurance_cleaned.csv` → Click "Load" (not "Transform Data" yet — we will use Power Query for transformations in a moment).</p>
+
+            <p><strong>Step 3 — Check the imported data:</strong> Go to the "Data" tab (the table icon on the left). You should see all columns from the CSV. Click on columns to verify data types — dates should show as Date, numbers as Decimal Number or Whole Number, and text as Text.</p>
+
+            <p><strong>Step 4 — Open Power Query Editor</strong> for data transformations: "Home" tab → "Transform Data" → "Transform Data" (opens Power Query Editor). Perform these checks:</p>
+
+            <ul>
+                <li>Verify that `claim_date`, `settlement_date`, `start_date`, `end_date` are of type Date (not Text)</li>
+                <li>If any date column was imported as Text: click the column header, go to "Transform" → "Date" → select the correct format</li>
+                <li>Check that `premium`, `claim_amount`, `sum_assured` are Decimal Number (not Whole Number — premiums need decimals)</li>
+                <li>If needed: Use "Replace Values" to clean any stray characters</li>
+            </ul>
+
+            <p><strong>Step 5 — Review the Model:</strong> Go to the "Model" tab (the bar chart icon on the left sidebar). If you imported a single table, you will see only one entity. For this dashboard, a single flat table is sufficient — we flattened the schema in Session 05.</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> If you have not done Session 05 and do not have the cleaned dataset, you can import the 3 original CSVs (Customer, Policy, Claims) and create relationships in the Model view. Drag `customer_id` from Customer to Policy, then `policy_id` from Policy to Claims. This star-schema approach is more "proper" Power BI but requires more work. The flat file is simpler for learning.
+                </div>
+            </div>
+
+            <h3>2.2 Creating a Date Table</h3>
+
+            <p>A date table is essential for time-based DAX calculations. Power BI works best when you have a separate date table linked to your data:</p>
+
+            <p><strong>Option A — Create in Power Query:</strong> In Power Query Editor, right-click in the Queries pane → "New Blank Query" → Advanced Editor → paste:</p>
+
+            <pre><code class="language-powerquery">let
+    StartDate = #date(2020, 1, 1),
+    EndDate = #date(2026, 12, 31),
+    NumberOfDays = Duration.Days(EndDate - StartDate),
+    DateList = List.Dates(StartDate, NumberOfDays, #duration(1, 0, 0, 0)),
+    TableFromList = Table.FromList(DateList, Splitter.SplitByNothing()),
+    RenamedColumns = Table.RenameColumns(TableFromList,{{"Column1", "Date"}}),
+    ChangedType = Table.TransformColumnTypes(RenamedColumns,{{"Date", type date}}),
+    AddedYear = Table.AddColumn(ChangedType, "Year", each Date.Year([Date]), Int64.Type),
+    AddedMonth = Table.AddColumn(AddedYear, "Month", each Date.Month([Date]), Int64.Type),
+    AddedMonthName = Table.AddColumn(AddedMonth, "MonthName", each Date.MonthName([Date]), type text),
+    AddedQuarter = Table.AddColumn(AddedMonthName, "Quarter", each Date.QuarterOfYear([Date]), Int64.Type),
+    AddedYearMonth = Table.AddColumn(AddedQuarter, "YearMonth", each Date.ToText([Date], "yyyy-MM"), type text)
+in
+    AddedYearMonth</code></pre>
+
+            <p><strong>Then, create the relationship:</strong> In the Model view, connect the Date table's `Date` column to your fact table's `claim_date` column. This allows you to use time-intelligence functions in DAX.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> Always create a separate date table and mark it as a "Date Table" in Power BI (right-click the table → "Mark as Date Table"). This enables all time-intelligence DAX functions (TOTALYTD, SAMEPERIODLASTYEAR, PREVIOUSMONTH, etc.) and ensures correct time-based filtering. A dashboard without a proper date table will have unreliable time calculations.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. DAX Measures for Insurance KPIs</h2>
+
+            <p>DAX (Data Analysis Expressions) is the formula language of Power BI. Unlike Excel formulas that operate on individual cells, DAX measures operate on <strong>context</strong> — they automatically recalculate based on the filters, slicers, and cross-filtering applied by the user. This is what makes Power BI interactive.</p>
+
+            <h3>3.1 Foundational Measures</h3>
+
+            <p>Create these measures in the "Modeling" tab → "New Measure":</p>
+
+            <pre><code class="language-dax">-- Total Premium (sum of all premium values in the current filter context)
+Total Premium = SUM('insurance_cleaned'[premium])
+
+-- Total Claims Amount
+Total Claims = SUM('insurance_cleaned'[claim_amount])
+
+-- Claim Count (using COUNTROWS instead of COUNT — more reliable with column filters)
+Claim Count = COUNTROWS('insurance_cleaned')
+
+-- Policy Count (distinct count, since one policy may have multiple claims)
+Policy Count = DISTINCTCOUNT('insurance_cleaned'[policy_id])
+
+-- Average Claim Size
+Avg Claim Size = DIVIDE([Total Claims], [Claim Count])</code></pre>
+
+            <h3>3.2 Insurance-Specific Measures</h3>
+
+            <pre><code class="language-dax">-- Loss Ratio: Claims / Premium
+Loss Ratio = DIVIDE([Total Claims], [Total Premium], 0)
+
+-- Format: Home tab → Percentage, 2 decimal places
+
+-- Loss Ratio (as percentage expressed as number 0-100 for gauge charts)
+Loss Ratio % = DIVIDE([Total Claims], [Total Premium], 0) * 100
+
+-- Claim Settlement Ratio: Settled / (Settled + Rejected)
+-- First, define measures for each status
+Settled Claims = CALCULATE([Claim Count], 'insurance_cleaned'[status] = "Settled")
+Rejected Claims = CALCULATE([Claim Count], 'insurance_cleaned'[status] = "Rejected")
+Pending Claims = CALCULATE([Claim Count], 'insurance_cleaned'[status] = "Pending")
+
+Claim Settlement Ratio = DIVIDE([Settled Claims], [Settled Claims] + [Rejected Claims], 0)
+
+-- Average Days to Settle
+Avg Days to Settle = AVERAGE('insurance_cleaned'[days_to_settle])
+
+-- Fraud Rate
+Fraud Count = CALCULATE([Claim Count], 'insurance_cleaned'[fraud_flag] = 1)
+Fraud Rate = DIVIDE([Fraud Count], [Claim Count], 0)</code></pre>
+
+            <h3>3.3 Time Intelligence Measures</h3>
+
+            <pre><code class="language-dax">-- Total Premium Previous Year (requires date table and relationship)
+Premium PY = CALCULATE([Total Premium], SAMEPERIODLASTYEAR('DateTable'[Date]))
+
+-- Premium Year-over-Year Growth
+Premium YoY % = DIVIDE([Total Premium] - [Premium PY], [Premium PY], 0)
+
+-- Claims Year-to-Date
+Claims YTD = TOTALYTD([Total Claims], 'DateTable'[Date])
+
+-- Claims Previous Month
+Claims PM = CALCULATE([Total Claims], PREVIOUSMONTH('DateTable'[Date]))
+
+-- Rolling 12-Month Claims Average
+Claims Rolling 12M = AVERAGEX(
+    DATESINPERIOD('DateTable'[Date], LASTDATE('DateTable'[Date]), -12, MONTH),
+    [Total Claims]
+)</code></pre>
+
+            <h3>3.4 Conditional / Categorical Measures</h3>
+
+            <pre><code class="language-dax">-- Loss Ratio by Product Type (this is implied by context — DAX is automatic)
+
+-- Severity Bucket: classify claims for visual grouping
+Claim Severity Bucket = SWITCH(
+    TRUE(),
+    'insurance_cleaned'[claim_amount] <= 25000, "Low (≤₹25K)",
+    'insurance_cleaned'[claim_amount] <= 100000, "Medium (₹25K-₹1L)",
+    'insurance_cleaned'[claim_amount] <= 500000, "High (₹1L-₹5L)",
+    "Catastrophic (>₹5L)"
+)
+
+-- Premium per Policy (average premium per distinct policy)
+Premium per Policy = DIVIDE([Total Premium], [Policy Count], 0)
+
+-- Loss Ratio Trend Indicator
+Loss Ratio Trend = IF(
+    [Loss Ratio] > 0.75,
+    "High — Investigate",
+    IF([Loss Ratio] > 0.60, "Moderate — Monitor", "Healthy")
+)</code></pre>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> DAX measures are <strong>context-dependent</strong>. The same measure `[Loss Ratio]` will return different values depending on which slicers are active — that is intentional. But it means you must always test your measures with different filter combinations to ensure they behave correctly. A measure that looks right in the default view may return unexpected results when a specific product type or date range is selected. Always test with at least 3 different filter combinations.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Building Visuals in Power BI</h2>
+
+            <p>With measures defined, the next step is to build the visual elements. Power BI provides a rich set of visual types. For insurance dashboards, five visual types cover 90% of needs.</p>
+
+            <h3>4.1 The Five Essential Visual Types for Insurance</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Visual</th><th>Insurance Use</th><th>Configuration Notes</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Card / Multi-row Card</strong></td>
+                        <td>Display a single KPI value prominently — Total Premium, Loss Ratio, Claim Count</td>
+                        <td>Add a title (turn off auto-display of column name), format as currency or percentage, set high-contrast background, enable "Category Label" for context</td>
+                    </tr>
+                    <tr>
+                        <td><strong>KPI Visual</strong></td>
+                        <td>Show KPI with trend indicator and goal — Loss Ratio vs. 75% target, Premium YoY growth</td>
+                        <td>Use "Value" = KPI, "Trend Axis" = Date, "Target" = goal value or measure. The trend mini-sparkline is the key feature.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Line &amp; Clustered Column Chart</strong></td>
+                        <td>Dual-axis: premium (column) + loss ratio (line), claims count (column) + settlement ratio (line)</td>
+                        <td>Enable "Show secondary axis" for the line measure. Use consistent colors (monochrome for columns, a contrasting color for the line).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stacked Column / Bar</strong></td>
+                        <td>Claims by status (paid vs. pending vs. rejected) by month, Premium by channel by product</td>
+                        <td>Use "100% Stacked" when proportions matter more than absolute values. Use regular Stacked when volume matters.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Matrix Table</strong></td>
+                        <td>Detailed data view — claims by product by month with drill-down, policy details</td>
+                        <td>Enable stepped layout, conditional formatting on values (loss ratio > 75% → red), row subtotals, column subtotals</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> In Power BI's "Format" pane for any visual, the most important settings for insurance dashboards are: (1) <strong>X-axis</strong> — set Type = Continuous for date axes to prevent gaps, (2) <strong>Data labels</strong> — enable for key values only (not every single point — avoid clutter), (3) <strong>Title</strong> — use business titles not column names, (4) <strong>Border</strong> — add a thin 1px border to each visual for clean separation, (5) <strong>Background</strong> — set to slightly different shade than the report background to create visual containers.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Page 1 — Claims Overview Dashboard</h2>
+
+            <p>The Claims Overview page answers the question: <strong>"What is happening with our claims?"</strong> This is the page that the Head of Claims, the Chief Operating Officer, and the Underwriting team will look at daily. It focuses on five things: volume, speed, cost, settlement rate, and fraud.</p>
+
+            <h3>5.1 Page Layout</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│ CLAIMS OVERVIEW  [Slicers: Year ▼] [Product ▼] [Status ▼]          │
+├──────────────────┬──────────────────┬──────────────────┬─────────────┤
+│ Total Claims     │ Avg Claim Size   │ Avg Days to      │ Claim       │
+│ ₹X,XX,XX,XXX     │ ₹XX,XXX         │ Settle XX days   │ Settlement  │
+│ vs PY: +X.X%     │ vs PY: +X.X%    │ vs PY: -X days   │ Ratio X.X%  │
+├──────────────────┼──────────────────┴──────────────────┴─────────────┤
+│ Monthly Claims Trend (Line + Column combo)                          │
+│ [Column: claim count by month] [Line: rolling 3-month avg]         │
+│ X-axis: Month-Year, Y1: Claim Count, Y2: Avg Claim Size            │
+├─────────────────────┬──────────────────────┬────────────────────────┤
+│ Claims by Type (Bar)│ Claims by Status     │ Claims by Product     │
+│ [X: claim_type]     │ (Donut/Pie)          │ (100% Stacked Bar)    │
+│ [Y: claim count]    │ [Settled : Pending   │ [X: product]          │
+│                     │  : Rejected]         │ [Y: % of total]       │
+├─────────────────────┴──────────────────────┴────────────────────────┤
+│ Claims Detail Table — last 100 claims (matrix/table)               │
+│ [Claim ID, Customer, Type, Amount, Status, Days Open, Fraud Flag]  │
+│ Conditional formatting: Red for >90 days, Fraud flag highlighted   │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>5.2 Building the Page Step-by-Step</h3>
+
+            <p><strong>Step 1 — Add slicers:</strong> Add a "Year" slicer using the Date table's Year column. Set it to "List" or "Dropdown" style. Add a "Policy Type" slicer using the policy_type column. Set to "Tile" or "Dropdown" style. Add a "Status" slicer using status column. These three slicers will filter everything on the page.</p>
+
+            <p><strong>Step 2 — Add KPI cards:</strong> Create 4 KPI visual elements at the top:</p>
+            <ul>
+                <li>Card 1: Total Claims (formatted as ₹ Crores with 2 decimal places)</li>
+                <li>Card 2: Avg Claim Size (formatted as ₹ with no decimals)</li>
+                <li>Card 3: Avg Days to Settle (formatted as whole number, add a goal of 15)</li>
+                <li>Card 4: Claim Settlement Ratio (formatted as %, add a goal of 95%)</li>
+            </ul>
+
+            <p>For each card, enable the "Category Label" to show the measure name. Set background color to a dark card with white text for visual separation from the chart area.</p>
+
+            <p><strong>Step 3 — Monthly claims trend chart:</strong> Add a "Line and Stacked Column" chart. Column values: Claim Count (Y-axis). Line values: Avg Claim Size (Secondary Y-axis). X-axis: Date table's YearMonth or Date field. Add a "rolling average" if you created a measure for it. Format the line in a contrasting color (red or orange against blue columns). Remove the chart title and add it as a text box above: "Claims Volume and Average Size Over Time."</p>
+
+            <p><strong>Step 4 — Claims by type bar chart:</strong> Add a clustered bar chart. Axis: claim_type (from insurance_cleaned). Value: Claim Count. Sort descending by value. Enable data labels. Apply consistent color to match the dashboard theme.</p>
+
+            <p><strong>Step 5 — Claims by status donut:</strong> Add a donut chart. Legend: status. Value: Claim Count. Add data labels showing percentage and count. The donut should immediately answer: what proportion of claims are settled vs. pending vs. rejected?</p>
+
+            <p><strong>Step 6 — Claims by product stacked bar:</strong> Add a 100% stacked bar chart. Axis: policy_type. Value: Claim Count. Legend: status. This shows the <em>proportion</em> of settled/pending/rejected claims for each product type, allowing the claims manager to see if one product is generating more pending or rejected cases.</p>
+
+            <p><strong>Step 7 — Claims detail table:</strong> Add a table visual showing: claim_id, customer_id, policy_type, claim_amount, claim_date, days_to_settle, status, fraud_flag. Apply conditional formatting to days_to_settle (red background if > 90 days). Apply conditional formatting to fraud_flag (yellow background if 1). This table gives the operational team a working list of claims to manage.</p>
+
+            <p><strong>Step 8 — Arrange and align:</strong> Use Power BI's format tools to align all visuals evenly. A 16:9 page ratio works well. Set the page background to a dark or light color that matches your chosen theme. Ensure all visuals have the same border styling for a professional, cohesive appearance.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A leading Indian health insurer's claims team had been using a static Excel report with 40 pivot tables that took 3 days to prepare each month. The team switched to a Power BI dashboard (similar to the one described here) with slicers for product, hospital network, TPA, and region. The same analysis that took 3 days now took 2 minutes — and because the dashboard was interactive, the team discovered trends they had never seen in the static reports, including a pattern of delayed claim filings by certain TPAs that was adding ₹12 crore in unnecessary IBNR reserves.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Page 2 — Policy Analytics Dashboard</h2>
+
+            <p>The Policy Analytics page answers the question: <strong>"What is happening with our portfolio?"</strong> This is the page for the Head of Products, the Chief Marketing Officer, and the Distribution team.</p>
+
+            <h3>6.1 Page Layout</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│ POLICY ANALYTICS  [Slicers: Year ▼] [Product ▼] [Channel ▼]        │
+├──────────────────┬──────────────────┬──────────────────┬─────────────┤
+│ Total Premium   │ Policy Count     │ Avg Premium      │ Loss Ratio  │
+│ ₹X,XX,XX,XXX    │ XX,XXX          │ ₹XX,XXX          │ XX.X%       │
+│ vs PY: +X.X%    │ vs PY: +X.X%    │ vs PY: +X.X%     │ vs PY: ±X%  │
+├──────────────────┴──────────────────┴──────────────────┴─────────────┤
+│ Premium & Loss Ratio Trend (Line and Stacked Column — Dual Axis)   │
+│ [Column: Total Premium by month] [Line: Loss Ratio trend]          │
+│ [Reference line on Loss Ratio at 75%]                              │
+├──────────────────────────┬──────────────────────────────────────────┤
+│ Premium by Product       │ Premium by Channel & Product            │
+│ (Horizontal Bar)         │ (Stacked Bar, Channel axis, Legend=Prod)│
+│ [Sorted descending,      │ [Data labels for total per channel]     │
+│  data labels in ₹Cr]     │                                          │
+├──────────────────────────┴──────────────────────────────────────────┤
+│                          │                                          │
+│ Policy Portfolio Matrix — Premium vs. Loss Ratio by Product        │
+│ (Scatter chart: X=Premium, Y=Loss Ratio, Legend=Product,           │
+│  Size=Policy Count)                                                │
+│ Quadrant lines at median premium and 75% loss ratio                │
+│ 4 quadrants: High Premium/Low LR (⭐) | High Premium/High LR (⚠)   │
+│             Low Premium/Low LR (✓)  | Low Premium/High LR (✗)     │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>6.2 Building the Page Step-by-Step</h3>
+
+            <p><strong>Step 1 — Top slicers:</strong> Add slicers for Year, Policy Type, and Channel. Use dropdown style for compact layout. These slicers control all visuals on the page.</p>
+
+            <p><strong>Step 2 — KPI cards:</strong> Total Premium, Policy Count, Avg Premium per Policy, and Loss Ratio. Use the KPI visual type where possible to include the trend indicator (up arrow/down arrow) and goal comparison. Format the Loss Ratio card with conditional formatting on the value — green if below 60%, amber if 60–75%, red if above 75%.</p>
+
+            <p><strong>Step 3 — Dual-axis trend chart:</strong> Line and stacked column chart. Column values: Total Premium. Line values: Loss Ratio %. Secondary axis for Loss Ratio. Add a reference line on the secondary axis at 75% (use "Analytics" pane → "Line" → Constant Line). This single chart answers the most important portfolio question: "are we growing profitably?"</p>
+
+            <p><strong>Step 4 — Premium by product:</strong> Horizontal bar chart. Axis: policy_type. Value: Total Premium. Sort descending. Format data labels in ₹ Crores. This chart shows which products are driving premium volume.</p>
+
+            <p><strong>Step 5 — Premium by channel and product:</strong> Stacked bar chart. Axis: channel. Value: Total Premium. Legend: policy_type. 100% stacking can be used if the focus is on channel composition by product. Regular stacking if channel volume comparison matters.</p>
+
+            <p><strong>Step 6 — Premium vs. Loss Ratio scatter:</strong> Scatter chart. Values: policy_type (in Legend). X-Axis: Total Premium. Y-Axis: Loss Ratio %. Size: Policy Count. Add constant lines at the median of X and at 75% on Y. The four resulting quadrants show at a glance which products are: high-volume with healthy loss ratios (quadrant to protect), high-volume with concerning loss ratios (quadrant to investigate), low-volume healthy, and low-volume concerning.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The Premium-vs-Loss Ratio scatter plot is the single most strategic chart in insurance portfolio management. It is the equivalent of the BCG Growth-Share Matrix for insurance. Products in the top-left (high premium, low loss ratio) are the cash cows. Products in the top-right (high premium, high loss ratio) are the underwriting risks that demand immediate attention. Products in the bottom-right (low premium, high loss ratio) may need to be exited. Products in the bottom-left (low premium, low loss ratio) are potential growth opportunities. Use this chart at every quarterly portfolio review.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch7-customer-segmentation">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Page 3 — Customer Segmentation &amp; Demographics</h2>
+
+            <p>The Customer Segmentation page answers the question: <strong>"Who are our policyholders and how do they behave?"</strong> This page helps the marketing team target campaigns, the underwriting team understand risk profiles, and the product team design products for specific segments.</p>
+
+            <h3>7.1 Page Layout</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│ CUSTOMER INSIGHTS  [Slicers: Age Group ▼] [Location ▼] [Product ▼] │
+├──────────────────┬──────────────────┬──────────────────┬─────────────┤
+│ Total Customers  │ Avg Age          │ Avg Credit Score │ Top Location│
+│ XX,XXX           │ XX years         │ XXX              │ XXXX        │
+├──────────────────┴──────────────────┴──────────────────┴─────────────┤
+│ Customer Age Distribution (Histogram)                               │
+│ X-axis: Age Group [18-25, 26-35, 36-45, 46-55, 56-65, 65+]        │
+│ Y-axis: Customer Count                                              │
+│ Color: Claims Frequency overlay (line on secondary axis)            │
+├──────────────────────────┬──────────────────────────────────────────┤
+│ Top Locations by Premium │ Customer Risk Profile                   │
+│ (Map chart if available,│ (Waterfall or decomposition tree:       │
+│  else horizontal bar)   │  Risk score = Credit Score + Age +      │
+│                          │  Claim History composite)               │
+├──────────────────────────┴──────────────────────────────────────────┤
+│ Customer Table — Top 100 by Premium with drill-through              │
+│ [Name, Policy, Premium, Claims Count, Total Claims, Fraud Flag]    │
+│ Conditional formatting on fraud flag. Row selection drills through │
+│ to customer detail page.                                            │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>7.2 Building the Page Step-by-Step</h3>
+
+            <p><strong>Step 1 — Create Age Group column:</strong> In Power Query or as a calculated column in DAX:</p>
+
+            <pre><code class="language-dax">Age Group = SWITCH(
+    TRUE(),
+    'insurance_cleaned'[age] < 25, "18-25",
+    'insurance_cleaned'[age] < 35, "26-35",
+    'insurance_cleaned'[age] < 45, "36-45",
+    'insurance_cleaned'[age] < 55, "46-55",
+    'insurance_cleaned'[age] < 65, "56-65",
+    "65+"
+)</code></pre>
+
+            <p><strong>Step 2 — Top KPI cards:</strong> Total Customers, Average Age, Average Credit Score, Top Location. The "Top Location" measure requires:</p>
+
+            <pre><code class="language-dax">Top Location = TOPN(
+    1,
+    VALUES('insurance_cleaned'[location]),
+    [Policy Count]
+)
+-- Then use this in a card visual</code></pre>
+
+            <p><strong>Step 3 — Customer age histogram:</strong> Create a clustered column chart with Age Group as the axis and distinct Customer Count as the value. Add a measure for "Claim Frequency by Age Group" as a line on the secondary axis:</p>
+
+            <pre><code class="language-dax">Claims per Customer by Age Group = DIVIDE(
+    [Claim Count],
+    DISTINCTCOUNT('insurance_cleaned'[customer_id])
+)</code></pre>
+
+            <p>This dual-axis chart reveals the critical relationship: does claim frequency increase with age? (It should — older policyholders generally file more claims in health and motor lines.)</p>
+
+            <p><strong>Step 4 — Top locations:</strong> If you have geographic data, create a filled map (choropleth) or ArcGIS map visual. For a simpler approach, use a horizontal bar chart with location as axis and Total Premium as value, sorted descending. Limit to top 10 locations.</p>
+
+            <p><strong>Step 5 — Risk profile decomposition:</strong> Use a "Decomposition Tree" visual (available in Power BI). Place: "Risk Score" (calculated as a composite of credit_score, age, and claim_history) as the value. Breakdown by: product_type, location, age_group, channel. This allows the user to click into any segment and see what drives its risk profile.</p>
+
+            <p>If Decomposition Tree is not available, use a Matrix with conditional formatting on Loss Ratio by Segment.</p>
+
+            <p><strong>Step 6 — Customer drill-through table:</strong> Create a table with customer_id, policy_type, age, location, premium, claim_count, total_claim_amount, fraud_flag. Enable conditional formatting: yellow background for fraud_flag = 1. Right-click on a row → "Drill through" option (requires setting up a drill-through page). This allows the user to click on any customer and see their full details on a separate page.</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Drill-through is one of Power BI's most powerful features for insurance analytics. Create a dedicated "Customer Detail" page that shows: all policies held by that customer, all claims filed, claim amounts by date, payment history, and any fraud flags. Set up the drill-through from your main customer table by right-clicking the page tab → "Page Information" → "Drill through" → add customer_id as the drill-through filter. Now any stakeholder can click a customer row and instantly see their complete insurance relationship — no SQL query needed.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 8 -->
+        <section class="content-section stability-core">
+            <h2>8. Dashboard Design Principles</h2>
+
+            <p>A dashboard that is technically correct but poorly designed will not be used. The following principles are distilled from observing which insurance dashboards actually drive decisions — and which ones sit unused.</p>
+
+            <h3>8.1 The Five-Second Test</h3>
+            <p>A stakeholder should be able to look at your dashboard and answer the most important question <strong>within five seconds</strong>. For the Claims Overview page: "Are claims trending better or worse than last month?" For the Policy Analytics page: "Is our premium growth profitable?" If the answer is not visible within 5 seconds, the dashboard needs to be redesigned. The most important number must be the biggest thing on the page, ideally in the top-left position where the eye naturally goes first.</p>
+
+            <h3>8.2 The Three-Page Rule</h3>
+            <p>An insurance analytics dashboard should have <strong>exactly three pages</strong> — one for claims, one for policies, one for customers. More pages mean the user never goes past page 2. Fewer pages mean the content is insufficient. Within each page, limit yourself to 6–8 visuals. More than 8 visuals produces visual fatigue; fewer than 4 generally fails to tell a complete story.</p>
+
+            <h3>8.3 The Consistent Color Rule</h3>
+            <p>Use a consistent color scheme and assign meaning to colors. For insurance dashboards, establish these conventions: <strong>Green</strong> = good, healthy, improving (low loss ratio, fast settlement, high retention). <strong>Amber</strong> = monitor, moderate, borderline. <strong>Red</strong> = concerning, requires action (high loss ratio, long settlement, high fraud). <strong>Blue</strong> = neutral, informational (volumes, counts, premiums).</p>
+
+            <p>Apply these colors consistently across all three pages. A red loss ratio on Page 1 and a red KPI on Page 2 should convey the same level of urgency. Never use red for a neutral measure — overuse of red creates alarm fatigue and the stakeholders will stop taking it seriously.</p>
+
+            <h3>8.4 The Filter Consistency Rule</h3>
+            <p>When a user selects "Motor" in the Product Type slicer on Page 1, they expect the same filter to apply when they navigate to Page 2 and Page 3. Power BI calls this "synchronizing slicers across pages." Use the "View" → "Sync Slicers" feature to ensure consistent filtering. Nothing frustrates a dashboard user more than having to re-select the same filter on every page.</p>
+
+            <h3>8.5 The "Why" Annotation Rule</h3>
+            <p>For every chart that shows a significant trend, add a text box or annotation explaining <strong>why</strong> the trend occurred. A chart showing "Loss Ratio increased from 68% to 82% in June" is incomplete. The annotation "Monsoon claims surge — motor accident frequency up 35%" turns data into insight. In a static report, these annotations are written by the analyst. In a Power BI dashboard, you can use "Text Box" elements pinned in specific locations to provide permanent context for the most common interpretations.</p>
+
+            <h3>8.6 Publishing and Sharing</h3>
+
+            <p>Once your dashboard is built, you have three sharing options:</p>
+            <ul>
+                <li><strong>Power BI Service (cloud):</strong> Publish to the Power BI service (requires a Pro license for shared consumption). Schedule daily data refresh. Create a mobile-optimised view for executives.</li>
+                <li><strong>Power BI Report Server (on-premises):</strong> For insurers with regulatory restrictions on cloud data. Requires Power BI Premium licenses. Slower feature release cycle than cloud.</li>
+                <li><strong>Export to PDF/PPT:</strong> For stakeholders who do not have Power BI access. Export each page as a high-resolution image or use the "Export to PowerPoint" feature. Create a "print-friendly" version of each page (white background, lighter shading, consistent page breaks).</li>
+            </ul>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> Before publishing, test your dashboard with a <strong>real business stakeholder</strong> — ideally someone from the claims or underwriting team. Sit with them while they use the dashboard. Do not explain it first. Watch where they click, where they get confused, and what questions they ask. The first 10 minutes of that session will teach you more about dashboard design than any book or tutorial. Then iterate based on what they struggled with. A dashboard that passes the "real user, no instruction" test is ready for production.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a 3-Page Insurance Dashboard in Power BI</h2>
+            <div class="project-brief">
+                <p>Build a complete 3-page insurance analytics dashboard in Power BI Desktop using the cleaned `insurance_cleaned.csv` dataset from Session 05. Follow the layouts and specifications from Sections 5, 6, and 7. The goal is not just to place visuals — it is to create a dashboard that a Head of Claims, Head of Products, and Head of Marketing would use daily to monitor their business.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Data preparation:</strong> Import the cleaned CSV. Create and mark a Date table. Establish correct relationships in the Model view.</li>
+                    <li><strong>DAX measures:</strong> Create ALL the measures from Section 3 at minimum. Add any additional measures you find useful as you build.</li>
+                    <li><strong>Page 1 — Claims Overview:</strong> Build exactly as specified in Section 5. Minimum: 4 KPI cards, 1 dual-axis trend chart, 2 category charts, 1 detail table, 3 slicers. All slicers must control all visuals on the page.</li>
+                    <li><strong>Page 2 — Policy Analytics:</strong> Build exactly as specified in Section 6. Minimum: 4 KPI cards (use KPI visual type with trend), 1 dual-axis trend chart, 1 horizontal bar, 1 stacked bar, 1 scatter plot. Constant lines on scatter at median premium and 75% loss ratio.</li>
+                    <li><strong>Page 3 — Customer Segmentation:</strong> Build as specified in Section 7. Minimum: 4 KPI cards, 1 age histogram with dual-axis, 1 location bar, 1 decomposition tree or matrix, 1 drill-through table. Set up drill-through to a "Customer Detail" page (4th page, not shown in nav).</li>
+                    <li><strong>Design:</strong> Apply consistent colors, synchronize slicers across all 3 pages, add annotations to at least 2 charts explaining trends, apply conditional formatting to at least 2 tables (settlement time overdue, fraud flagged).</li>
+                    <li><strong>Test and export:</strong> Test with at least 3 filter combinations. Export each page as a PNG at 150 DPI for inclusion in a management report. Write a 1-page executive summary interpreting the key insights from the dashboard.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Solution Architecture Checklist</h4>
+
+                    <p>Before submission, verify your dashboard against this checklist:</p>
+
+                    <table>
+                        <thead>
+                            <tr><th>Check</th><th>Page 1 — Claims</th><th>Page 2 — Policies</th><th>Page 3 — Customers</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>KPI cards (4 per page)</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+                            <tr><td>Dual-axis trend chart</td><td>&#9744; Claims + Avg Size</td><td>&#9744; Premium + Loss Ratio</td><td>&#9744; Age Histogram + Freq</td></tr>
+                            <tr><td>Category comparison chart</td><td>&#9744; Claims by Type</td><td>&#9744; Premium by Product</td><td>&#9744; Top Locations</td></tr>
+                            <tr><td>Second comparison chart</td><td>&#9744; Claims by Status</td><td>&#9744; Premium by Channel</td><td>&#9744; Risk Profile</td></tr>
+                            <tr><td>Detail table</td><td>&#9744; Claims Detail</td><td>&#9744; —</td><td>&#9744; Customer Table</td></tr>
+                            <tr><td>Slicers (sync'd across pages)</td><td>&#9744; Year, Product, Status</td><td>&#9744; Year, Product, Channel</td><td>&#9744; Age Group, Location, Product</td></tr>
+                            <tr><td>Conditional formatting</td><td>&#9744; Days &gt; 90 red</td><td>&#9744; Loss Ratio &gt; 75% red</td><td>&#9744; Fraud flag = 1 yellow</td></tr>
+                            <tr><td>Drill-through configured</td><td>&#9744; N/A</td><td>&#9744; N/A</td><td>&#9744; Customer Detail page</td></tr>
+                            <tr><td>Annotations (min 2 total)</td><td>&#9744;</td><td>&#9744;</td><td>&#9744;</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Executive Summary (Sample)</h4>
+
+                    <p><strong>Claims Overview:</strong> The portfolio processed ₹X crore in total claims across YYYY claims during the period. The average claim size is trending upward at Z% year-over-year, indicating claims inflation that warrants pricing review for motor and health lines. The claim settlement ratio of A% is above the regulatory target of B%, and average settlement time of C days has improved by D days YoY — reflecting the recent claims automation initiative in the motor line. However, E% of claims remain pending beyond 30 days, concentrated in property insurance, where surveyor availability remains the bottleneck.</p>
+
+                    <p><strong>Policy Analytics:</strong> Premium grew F% year-over-year to ₹G crore, driven primarily by the motor and health lines. The combined ratio stands at H%, broadly stable compared to last year, with the underlying loss ratio of I% partially offset by an expense ratio of J%. The scatter analysis reveals that the motor and health portfolios are in the "high-premium, healthy-loss-ratio" quadrant, while the property portfolio shows elevated loss ratios that require underwriting tightening. The channel mix is shifting — digital direct now accounts for K% of new business, up from L% last year, reflecting the success of the app-based customer acquisition strategy.</p>
+
+                    <p><strong>Customer Insights:</strong> The portfolio serves M customers with an average age of N and an average credit score of O. The age-claim frequency analysis confirms the expected pattern: claim frequency increases significantly for policyholders over 55, particularly in health insurance, driving a higher loss ratio for this segment. Region P accounts for the largest share of premium, but also shows a loss ratio above the portfolio average, suggesting the need for region-specific pricing. The top Q% of customers by premium contribute R% of total premium but only S% of total claims — a retention priority segment.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Power BI excels at interactive dashboards for recurring business consumption; Python excels at custom statistical visualizations for ad-hoc analysis. Use each tool where it is strongest, and connect them where they complement each other.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>A proper Date table is non-negotiable for insurance time intelligence in Power BI. Without it, time-based DAX functions cannot work correctly and time-series analysis will be unreliable.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>DAX measures are context-dependent by design. Always test measures under at least 3 different filter combinations to ensure they behave correctly — especially time-intelligence measures.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>The 3-page dashboard template — Claims Overview, Policy Analytics, Customer Segmentation — covers the complete insurance business. The scatter plot (premium vs. loss ratio) is the single most strategic visual for portfolio management.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>A technically correct dashboard that fails the "5-second test" will not be used. Design principles — consistent colors, synchronous slicers, business-focused titles, trend annotations — determine whether a dashboard drives decisions or sits untouched.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s07-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. A recurring monthly dashboard for the Head of Claims that requires interactive filters for product type, region, and time period should be built in:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Python (Matplotlib) — because the data needs statistical transformations</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Power BI — because the audience needs interactivity (slicers, drill-through, cross-filtering) and the dashboard will be consumed monthly</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Excel — because the claims team already uses Excel</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) PowerPoint — because static visuals are sufficient for operational reporting</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. In Power BI, what is the purpose of marking a table as a Date Table?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) It changes the color of the table in the Model view for visual identification</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) It enables all time-intelligence DAX functions (TOTALYTD, SAMEPERIODLASTYEAR, etc.) and ensures correct time-based filtering and calculations</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) It automatically sorts all date columns in the dataset chronologically</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) It prevents users from selecting dates in the future</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. The following DAX measure calculates the loss ratio correctly:</p>
+                    <pre style="font-size: var(--font-size-sm);"><code class="language-dax">Loss Ratio = DIVIDE(
+    SUM('insurance_cleaned'[claim_amount]),
+    SUM('insurance_cleaned'[premium]),
+    0
+)</code></pre>
+                    <p>The third parameter (0) in the DIVIDE function specifies:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The number of decimal places to display</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) The alternative result to return when the denominator is zero (to avoid DIV/0 errors)</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The minimum acceptable loss ratio threshold</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The rounding mode for the result</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. The "5-second test" for a Power BI dashboard states that:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) The dashboard must load in under 5 seconds</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) A stakeholder should be able to answer the most important question on the page within 5 seconds of looking at it — the most critical KPI must be the biggest, most prominent element</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Each visual should be viewable for at least 5 seconds before interacting with the next one</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) The dashboard should automatically refresh every 5 seconds for real-time data</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. In the Premium vs. Loss Ratio scatter chart, a product that appears in the top-left quadrant (high premium, low loss ratio) is best described as:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) A strategic priority to exit — low returns suggest the product is underperforming</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) The portfolio's "cash cow" — it generates high premium volume at low claims cost, and should be protected and nurtured</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) A high-risk product — high premium suggests the insurer is price-gouging customers</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) An error in the data — this quadrant combination is mathematically impossible</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s07-quiz', ['b','b','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s07-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-06.html" class="nav-link">&larr; Previous: Data Visualization for Insurance</a>
+            <a href="session-08.html" class="nav-link next">Next: Introduction to InsurTech &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

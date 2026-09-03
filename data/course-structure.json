@@ -1,0 +1,160 @@
+{
+  "course": {
+    "name": "Insurtech & Digital Risk Solutions",
+    "code": "TBD",
+    "term": "II - Trimester",
+    "program": "MBA (GM & FS)",
+    "school": "School of Business",
+    "credits": 3,
+    "ltpc": "3003",
+    "totalHours": 39,
+    "totalSessions": 26
+  },
+  "modules": [
+    {
+      "id": "module-1",
+      "number": 1,
+      "title": "Insurance Fundamentals and Digital Transformation",
+      "sessions": "1–4",
+      "hours": 6,
+      "cilos": ["CILO-1"],
+      "chapters": [1, 2, 3, 4],
+      "description": "Foundations of the insurance ecosystem, risk management frameworks, insurance business models, and the digital transformation reshaping the industry.",
+      "assessment": "Quiz (Sessions 1–10)"
+    },
+    {
+      "id": "module-2",
+      "number": 2,
+      "title": "Insurance Data and Analytics",
+      "sessions": "5–7",
+      "hours": 5,
+      "cilos": ["CILO-2"],
+      "chapters": [5, 6, 7],
+      "description": "Data cleaning and preprocessing with Python Pandas, insurance KPIs visualization with Matplotlib/Seaborn, and interactive dashboards with Power BI.",
+      "assessment": "Quiz (Sessions 1–10)"
+    },
+    {
+      "id": "module-3",
+      "number": 3,
+      "title": "InsurTech Innovations",
+      "sessions": "8–10",
+      "hours": 4,
+      "cilos": ["CILO-1", "CILO-2"],
+      "chapters": [8, 9, 10],
+      "description": "InsurTech evolution, Indian startup landscape, digital customer acquisition and CLV analytics, embedded insurance, and usage-based insurance models.",
+      "assessment": "Quiz (Sessions 1–10)"
+    },
+    {
+      "id": "module-4",
+      "number": 4,
+      "title": "Artificial Intelligence in Insurance",
+      "sessions": "11–14",
+      "hours": 6,
+      "cilos": ["CILO-2", "CILO-3"],
+      "chapters": [11, 12, 13, 14],
+      "description": "Machine learning fundamentals, AI for underwriting and claims processing, and generative AI applications including chatbots and document generation.",
+      "assessment": "Dashboard Project (Sessions 11–20)"
+    },
+    {
+      "id": "module-5",
+      "number": 5,
+      "title": "Fraud Analytics and Digital Risk",
+      "sessions": "15–17",
+      "hours": 5,
+      "cilos": ["CILO-2", "CILO-3"],
+      "chapters": [15, 16, 17],
+      "description": "Insurance fraud typology, fraud detection with ML and anomaly detection, cyber risk assessment, and cyber insurance products.",
+      "assessment": "Dashboard Project (Sessions 11–20)"
+    },
+    {
+      "id": "module-6",
+      "number": 6,
+      "title": "Climate Risk and Parametric Insurance",
+      "sessions": "18–20",
+      "hours": 4,
+      "cilos": ["CILO-1", "CILO-2", "CILO-3"],
+      "chapters": [18, 19, 20],
+      "description": "Climate risk impacts on insurance portfolios, parametric insurance product design with trigger-based payouts, and catastrophe risk modeling with Monte Carlo simulation.",
+      "assessment": "Dashboard Project (Sessions 11–20)"
+    },
+    {
+      "id": "module-7",
+      "number": 7,
+      "title": "Advanced Analytics and Business Intelligence",
+      "sessions": "21–23",
+      "hours": 5,
+      "cilos": ["CILO-2", "CILO-3"],
+      "chapters": [21, 22, 23],
+      "description": "Time series forecasting, churn prediction, regression analysis for premium modeling, and executive KPI dashboards with Looker Studio.",
+      "assessment": "Capstone Project (Sessions 21–26)"
+    },
+    {
+      "id": "module-8",
+      "number": 8,
+      "title": "Governance, Compliance and Capstone",
+      "sessions": "24–26",
+      "hours": 4,
+      "cilos": ["CILO-1", "CILO-3"],
+      "chapters": [24, 25, 26],
+      "description": "IRDAI regulations, DPDP Act compliance, ethical AI governance, algorithmic bias mitigation, and capstone project presentations.",
+      "assessment": "Capstone Project (Sessions 21–26)"
+    }
+  ],
+  "sessions": [
+    {"number": 1, "title": "Introduction to Insurance Industry", "module": 1, "tools": [], "cilo": "CILO-1", "hours": 1.5},
+    {"number": 2, "title": "Risk Management Fundamentals", "module": 1, "tools": ["Excel"], "cilo": "CILO-1", "hours": 1.5},
+    {"number": 3, "title": "Insurance Business Model", "module": 1, "tools": ["Excel"], "cilo": "CILO-1", "hours": 1.5},
+    {"number": 4, "title": "Digital Transformation in Insurance", "module": 1, "tools": ["ChatGPT"], "cilo": "CILO-1", "hours": 1.5},
+    {"number": 5, "title": "Insurance Data Sources & Cleaning", "module": 2, "tools": ["Python"], "cilo": "CILO-2", "hours": 1.5},
+    {"number": 6, "title": "Data Visualization for Insurance", "module": 2, "tools": ["Python"], "cilo": "CILO-2", "hours": 1.5},
+    {"number": 7, "title": "Power BI for Insurance Analytics", "module": 2, "tools": ["Power BI"], "cilo": "CILO-2", "hours": 2},
+    {"number": 8, "title": "Introduction to InsurTech", "module": 3, "tools": [], "cilo": "CILO-1", "hours": 1.5},
+    {"number": 9, "title": "Digital Customer Acquisition", "module": 3, "tools": ["Python"], "cilo": "CILO-1, CILO-2", "hours": 1.5},
+    {"number": 10, "title": "Embedded & Usage-Based Insurance", "module": 3, "tools": ["Python"], "cilo": "CILO-1, CILO-2", "hours": 1.5},
+    {"number": 11, "title": "AI & Machine Learning Fundamentals", "module": 4, "tools": ["Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 12, "title": "AI for Underwriting", "module": 4, "tools": ["Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 13, "title": "AI for Claims Processing", "module": 4, "tools": ["Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 14, "title": "Generative AI in Insurance", "module": 4, "tools": ["ChatGPT"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 15, "title": "Insurance Fraud Analytics", "module": 5, "tools": ["Power BI", "Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 16, "title": "Fraud Detection Using ML", "module": 5, "tools": ["Python", "KNIME"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 17, "title": "Cyber Risk & Cyber Insurance", "module": 5, "tools": ["Excel"], "cilo": "CILO-1, CILO-3", "hours": 1.5},
+    {"number": 18, "title": "Climate Risk in Insurance", "module": 6, "tools": ["Python", "Looker Studio"], "cilo": "CILO-1, CILO-2", "hours": 1.5},
+    {"number": 19, "title": "Parametric Insurance Design", "module": 6, "tools": ["Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 20, "title": "Catastrophe Modeling & Risk Assessment", "module": 6, "tools": ["Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 21, "title": "Advanced Python for Insurance Analytics", "module": 7, "tools": ["Python"], "cilo": "CILO-2, CILO-3", "hours": 1.5},
+    {"number": 22, "title": "Customer Retention & Churn Analytics", "module": 7, "tools": ["Python", "KNIME"], "cilo": "CILO-2, CILO-3", "hours": 2},
+    {"number": 23, "title": "Looker Studio for Executive Reporting", "module": 7, "tools": ["Looker Studio"], "cilo": "CILO-2", "hours": 1.5},
+    {"number": 24, "title": "Insurance Regulations & Digital Governance", "module": 8, "tools": ["Power BI"], "cilo": "CILO-1, CILO-3", "hours": 1.5},
+    {"number": 25, "title": "Ethical AI & Responsible Insurance", "module": 8, "tools": ["ChatGPT"], "cilo": "CILO-1, CILO-3", "hours": 1.5},
+    {"number": 26, "title": "Capstone Project Presentations", "module": 8, "tools": [], "cilo": "CILO-3", "hours": 1}
+  ],
+  "assessments": [
+    {"id": "quiz", "title": "Quiz on Insurance Fundamentals, InsurTech & Digital Transformation", "sessions": "1–10", "marks": 20, "aiLevel": 1, "cilos": ["CILO-1", "CILO-2"]},
+    {"id": "dashboard", "title": "Insurance Analytics Dashboard Project", "sessions": "11–20", "marks": 20, "aiLevel": 2, "cilos": ["CILO-2", "CILO-3"]},
+    {"id": "capstone", "title": "Capstone Project — Comprehensive Insurance Analytics Solution", "sessions": "21–26", "marks": 20, "aiLevel": 2, "cilos": ["CILO-2", "CILO-3"]},
+    {"id": "endterm", "title": "End Term Practical Examination", "sessions": "End Term", "marks": 40, "aiLevel": 1, "cilos": ["CILO-1", "CILO-2", "CILO-3"]}
+  ],
+  "tools": [
+    {"id": "python", "name": "Python", "packages": "Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn, XGBoost", "installNote": "Install via Anaconda distribution"},
+    {"id": "excel", "name": "Microsoft Excel", "packages": null, "installNote": "University lab — verify version"},
+    {"id": "powerbi", "name": "Power BI Desktop", "packages": null, "installNote": "Free download; Windows only"},
+    {"id": "knime", "name": "KNIME Analytics Platform", "packages": null, "installNote": "Free; requires Java runtime"},
+    {"id": "looker", "name": "Looker Studio", "packages": null, "installNote": "Browser-based; Google account required"},
+    {"id": "chatgpt", "name": "ChatGPT / LLM", "packages": null, "installNote": "Free tier sufficient"}
+  ],
+  "datasets": [
+    {"table": "Customer", "records": 5000, "description": "Demographics, location, occupation, credit score"},
+    {"table": "Policy", "records": 10000, "description": "Policy type, premium, sum assured, tenure, product details"},
+    {"table": "Claims", "records": 20000, "description": "Claim amount, type, status, settlement date, fraud flag"},
+    {"table": "Fraud Indicators", "records": 5000, "description": "Suspicious patterns, historical flags, audit trail"},
+    {"table": "Cyber Incident", "records": 2000, "description": "Breach type, severity, loss amount, industry"},
+    {"table": "Weather / Climate", "records": 3000, "description": "Rainfall, temperature, cyclone data for parametric modeling"}
+  ],
+  "readings": [
+    {"code": "TB1", "title": "Insurance: Principles and Practice", "author": "M. N. Mishra & S. B. Mishra", "edition": "22nd Edition, 2020", "cilo": "CILO-1"},
+    {"code": "RB1", "title": "Risk Management and Insurance", "author": "Harrington & Niehaus", "edition": "2nd Edition, 2018", "cilo": "CILO-1"},
+    {"code": "RB2", "title": "Python for Data Analysis", "author": "Wes McKinney", "edition": "3rd Edition, 2022", "cilo": "CILO-2, CILO-3"},
+    {"code": "RB3", "title": "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow", "author": "Aurelien Geron", "edition": "3rd Edition, 2022", "cilo": "CILO-2, CILO-3"},
+    {"code": "RB4", "title": "IRDAI Annual Reports and NASSCOM InsurTech Reports", "author": "IRDAI / NASSCOM", "edition": "Latest", "cilo": "CILO-1, CILO-3"}
+  ]
+}

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 06: Data Visualization for Insurance — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* Editable answer fields — students can type directly in the page.
+           Input is NOT saved anywhere; it only lives in the browser session
+           so students can try their answer before revealing the solution. */
+        .write-in {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+            box-sizing: border-box;
+        }
+        .write-in:focus {
+            border-color: var(--primary);
+            border-style: solid;
+            background: var(--surface-hover);
+        }
+        .write-in::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .write-in-tall { min-height: 72px; }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-05.html" class="nav-link">&larr; Previous: Insurance Data Sources &amp; Cleaning</a>
+            <a href="session-07.html" class="nav-link next">Next: Power BI for Insurance Analytics &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 2 &middot; Session 06 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 06: Data Visualization for Insurance</h1>
+            <div class="chapter-meta">
+                CILO-2 &middot; Analytics Tools &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+            <div style="margin-top: var(--space-md);">
+                <a href="https://github.com/afzalur7/insurtech-course-dataset/blob/master/session-06/visualization_analysis.py" target="_blank" rel="noopener" style="display: inline-block; padding: 8px 18px; background: rgba(255,255,255,0.15); color: #fff; border-radius: var(--radius-md); font-weight: 700; font-size: var(--font-size-sm); text-decoration: none;">&#128279; All Code for This Session Is on GitHub</a>
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Define and calculate the key insurance KPIs that drive visualization decisions — loss ratio, claim frequency, average claim size, claim settlement ratio, and persistency</li>
+                <li>Create line charts, bar charts, histograms, box plots, scatter plots, and heatmaps using Matplotlib and Seaborn</li>
+                <li>Analyze claims trends over time with moving averages and year-over-year comparisons</li>
+                <li>Visualize portfolio composition and cross-sectional comparisons across policy types, channels, and customer segments</li>
+                <li>Export publication-quality charts at 300 DPI for boardroom presentations and reports</li>
+                <li>Translate every chart into a <strong>management decision</strong> — what does it tell you, so what, and what should you do about it</li>
+            </ul>
+        </section>
+
+        <!-- OPENING HOOK — The Manager's Question First -->
+        <section class="content-section stability-core" style="border-left: 4px solid var(--accent); padding-left: var(--space-lg); background: var(--surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; margin-bottom: var(--space-xl);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">&#128188;</div>
+                <div>
+                    <h2 style="margin-bottom: var(--space-sm); font-size: var(--font-size-xl);">The Manager's Question First</h2>
+                    <p>This session teaches you to <strong>build charts</strong> — but for a management student, that is not the point. The point is <strong>what you do with them.</strong> Imagine you are the Head of Analytics, presenting to the Board. Every chart you show must let the Board answer three questions in 30 seconds:</p>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-md) 0;">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-light);">WHAT?</div>
+                            <div style="font-size: var(--font-size-sm); color: var(--text-light);">What does this tell us? (Read the chart)</div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">SO WHAT?</div>
+                            <div style="font-size: var(--font-size-sm); color: var(--text-light);">Why does it matter? (Business impact)</div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--warning);">NOW WHAT?</div>
+                            <div style="font-size: var(--font-size-sm); color: var(--text-light);">What should we do? (Decision / action)</div>
+                        </div>
+                    </div>
+                    <p style="margin-bottom: 0;"><em>Every section in this session follows this pattern. The Python code is the tool — the <strong>What / So What / Now What</strong> is the craft. A chart that fails the 30-second test is decoration, not analysis.</em></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Insurance KPIs for Visualization</h2>
+
+            <p>Before we create a single chart, we must understand what we are visualizing. Insurance has a specific vocabulary of Key Performance Indicators (KPIs) — and every chart should make at least one of these numbers clearer, more actionable, or more memorable. A chart that does not help a business audience make a decision is decoration, not data visualization.</p>
+
+            <h3>1.1 The Six KPIs That Drive Insurance Visualization</h3>
+
+            <table>
+                <thead>
+                    <tr><th>KPI</th><th>Formula</th><th>What It Reveals</th><th>Best Chart Type</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Loss Ratio</strong></td>
+                        <td>Incurred Claims ÷ Earned Premium</td>
+                        <td>Pricing adequacy — is the insurer collecting enough premium for the risk it covers? < 60% may indicate over-pricing; > 85% signals pricing pressure.</td>
+                        <td>Line chart (trend), bar chart (by product), gauge (current value vs. target)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Claim Frequency</strong></td>
+                        <td>Number of Claims ÷ Number of Policies</td>
+                        <td>How often do claims happen? Useful for spotting emerging risk patterns — a rising frequency trend may indicate a new risk factor, product change, or claims process shift.</td>
+                        <td>Line chart (trend), bar chart (by segment, region)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Average Claim Size</strong></td>
+                        <td>Total Claim Amount ÷ Number of Claims</td>
+                        <td>How severe are claims when they occur? Rising average claim size indicates claims inflation — medical cost inflation, repair cost inflation, or more severe losses.</td>
+                        <td>Line chart (trend), box plot (distribution by product), histogram (distribution shape)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Claim Settlement Ratio</strong></td>
+                        <td>Claims Paid ÷ (Claims Paid + Claims Rejected)</td>
+                        <td>How many claims are actually paid? A measure of fairness and customer treatment. Too low (< 80%) is bad for customers. Too high (> 98%) may indicate inadequate fraud control.</td>
+                        <td>Bar chart (by product), stacked bar (paid vs. rejected), gauge (current vs. regulatory target)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Persistency / Renewal Rate</strong></td>
+                        <td>Policies Renewed ÷ Policies Due for Renewal</td>
+                        <td>Customer retention. The most important leading indicator of future profitability. A 1% improvement in persistency can increase enterprise value by 5–10% in life insurance.</td>
+                        <td>Line chart (cohort analysis), bar chart (by channel, product)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Premium Growth YoY</strong></td>
+                        <td>(Current Year Premium − Prior Year Premium) ÷ Prior Year Premium</td>
+                        <td>Business growth rate. Must be analyzed alongside loss ratio — rapid growth with deteriorating loss ratio indicates under-pricing for market share.</td>
+                        <td>Bar or waterfall chart, line chart (cumulative), dual-axis (growth + loss ratio)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The best insurance visualizations pair KPIs together. A chart showing premium growth (good news) alongside loss ratio trend (potentially bad news) tells the complete story. A chart showing only one KPI in isolation is almost always misleading. This principle — "pair your KPIs" — distinguishes professional insurance dashboards from amateur ones.
+                </div>
+            </div>
+
+            <!-- Exercise 1.1 — Which KPI for Which Stakeholder? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128188; Exercise 1.1 — Which KPI Does Each Stakeholder Watch?</h4>
+                    <p>Every KPI exists because <strong>someone with a decision to make</strong> needs it. For each stakeholder below, choose the KPI they watch most closely, and the decision it drives.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Stakeholder</th><th style="width: 200px;">Primary KPI</th><th style="width: 220px;">Decision It Drives</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>CEO / Board</strong></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Loss Ratio</option><option>Combined Ratio</option><option>Claim Frequency</option><option>Average Claim Size</option><option>Claim Settlement Ratio</option><option>Persistency</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Decision..."></td></tr>
+                        <tr><td><strong>CFO</strong></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Loss Ratio</option><option>Combined Ratio</option><option>Claim Frequency</option><option>Average Claim Size</option><option>Claim Settlement Ratio</option><option>Persistency</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Decision..."></td></tr>
+                        <tr><td><strong>Head of Underwriting</strong></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Loss Ratio</option><option>Combined Ratio</option><option>Claim Frequency</option><option>Average Claim Size</option><option>Claim Settlement Ratio</option><option>Persistency</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Decision..."></td></tr>
+                        <tr><td><strong>Head of Claims</strong></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Loss Ratio</option><option>Combined Ratio</option><option>Claim Frequency</option><option>Average Claim Size</option><option>Claim Settlement Ratio</option><option>Persistency</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Decision..."></td></tr>
+                        <tr><td><strong>Head of Marketing</strong></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Loss Ratio</option><option>Combined Ratio</option><option>Claim Frequency</option><option>Average Claim Size</option><option>Claim Settlement Ratio</option><option>Persistency</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Decision..."></td></tr>
+                    </tbody>
+                </table>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Mappings</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>Stakeholder</th><th>KPI</th><th>Decision It Drives</th></tr>
+                            <tr><td><strong>CEO / Board</strong></td><td><strong>Combined Ratio</strong></td><td>Is the core business profitable? Where to focus capital and strategy. (It captures both claims AND expenses in one number.)</td></tr>
+                            <tr><td><strong>CFO</strong></td><td><strong>Combined Ratio</strong> (+ solvency)</td><td>Is underwriting profit enough, or must investment income cover losses? Reserve adequacy.</td></tr>
+                            <tr><td><strong>Head of Underwriting</strong></td><td><strong>Loss Ratio by product</strong></td><td>Which product is priced inadequately? Where to tighten risk selection / raise rates.</td></tr>
+                            <tr><td><strong>Head of Claims</strong></td><td><strong>Claim Settlement Ratio</strong> (+ days-to-settle)</td><td>Are we treating customers fairly and fast enough? Where are process bottlenecks?</td></tr>
+                            <tr><td><strong>Head of Marketing</strong></td><td><strong>Persistency</strong></td><td>Are customers renewing? Where to invest in retention vs. acquisition.</td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Key idea:</strong> The same chart can serve different stakeholders <em>differently</em>. A loss-ratio-by-product chart tells the Underwriting Head <em>what to re-price</em> and the CFO <em>what the profit risk is</em>. Always ask: <strong>who is looking at this, and what decision are they making?</strong></p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Matplotlib Foundations</h2>
+
+            <p>Matplotlib is the foundational plotting library in Python. Seaborn, which we cover in Section 3, is built on top of Matplotlib and provides higher-level statistical visualizations. Understanding Matplotlib basics is essential because all Seaborn plots can be customized using Matplotlib commands.</p>
+
+            <h3>2.1 Setup and Imports</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 2 — Matplotlib foundations (setup)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+
+            <h3>2.2 The Anatomy of a Matplotlib Figure</h3>
+
+            <p>Every Matplotlib chart has a <strong>Figure</strong> (the container) and one or more <strong>Axes</strong> (the actual plots within the figure). Understanding this distinction is key to controlling your charts precisely.</p>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 2 — Matplotlib foundations (anatomy)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_01.png" alt="SECTION 2 — Matplotlib foundations (anatomy)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the basic figure skeleton — fig + ax, title, labels, legend, grid. Every chart in this session follows this same pattern. <strong>So what:</strong> once you recognise the skeleton, every chart is just a variation. <strong>Now what:</strong> keep this pattern open — you will reuse it for all 15 charts that follow.</figcaption>
+            </figure>
+
+            <h3>2.3 Essential Matplotlib Customizations</h3>
+
+            <p>These formatting commands apply to any plot type and are the ones you will use most often in insurance dashboards:</p>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 2 — Matplotlib foundations (customizations)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> In insurance charts, always annotate significant events — regulatory changes, major catastrophes, product launches, pricing changes. A chart of quarterly loss ratios without the annotation "IRDAI motor TP pricing increased 15% — Q2 2024" is a chart that will confuse its audience. The annotation turns data into a story.
+                </div>
+            </div>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>For the manager — you don't need to memorise the API:</strong> The figure/axes details above are the <em>plumbing</em> of Matplotlib. You need to know <strong>what is possible</strong> (annotations, reference lines, dual axes, colour control), not the exact syntax. When you build a chart, copy the patterns from this session. The real skill — the one no library gives you — is deciding <strong>what the chart should say</strong> and making sure it says it honestly.
+                </div>
+            </div>
+
+            <!-- Exercise 2.1 — Spot the Deceptive Chart -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128064; Exercise 2.1 — Spot the Deceptive Chart</h4>
+                    <p>Both charts below show the <strong>same loss-ratio data</strong>. One is honest; one is misleading. Identify which is which, what manipulation is used, and why a board could be misled.</p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-md);">
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                        <div style="font-weight: 700; margin-bottom: var(--space-sm);">Chart A</div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-light); margin-bottom: var(--space-sm);">Y-axis from 0 to 10%<br>Loss ratio: Jan 7.0%, Feb 7.2%, Mar 7.4%, Apr 7.6%</div>
+                        <div style="height: 80px; display: flex; align-items: flex-end; gap: 6px; justify-content: center;">
+                            <div style="width: 36px; height: 56px; background: var(--primary-light);"></div>
+                            <div style="width: 36px; height: 57px; background: var(--primary-light);"></div>
+                            <div style="width: 36px; height: 59px; background: var(--primary-light);"></div>
+                            <div style="width: 36px; height: 60px; background: var(--primary-light);"></div>
+                        </div>
+                        <div style="font-size: var(--font-size-xs); color: var(--text-muted);">"Loss ratio stable"</div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
+                        <div style="font-weight: 700; margin-bottom: var(--space-sm);">Chart B</div>
+                        <div style="font-size: var(--font-size-sm); color: var(--text-light); margin-bottom: var(--space-sm);">Y-axis from 7.0% to 7.8%<br>Loss ratio: Jan 7.0%, Feb 7.2%, Mar 7.4%, Apr 7.6%</div>
+                        <div style="height: 80px; display: flex; align-items: flex-end; gap: 6px; justify-content: center;">
+                            <div style="width: 36px; height: 8px; background: var(--danger);"></div>
+                            <div style="width: 36px; height: 27px; background: var(--danger);"></div>
+                            <div style="width: 36px; height: 47px; background: var(--danger);"></div>
+                            <div style="width: 36px; height: 67px; background: var(--danger);"></div>
+                        </div>
+                        <div style="font-size: var(--font-size-xs); color: var(--text-muted);">"Loss ratio surging!"</div>
+                    </div>
+                </div>
+                <p><strong>Questions:</strong></p>
+                <ol>
+                    <li>Which chart is misleading, and what is the manipulation?<br><textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                    <li>Why would a Board be misled by it?<br><textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                    <li>As a manager, what do you check before trusting a chart's "story"?<br><textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                </ol>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Analysis</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Chart B is misleading.</strong> It <strong>truncates the Y-axis</strong> (starts at 7.0% instead of 0). A change from 7.0% to 7.6% is genuinely small (0.6 percentage points) — but by cropping the axis, Chart B makes the bars look like a dramatic surge. Chart A uses the honest full scale and correctly shows the ratio as essentially flat.</li>
+                            <li><strong>A board could be misled into panic</strong> (thinking claims are spiralling, demanding drastic action) or — if the chart was used in reverse — into complacency. The 0.6 pp change is real but immaterial; a truncated axis turns it into a "crisis."</li>
+                            <li><strong>Manager's check:</strong> (1) Does the Y-axis start at zero? (2) What is the actual numeric change, not just the visual? (3) What time window is chosen — does it cherry-pick a favourable range? (4) Is there a comparison baseline? (5) Who made the chart and what are they trying to convince you of?</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>This is the most important chart skill in management:</strong> the ability to read a chart critically before trusting its conclusion. A chart is an argument — evaluate it like one.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Seaborn for Statistical Visualization</h2>
+
+            <p>Seaborn extends Matplotlib with three capabilities that are particularly useful for insurance analysis: (a) it works directly with Pandas DataFrames without requiring manual data aggregation, (b) it creates statistical plots that automatically compute distributions and relationships, and (c) it has built-in support for faceting (creating multiple related plots by category).</p>
+
+            <h3>3.1 Key Seaborn Plot Types</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 3 — Seaborn statistical plots</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_02.png" alt="SECTION 3 — Seaborn statistical plots" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the spread of claim amounts by policy type. Motor claims cluster tightly; Health spreads wide; Property shows extreme outliers. <strong>So what:</strong> a single "average claim" hides very different risk profiles per line. <strong>Now what:</strong> price and reserve each line differently — Property needs tail-focused reinsurance, not average-based pricing.</figcaption>
+            </figure>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 3 — Seaborn statistical plots</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_04.png" alt="SECTION 3 — Seaborn statistical plots" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> pairwise relationships between age, income, credit score, premium, and claim amount. <strong>So what:</strong> a quick scan reveals which variables move together before you build any model. <strong>Now what:</strong> the visible credit-score vs. claims relationship is a candidate underwriting factor — but correlation is not causation, so verify before using it.</figcaption>
+            </figure>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_03.png" alt="SECTION 3 — Seaborn statistical plots" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the full density shape of claims per product. Motor is a narrow peak (most claims similar); Health is multi-modal (several distinct claim sizes); Property has a long thin tail. <strong>So what:</strong> the shape tells you about claim drivers — multi-modal Health claims may mix very different claim types. <strong>Now what:</strong> investigate what creates the multiple modes before pricing Health.</figcaption>
+            </figure>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 3 — Seaborn statistical plots</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+
+            <h3>3.2 FacetGrid — Multi-Category Comparison</h3>
+
+            <p>FacetGrid creates a grid of subplots, one for each value of a categorical variable. This is invaluable for comparing distributions across segments:</p>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 3 — Seaborn (FacetGrid)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_05.png" alt="SECTION 3 — Seaborn (FacetGrid)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> claim distributions split by policy type AND claim status. <strong>So what:</strong> settled, pending, and rejected claims have different distributions — rejections concentrate in certain products. <strong>Now what:</strong> investigate why some products reject a higher share of claims — is it pricing, documentation, or fraud screening?</figcaption>
+            </figure>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> When working with large insurance datasets (hundreds of thousands of rows), pair plots and FacetGrid can be computationally expensive. Always use `.sample()` to create a representative subset for exploration, then verify patterns on the full data. The sampling should preserve the distribution of the key variables you are analyzing.
+                </div>
+            </div>
+
+            <!-- Exercise 3.1 — What Does This Plot Tell a Manager? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128202; Exercise 3.1 — What Does This Plot Tell a Manager?</h4>
+                    <p>You are shown two Seaborn plots. For each, write the <strong>business insight</strong> — not the statistical detail. Then say what decision the insight triggers.</p>
+                </div>
+                <div class="project-steps">
+                    <ol>
+                        <li><strong>A box plot of claim_amount by policy_type.</strong> You see: Motor has a narrow box around ₹40–60K with a few high outliers. Health has a wide box from ₹10K–₹1.2L with many outliers. Property has a low median but one extreme outlier at ₹2.5 Cr.<br>
+                            <em>Business insight (What / So What / Now What):</em><br>
+                            <textarea class="write-in write-in-tall" placeholder="Write the 30-second read + the decision..."></textarea></li>
+                        <li><strong>A pair plot / scatter of credit_score vs. claim_amount.</strong> You see a clear negative slope — higher credit score, lower claim amounts — with the relationship stronger for Motor than for Health.<br>
+                            <em>Business insight (What / So What / Now What):</em><br>
+                            <textarea class="write-in write-in-tall" placeholder="Write the 30-second read + the decision..."></textarea></li>
+                    </ol>
+                </div>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Insights</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>What:</strong> Claims behaviour differs sharply by product — Motor is stable and contained, Health is volatile across the board, Property has rare but enormous tail losses. <strong>So What:</strong> A single "average claim" hides the real picture; Property's risk lives in the tail, not the average. <strong>Now What:</strong> Price and reserve the lines differently — Motor can be priced on the mean, Property needs heavy reinsurance and tail-based pricing, Health needs closer claims control.</li>
+                            <li><strong>What:</strong> Credit score is inversely related to claims — a useful signal. <strong>So What:</strong> It is a candidate rating factor (already common in practice), but the relationship is weaker for Health, so it should not be applied uniformly. <strong>Now What:</strong> Test credit score as a pricing/underwriting variable per product line — and remember correlation ≠ causation; check for regulatory/ethical limits before using it.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>The habit:</strong> Every time you look at a plot, force yourself to complete the sentence — <em>"This plot tells me [X], which matters because [Y], so we should [Z]."</em> If you cannot complete it, the chart is not yet useful.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Claims Trend Analysis</h2>
+
+            <p>Time series visualization is the most common type of chart in insurance analytics. Claims trends, premium growth, and loss ratio evolution all require plotting data over time. The key is to show<strong> direction, magnitude, and context</strong> simultaneously.</p>
+
+            <h3>4.1 Monthly Claims Trend</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 4 — Claims trend (monthly)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_06.png" alt="SECTION 4 — Claims trend (monthly)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> monthly claims with a 3-month rolling average. <strong>So what:</strong> the rolling line reveals the true trend behind the monthly noise — is it rising, flat, or seasonal? <strong>Now what:</strong> rising claims + stable premium = pricing deterioration; act on the trend line, not on any single month.</figcaption>
+            </figure>
+
+            <h3>4.2 Year-over-Year Comparison</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 4 — Claims trend (year-over-year)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_07.png" alt="SECTION 4 — Claims trend (year-over-year)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the same months compared across two years. <strong>So what:</strong> year-over-year comparison removes seasonality and shows true growth. <strong>Now what:</strong> if most months are higher than last year, that is structural growth — check whether premium grew at the same rate.</figcaption>
+            </figure>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> When a major Indian health insurer plotted its monthly claims trend with a 3-month rolling average, it noticed a persistent uptick in claims frequency starting exactly 6 months after it had introduced a new health insurance product with lower co-payment requirements. The chart told the story that the underwriting team had missed: the lower co-payment was incentiving more claims, and the product was not priced for the higher frequency. The rolling average made the trend visible 3 months earlier than annual financial reporting would have revealed it — saving the insurer an estimated ₹50 crore in unnecessary claims.
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                    <div style="font-size: 1.5rem; flex-shrink: 0;">&#128202;</div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: var(--space-sm);">The Manager's Read of a Trend Chart</h4>
+                        <p style="margin-bottom: var(--space-xs);"><strong>Business Question:</strong> Is claims volume growing faster or slower than the business? Is the trend a blip or a structural shift?</p>
+                        <p style="margin-bottom: var(--space-xs);"><strong>How to Read (30 seconds):</strong> Look at the <em>slope</em> of the trend line (not the month-to-month noise). Ask: is it rising steadily (structural), spiking (event-driven), or flat (stable)? Check the gap between the actual line and the rolling average — a widening gap means acceleration.</p>
+                        <p style="margin-bottom: 0;"><strong>Action it triggers:</strong> Rising trend vs. stable premium → pricing is deteriorating → raise rates or tighten underwriting. A spike → investigate the cause (new product, monsoon, fraud ring). A falling trend → check if the business is shrinking or just claims are improving.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Portfolio Composition &amp; Comparison</h2>
+
+            <p>Understanding the composition of an insurance portfolio — how premium, policies, and claims distribute across products, channels, regions, and customer segments — is essential for strategic decision-making. The right charts make these distributions immediately visible.</p>
+
+            <h3>5.1 Premium by Product Type</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 5 — Portfolio (premium by product)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_08.png" alt="SECTION 5 — Portfolio (premium by product)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> total premium by product type. <strong>So what:</strong> Motor and Health together dominate ~70% of the book — the portfolio lives or dies by these two lines. <strong>Now what:</strong> protect the big lines; treat small lines as experiments rather than profit drivers.</figcaption>
+            </figure>
+
+            <h3>5.2 Loss Ratio Comparison — Grouped Bar Chart</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 5 — Portfolio (loss ratio grouped bar)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_09.png" alt="SECTION 5 — Portfolio (loss ratio grouped bar)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> loss ratio by product and year, with the 100% break-even line. <strong>So what:</strong> Property and Crop cross 100% — they lose money on every rupee of premium. <strong>Now what:</strong> this is the "bleeder" quadrant of the BCG lens — launch a 90-day pricing/underwriting review or exit these lines.</figcaption>
+            </figure>
+
+            <h3>5.3 Channel Performance — Treemap Alternative</h3>
+
+            <p>A treemap is ideal for showing hierarchical composition (channel → product), but requires an additional library (`squarify`). As a pure Matplotlib alternative, a stacked bar chart serves a similar purpose:</p>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 5 — Portfolio (channel performance)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_10.png" alt="SECTION 5 — Portfolio (channel performance)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> premium by channel, stacked by product. <strong>So what:</strong> Agent and Online dominate, but the product mix differs by channel — channel drives cost and risk. <strong>Now what:</strong> build channel-specific strategies; do not assume one acquisition model fits all products.</figcaption>
+            </figure>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> In an insurance portfolio chart, always sort bars by value (descending from top for horizontal, left-to-right for vertical). The human eye naturally looks for edges and endpoints — placing the highest value at the top-left guides the viewer to the most important information first. Unsorted bar charts force the audience to constantly refer to the legend, which is a sign of poor chart design.
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                    <div style="font-size: 1.5rem; flex-shrink: 0;">&#128188;</div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: var(--space-sm);">The "BCG Lens" on the Portfolio</h4>
+                        <p style="margin-bottom: var(--space-xs);">A loss-ratio-by-product chart is the insurance equivalent of the BCG Growth-Share Matrix. Read it in two dimensions at once:</p>
+                        <ul>
+                            <li><strong>Volume (premium share):</strong> which products bring in the money?</li>
+                            <li><strong>Profitability (loss ratio):</strong> which products keep the money?</li>
+                        </ul>
+                        <p style="margin-bottom: 0;"><strong>The four quadrants:</strong> High volume + low loss ratio = <strong>star</strong> (protect it). High volume + high loss ratio = <strong>bleeder</strong> (fix pricing or exit). Low volume + low loss ratio = <strong>opportunity</strong> (grow it). Low volume + high loss ratio = <strong>candidate for exit</strong>. A chart that shows only one dimension tells you half the story.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise 5.1 — Portfolio Review Role-Play -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#127908; Exercise 5.1 — Portfolio Review Role-Play</h4>
+                    <p>You are the Head of Analytics presenting to the CEO. Here is your portfolio's loss-ratio-by-product chart:</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Product</th><th>Premium Share</th><th>Loss Ratio</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Motor</td><td>40%</td><td>72%</td></tr>
+                        <tr><td>Health</td><td>30%</td><td>78%</td></tr>
+                        <tr><td>Property</td><td>15%</td><td>105%</td></tr>
+                        <tr><td>Travel</td><td>10%</td><td>55%</td></tr>
+                        <tr><td>Crop</td><td>5%</td><td>112%</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);">In one or two sentences each, complete the <strong>What / So What / Now What</strong> for the CEO:</p>
+                <ol>
+                    <li><strong>What</strong> does this chart show?<br><textarea class="write-in write-in-tall" placeholder="The one-sentence read..."></textarea></li>
+                    <li><strong>So What</strong> — which line is the biggest problem, and why is it worse than the others?<br><textarea class="write-in write-in-tall" placeholder="The one-sentence impact..."></textarea></li>
+                    <li><strong>Now What</strong> — give ONE action the CEO should approve.<br><textarea class="write-in write-in-tall" placeholder="The one-sentence decision..."></textarea></li>
+                </ol>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check a Model Answer</summary>
+                    <div class="solution-content">
+                        <p><strong>What:</strong> Our portfolio is healthy overall (weighted loss ratio ~74%) — Motor and Health, our two big lines, are within the normal band. But two small lines are bleeding: Property at 105% and Crop at 112% are paying out more than they earn in premium.</p>
+                        <p><strong>So What:</strong> Crop is the worst — a 112% loss ratio means we lose ₹12 for every ₹100 of premium. Because Crop is only 5% of the book, it is easy to ignore — but it is destroying value on every policy and would be far more damaging if it scaled. Property at 105% is also loss-making.</p>
+                        <p><strong>Now What:</strong> Approve a 90-day review of Crop and Property pricing and underwriting — either re-price to a sustainable level or stop writing these two lines. Protect Motor and Health, which are our stars, and consider growing Travel, our most profitable line.</p>
+                        <p style="margin-top: var(--space-md);"><em>The skill being tested is not the code — it is the discipline of stating the problem in one line and committing to one decision. That is what a board wants from an analytics head.</em></p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Distribution &amp; Outlier Analysis</h2>
+
+            <p>Understanding the distribution of claim amounts, claim durations, and premium values is essential for pricing, reserving, and fraud detection. Insurance distributions are almost always right-skewed — a small number of large claims dominate total claims spend.</p>
+
+            <h3>6.1 Claim Amount Distribution</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 6 — Distribution & outliers (claim amounts)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_11.png" alt="SECTION 6 — Distribution & outliers (claim amounts)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the claim amount distribution — mean well above median (right-skewed). <strong>So what:</strong> a few large claims drive most of the loss. Reserving on the average understates what you owe. <strong>Now what:</strong> reserve for the tail, buy reinsurance for the tail, and never price on the mean alone.</figcaption>
+            </figure>
+
+            <h3>6.2 Days-to-Settle Analysis</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 6 — Distribution & outliers (days to settle)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_12.png" alt="SECTION 6 — Distribution & outliers (days to settle)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> settlement time — most claims settle fast, some drag past 60 days. <strong>So what:</strong> settlement speed is the customer experience KPI; the slow tail creates complaints and churn. <strong>Now what:</strong> investigate the slow tail and fast-track simple claims — speed is the strongest driver of claims satisfaction.</figcaption>
+            </figure>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> In insurance claim distributions, the extreme right tail is <em>not</em> noise — it is often the most important part of the distribution. A claim of ₹2 crore in a property portfolio with average claim size of ₹5 lakh is not an "outlier" in the data-cleaning sense. It is a large legitimate loss that the reinsurance program exists to cover. When analyzing insurance distributions, always distinguish between <strong>data quality outliers</strong> (data entry errors that must be fixed or removed) and <strong>business outliers</strong> (legitimate extreme values that are the reason insurance exists). Never automatically remove or cap high-value claims without understanding whether they are real.
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                    <div style="font-size: 1.5rem; flex-shrink: 0;">&#128202;</div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: var(--space-sm);">Why the Skew Is the Most Important Thing on the Chart</h4>
+                        <p style="margin-bottom: 0;">When the mean is well above the median (right-skewed), it means <strong>a few big claims drive most of the loss</strong>. This single fact changes three management decisions:</p>
+                        <ul>
+                            <li><strong>Reserving:</strong> Reserving on the average will understate what you owe — you must reserve for the tail.</li>
+                            <li><strong>Reinsurance:</strong> The tail is exactly what reinsurance exists for — the skew tells you how much tail protection you need.</li>
+                            <li><strong>Pricing:</strong> Premiums based on the mean under-price the risk of a big loss. A portfolio that "averages out" is only safe if the tail is covered.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise 6.1 — The 30-Second Board Read -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128188; Exercise 6.1 — The 30-Second Board Read</h4>
+                    <p>Your claims distribution shows: <strong>mean = ₹85,000, median = ₹42,000, and the top 1% of claims account for 28% of total claim spend.</strong> The board is about to approve next year's reinsurance budget. Write what you tell them — in three sentences: What, So What, Now What.</p>
+                </div>
+                <textarea class="write-in write-in-tall" placeholder="Your 3-sentence board read..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check a Model Answer</summary>
+                    <div class="solution-content">
+                        <p><strong>What:</strong> Our claims are heavily right-skewed — the typical claim is ₹42K, but the average is dragged up to ₹85K by a small number of very large claims. The top 1% of claims produce 28% of everything we pay out.</p>
+                        <p><strong>So What:</strong> Reserving on the average would systematically understate our liability, and any single year with two or three of these large claims would blow through our loss budget.</p>
+                        <p><strong>Now What:</strong> Approve the increased reinsurance layer — we are not buying protection for the average claim, we are buying protection for the top 1%, and that is where the risk actually lives.</p>
+                        <p style="margin-top: var(--space-md);"><em>Note the discipline: no jargon, no code, no statistics lecture — just a clear read and a clear ask. That is the manager's job.</em></p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-core">
+            <h2>7. Correlation &amp; Relationship Analysis</h2>
+
+            <p>Understanding how insurance variables relate to each other — and which relationships are strong enough to be useful for underwriting or pricing — is the foundation of predictive modeling in insurance.</p>
+
+            <h3>7.1 Correlation Heatmap</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 7 — Correlation (heatmap)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_13.png" alt="SECTION 7 — Correlation (heatmap)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the correlation matrix of key insurance variables. <strong>So what:</strong> credit score vs. claim amount is the strongest relationship — a candidate underwriting factor. <strong>Now what:</strong> correlation is not causation; test fairness and regulation before using any factor in pricing.</figcaption>
+            </figure>
+
+            <h3>7.2 Scatter Plot: Premium vs. Claim Amount</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 7 — Correlation (premium vs claim)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_14.png" alt="SECTION 7 — Correlation (premium vs claim)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> premium vs. claim amount with a regression line. <strong>So what:</strong> higher premium is associated with higher claims — expected — but the spread is wide. <strong>Now what:</strong> premium alone is a weak claim predictor; do not over-rely on it for underwriting.</figcaption>
+            </figure>
+
+            <h3>7.3 Multi-Dimensional Facet Scatter</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 7 — Correlation (facet scatter)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_15.png" alt="SECTION 7 — Correlation (facet scatter)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> the premium-claim relationship split by product. <strong>So what:</strong> the relationship differs across products — Health and Property behave differently from Motor. <strong>Now what:</strong> build product-specific pricing models instead of one size that fits all.</figcaption>
+            </figure>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> Correlation is not causation — and in insurance, this distinction has regulatory implications. A strong correlation between credit score and claim frequency does not mean that a low credit score <em>causes</em> more claims. The regulatory question is: "Is it fair to use credit score for pricing?" In the US, credit-based insurance scoring is legal in most states. In the EU, it would be more heavily scrutinized. In India, the regulatory position is still evolving. Always investigate the <em>why</em> behind a correlation before building it into a pricing model.
+                </div>
+            </div>
+
+            <!-- Exercise 7.1 — Which Factors Would You Price On? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#129504; Exercise 7.1 — Which Factors Would You Use to Price Risk?</h4>
+                    <p>Your correlation heatmap shows these relationships with claim_amount: <strong>credit_score (−0.41), age (+0.28), premium (+0.22), income (−0.15), sum_assured (+0.18)</strong>. The underwriter asks which factors you would build into a pricing model. Choose your top 3 and justify each.</p>
+                </div>
+                <div class="project-steps">
+                    <ol>
+                        <li>Top 3 factors to price on:<br>
+                            <textarea class="write-in write-in-tall" placeholder="e.g. 1. credit_score, 2. age, 3. ..."></textarea></li>
+                        <li>Which factor would you be <em>cautious</em> about using, and why?<br>
+                            <textarea class="write-in write-in-tall" placeholder="Your reasoning..."></textarea></li>
+                    </ol>
+                </div>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check a Model Answer</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Top 3: credit_score (−0.41), age (+0.28), premium (+0.22).</strong> These have the strongest relationships with claim amount — and they are all available at application time, so they are usable for pricing.</li>
+                            <li><strong>Be cautious with credit_score.</strong> It has the strongest correlation, but: (a) correlation ≠ causation — it may be a proxy for income or socioeconomic status; (b) it is ethically and legally sensitive as a pricing factor; (c) the EU AI Act and evolving Indian regulation scrutinise automated decisions that use such proxies. You would use it, but with a fairness/impact test and full documentation — not blindly.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><em>The point of this exercise is the trade-off a manager makes every day: <strong>predictive power vs. fairness and regulation.</strong> The strongest number is not always the right one to use.</em></p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 8 -->
+        <section class="content-section stability-core">
+            <h2>8. Publication-Ready Charts</h2>
+
+            <p>A chart that is not publication-ready is a chart that will not be used. Creating charts that communicate clearly in a boardroom, management report, or client presentation requires attention to detail that goes beyond the default Matplotlib output.</p>
+
+            <h3>8.1 The Publication Checklist</h3>
+
+            <p>Before exporting any chart, verify each item on this checklist:</p>
+            <ul>
+                <li><strong>Title:</strong> Does it tell the viewer what to look for? "Monthly Claims Trend" is a label, not a title. "Claims Volume Rose 15% YoY — Driven by Motor Portfolio Growth" is a title.</li>
+                <li><strong>Axis labels:</strong> Are units clear? Not "Claims" but "Number of Claims (Thousands)" or "Claim Amount (₹ Crores)."</li>
+                <li><strong>Data labels:</strong> Where the viewer needs to know exact values (KPIs, key data points), add labels directly on the chart rather than forcing the viewer to estimate from axis scales.</li>
+                <li><strong>Annotations:</strong> Have you explained unusual spikes, dips, or trend changes? The annotation is worth as much as the data.</li>
+                <li><strong>Legend:</strong> Is it placed where it does not obscure data? In the upper-left or below the chart are usually safest.</li>
+                <li><strong>Color:</strong> Are colors accessible (colorblind-safe)? Are they consistent with your brand or report theme? No more than 6 distinct categories per chart.</li>
+                <li><strong>Resolution:</strong> Is the export at least 300 DPI for print or 150 DPI for digital?</li>
+            </ul>
+
+            <h3>8.2 Creating a Consistent Dashboard Style</h3>
+
+            <p>Define a custom style once and reuse it across all charts to create a consistent visual identity:</p>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 8 — Publication-ready (style)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+
+            <h3>8.3 Exporting Charts</h3>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 8 — Publication-ready (exporting)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+
+            <h3>8.4 Dual-Axis Chart: Combining KPIs</h3>
+
+            <p>A dual-axis chart is the most effective way to show the relationship between two KPIs with different units — such as premium growth (₹) and loss ratio (%):</p>
+
+            <div class="callout callout-note" style="margin-bottom: var(--space-md);"><div class="callout-icon">&#128279;</div><div class="callout-content"><strong>Code for this chart is on GitHub:</strong> <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">SECTION 8 — Publication-ready (dual-axis)</a> <span style="color: var(--text-muted);">(download the script and run it in Jupyter — copy the relevant section)</span></div></div>
+            <figure style="margin: var(--space-lg) 0; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <img src="../../assets/images/session-06/chart_16.png" alt="SECTION 8 — Publication-ready (dual-axis)" style="max-width: 100%; border-radius: var(--radius-sm); display: block; margin: 0 auto;">
+                <figcaption style="font-size: var(--font-size-sm); color: var(--text-light); margin-top: var(--space-sm);"><strong>What it shows:</strong> premium growth (bars) alongside the loss ratio (line) — the "sustainability story." <strong>So what:</strong> growing premium with a rising loss ratio is growth at any cost; growing premium with a stable ratio is healthy. <strong>Now what:</strong> pair this chart with any growth claim before the board — it is the single most important check on whether growth is profitable.</figcaption>
+            </figure>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The golden rule of insurance data visualization: <strong>never show premium growth without the corresponding loss ratio trend, and never show loss ratio improvement without the corresponding premium trend.</strong> A growing portfolio with a stable loss ratio is healthy. A growing portfolio with a rapidly deteriorating loss ratio is a crisis in the making. A shrinking portfolio with an improving loss ratio may mean the insurer is pricing itself out of the market. The dual-axis chart makes all three stories immediately visible.
+                </div>
+            </div>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                    <div style="font-size: 1.5rem; flex-shrink: 0;">&#128172;</div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: var(--space-sm);">The 30-Second Presentation Rule</h4>
+                        <p style="margin-bottom: var(--space-xs);">When you present a chart to a board, <strong>tell them the conclusion before you show the chart.</strong> "Motor loss ratio deteriorated 6 points this year, driven by rising third-party claims — here is the chart." The chart then <em>confirms</em> the message; it does not have to <em>deliver</em> it.</p>
+                        <p style="margin-bottom: 0;"><strong>Practice prompt:</strong> Take the dual-axis chart (premium vs. loss ratio). Write the one sentence you would say to the CEO <em>before</em> showing it, and the one action you recommend. This is the difference between an analyst who shows data and one who drives decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: A 1-Page Board Brief from 6 Charts</h2>
+            <div class="project-brief">
+                <p>Using the cleaned merged dataset from Session 05, build 6 publication-quality charts — <strong>then turn them into a one-page board brief.</strong> The charts are the evidence; the brief is the decision. Every chart you make must answer the manager's three questions: <em>What / So What / Now What.</em></p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Chart 1 — Monthly Claims Trend:</strong> Bar chart of monthly claim counts with a 3-month rolling average. Annotate any significant spike or dip.</li>
+                    <li><strong>Chart 2 — Loss Ratio by Product Type:</strong> Horizontal bar chart of loss ratio by product. Add reference lines at 75 and 100. This is your "which line is bleeding?" chart.</li>
+                    <li><strong>Chart 3 — Claim Amount Distribution:</strong> Histogram with KDE overlay. Add mean and median lines. Print skewness and interpret — this is your "why reserving/reinsurance matter" chart.</li>
+                    <li><strong>Chart 4 — Correlation Heatmap:</strong> Heatmap of at least 5 numeric variables. Identify the strongest correlation and comment on whether it is <em>fair to use</em>, not just strong.</li>
+                    <li><strong>Chart 5 — Dual-Axis Chart:</strong> Premium growth (bar) vs. loss ratio trend (line). This answers: "is our growth profitable?"</li>
+                    <li><strong>Chart 6 — Settlement Time by Product:</strong> Box plot of days-to-settle by product. Add the overall average line — this is your customer-experience chart.</li>
+                    <li><strong>Export all charts</strong> at 300 DPI with consistent styling.</li>
+                    <li><strong>Write the 1-page board brief</strong> — for EACH chart, two lines only:
+                        <ul>
+                            <li><em>So What:</em> the single business insight (not the technical detail)</li>
+                            <li><em>Now What:</em> the one decision or action it supports</li>
+                        </ul>
+                        Then add a one-line "Headline" at the top: the single most important message the CEO must take away.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Master Solution: 6-Chart Insurance Dashboard</h4>
+
+                    <p>The complete code for all 6 charts is in <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-06/visualization_analysis.py" target="_blank" rel="noopener">visualization_analysis.py on GitHub</a> (the <strong>HANDS-ON</strong> section at the end of the script shows which blocks to reuse). Here is the structure and expected interpretation for each chart:</p>
+
+                    <table>
+                        <thead>
+                            <tr><th>Chart</th><th>Expected Pattern</th><th>Business Interpretation</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1. Monthly Claims Trend</td>
+                                <td>Cyclical pattern with claim counts peaking in July–August (monsoon) and December–January (travel/holiday). Long-term gradual upward trend as portfolio grows.</td>
+                                <td>"Claims follow a predictable seasonal pattern. The monsoon peak suggests weather-related motor claims — validate by cross-referencing with weather data from Session 18."</td>
+                            </tr>
+                            <tr>
+                                <td>2. Loss Ratio by Product</td>
+                                <td>Motor likely has highest loss ratio (70–85%), Health moderate (60–75%), Property most variable (40–80% depending on cat events).</td>
+                                <td>"Motor insurance is the most capital-intensive line with the highest loss ratio — it drives overall portfolio profitability. Any improvement in motor loss ratio directly improves the combined ratio."</td>
+                            </tr>
+                            <tr>
+                                <td>3. Claim Amount Distribution</td>
+                                <td>Strong right skew (skewness > 2). Mean > Median. Top 1% of claims may account for 15–30% of total claims cost.</td>
+                                <td>"The distribution confirms the classic insurance pattern — a small number of large claims drive the majority of losses. Pricing and reserving must be based on the full distribution, not just the average."</td>
+                            </tr>
+                            <tr>
+                                <td>4. Correlation Heatmap</td>
+                                <td>Premium shows moderate positive correlation with sum_assured. Credit_score shows weak negative correlation with claim_amount. Age-claim_amount relationship varies by product type.</td>
+                                <td>"Credit score has the expected negative relationship with claims — higher credit score, lower claims. The magnitude is modest, suggesting it is one factor among many in risk assessment."</td>
+                            </tr>
+                            <tr>
+                                <td>5. Dual-Axis: Premium vs. Loss Ratio</td>
+                                <td>Premium growing year-over-year (10–15%). Loss ratio should ideally be stable or declining. If loss ratio is rising as premium grows, the growth is under-priced.</td>
+                                <td>"Premium is growing at approximately X% annually. The loss ratio is trending at Y%, which is [within acceptable range / a concern]. This portfolio is [profitable / marginal / at risk]."</td>
+                            </tr>
+                            <tr>
+                                <td>6. Settlement Time by Product</td>
+                                <td>Motor claims settle fastest (10–20 days median). Property takes longer (20–40 days due to surveyor involvement). Health varies widely depending on cashless vs. reimbursement.</td>
+                                <td>"Motor claims settle fastest, reflecting standardized repair processes and aggregated garages. Property claims take longest, driven by surveyor scheduling and complex loss assessment."</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Key Considerations for Your Solution</h4>
+                    <ul>
+                        <li>Apply the INSURANCE_STYLE consistently so all 6 charts share the same visual identity — this is what makes them a "dashboard" rather than 6 separate charts</li>
+                        <li>Use the INSURANCE_PALETTE for all color choices</li>
+                        <li>Every chart must have a <strong>business title</strong> (not just "Claims Trend" but "Motor Claims Growing 12% YoY — Monsoon Spike Amplifying")</li>
+                        <li>At least 3 of the 6 charts should have an annotation explaining a specific data point</li>
+                        <li>Export all charts at 300 DPI with consistent dimensions</li>
+                        <li>The business interpretation paragraph for each chart is as important as the chart itself — without interpretation, it is just a picture</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <!-- 3-2-1 Reflection -->
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-2xl);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">&#9997;</div>
+                <div style="flex: 1;">
+                    <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-md);">3-2-1 Reflection — Before You Move On</h2>
+                    <p style="color: var(--text-light); margin-bottom: var(--space-lg);">A manager reads charts — practise translating them into decisions. Write from memory, don't scroll back.</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--primary-light); margin-bottom: var(--space-md);">3 Things I Learned Today</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="3. ______________________________________"></textarea></div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--accent); margin-bottom: var(--space-md);">2 Charts I Can Now Explain to a Manager</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. (chart) → (its business insight) __________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. (chart) → (its business insight) __________________"></textarea></div>
+                        </div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-top: var(--space-md);">
+                        <h3 style="font-size: var(--font-size-base); color: var(--warning); margin-bottom: var(--space-md);">1 Question I Still Have About Data Visualisation</h3>
+                        <div><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>In insurance, the best visualizations pair KPIs together: premium growth with loss ratio, claims frequency with average severity. A single KPI in isolation is almost always misleading.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Every chart should make a business insight immediately visible. If the audience cannot see the story in 5 seconds, the chart needs better formatting, annotations, or a different chart type.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Insurance claim distributions are heavily right-skewed — mean exceeds median, and the top 1% of claims may account for 20%+ of total cost. Visualizations must not obscure this tail risk.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>The dual-axis chart (premium growth + loss ratio) is the single most informative chart in insurance analytics — it tells the complete story of whether growth is profitable or destructive.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>Publication-ready charts require attention to 7 details: business-focused titles, clear axis labels, strategic data labels, contextual annotations, colorblind-safe colors, consistent styling, and high resolution exports.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s06-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. When creating a dual-axis chart showing premium growth (bar) alongside loss ratio (line), the primary business insight you are looking for is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Whether premium is growing in absolute terms</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Whether premium growth is accompanied by stable or deteriorating loss ratio — "profitable growth" vs. "buying market share"</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Whether the loss ratio is below 100%</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Whether the bar heights equal the line heights</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A histogram of claim amounts shows a strong right skew with mean = ₹85,000 and median = ₹42,000. This implies:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Most claims are above the average</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) A small number of very large claims are pulling the mean above the median — the typical claim is ~₹42,000, not ~₹85,000</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) The data is normally distributed with a moderate variance</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) The median is unreliable and should not be reported</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. When using Seaborn's FacetGrid to compare premium vs. claim amount by policy type, the col_wrap parameter controls:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The maximum number of columns per row</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) The width of each individual plot</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) The wrapping behavior for long labels on the x-axis</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The number of colors in the colormap</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. In the context of insurance data visualization, what distinguishes a "data quality outlier" from a "business outlier"?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Data quality outliers are above the 99th percentile; business outliers are below the 1st percentile</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Data quality outliers result from data entry errors (to be fixed/removed); business outliers are legitimate extreme values (the reason insurance exists — never auto-remove)</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Business outliers only occur in motor insurance; data quality outliers only in health insurance</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) There is no difference — all outliers should be capped at the 99th percentile before analysis</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. The correct Matplotlib command to rotate x-axis tick labels by 45 degrees is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) plt.xticks(rotation=45)</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) ax.tick_params(axis='x', rotation=45)</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Both (a) and (b) are valid — ax.tick_params() on an Axes object and plt.xticks() on the global state</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) plt.set_xticklabels(rotation=45)</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s06-quiz', ['b','b','a','b','c'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s06-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-05.html" class="nav-link">&larr; Previous: Insurance Data Sources &amp; Cleaning</a>
+            <a href="session-07.html" class="nav-link next">Next: Power BI for Insurance Analytics &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 24: Insurance Regulations &amp; Digital Governance — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-23.html" class="nav-link">&larr; Previous: Looker Studio for Executive Reporting</a>
+            <a href="session-25.html" class="nav-link next">Next: Ethical AI &amp; Responsible Insurance &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #1a0a2e 0%, #2c1a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 8 &middot; Session 24 &middot; 90 min &middot; Power BI Lab</div>
+            <h1>Session 24: Insurance Regulations &amp; Digital Governance</h1>
+            <div class="chapter-meta">
+                CILO-1, CILO-3 &middot; Domain Knowledge &amp; Solution Design &middot; Lecture &amp; Lab (Power BI) &middot; Power BI Desktop required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Explain the IRDAI regulatory framework — the Insurance Act 1938, IRDAI Act 1999, and the key regulations governing solvency, investments, and policyholder protection</li>
+                <li>Calculate and interpret solvency margin requirements — the difference between Available Solvency Margin (ASM) and Required Solvency Margin (RSM)</li>
+                <li>Evaluate the impact of the DPDP Act 2023 on insurance data processing — consent requirements, data minimisation, and breach notification obligations</li>
+                <li>Build a compliance monitoring dashboard in Power BI tracking solvency, claim settlement ratio, expense of management, rural sector obligations, and grievance redressal</li>
+                <li>Compare the Indian regulatory approach (IRDAI) with EU (EIOPA/Solvency II), US (NAIC), and Singapore (MAS) frameworks</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. The IRDAI Regulatory Framework</h2>
+
+            <p>The Insurance Regulatory and Development Authority of India (IRDAI) is the statutory body responsible for regulating and developing the insurance industry in India. Its mandate is dual: to protect the interests of policyholders AND to promote the orderly growth of the insurance market. These two objectives sometimes pull in opposite directions — stricter regulation protects consumers but may slow market growth — and IRDAI's success is measured by how well it balances both.</p>
+
+            <h3>1.1 The Legal Foundation</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Legislation</th><th>Year</th><th>Key Provisions</th><th>Current Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Insurance Act, 1938</strong></td><td>1938</td><td>Original framework for insurance regulation in India. Provisions on: registration of insurers, solvency margins, investments, commissions, policy terms, and winding-up of insurers. Has been amended multiple times.</td><td>Still in force — the foundational legislation. Most regulatory provisions have been subsumed into IRDAI regulations.</td></tr>
+                    <tr><td><strong>IRDAI Act, 1999</strong></td><td>1999</td><td>Established the Insurance Regulatory and Development Authority as an autonomous statutory body. Defined IRDAI's mandate, powers, and governance structure.</td><td>In force — the constitutional foundation of IRDAI's authority.</td></tr>
+                    <tr><td><strong>Insurance (Amendment) Act, 2015</strong></td><td>2015</td><td>Raised FDI limit from 26% to 49%. Allowed foreign reinsurance branches in India. Strengthened IRDAI's enforcement powers, including the ability to impose penalties.</td><td>Implemented — significant impact on market structure.</td></tr>
+                    <tr><td><strong>Insurance (Amendment) Act, 2021</strong></td><td>2021</td><td>Raised FDI limit from 49% to 74%. Provided for "use-and-file" product approval for certain products. Empowered IRDAI to make regulations without prior government approval on certain matters.</td><td>Implemented — transformative for foreign investment in Indian insurance.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>1.2 IRDAI's Regulatory Powers</h3>
+
+            <p>IRDAI exercises its authority through: <strong>Regulations</strong> (binding rules issued under the IRDAI Act — the primary regulatory instrument), <strong>Circulars</strong> (clarifications or directions on specific topics — more common than regulations for day-to-day guidance), <strong>Guidelines</strong> (non-binding guidance on best practices), and <strong>Orders</strong> (specific directions to individual entities). For insurance analytics professionals, the most important documents to track are: the annual IRDAI Annual Report (industry data and regulatory priorities), the Master Circulars (consolidated regulatory requirements updated annually), and the Exposure Drafts (proposed regulations open for public comment — the best source for anticipating regulatory change).</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> For anyone working in InsurTech, the single most important IRDAI publication is the <strong>Regulatory Sandbox</strong> regulations, which provide a framework for testing innovative insurance products, processes, and business models without requiring a full regulatory approval upfront. The sandbox has been used by startups to test: parametric insurance products, AI-based underwriting models, micro-insurance distribution through non-traditional channels, and blockchain-based claims processing. If you are building an innovative insurance product in India, the regulatory sandbox should be your first port of call — not your last resort.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Solvency &amp; Capital Adequacy</h2>
+
+            <p>Solvency regulation is the most important function of any insurance regulator. An insurer that cannot pay its claims because it lacks capital is not just a failed business — it is a social crisis that destroys the financial security of millions of policyholders. Solvency regulation sets minimum capital requirements to ensure that insurers can survive severe but plausible loss scenarios.</p>
+
+            <h3>2.1 The Solvency Framework</h3>
+
+            <p>IRDAI's solvency framework follows a three-pillar structure similar to the Basel capital framework for banks and Solvency II for European insurers:</p>
+
+            <ul>
+                <li><strong>Pillar 1 — Quantitative Requirements:</strong> The insurer must maintain an Available Solvency Margin (ASM) at least 1.5 times the Required Solvency Margin (RSM). The RSM is calculated as a percentage of unearned premium reserve and outstanding claims reserve (for general insurance) or as a percentage of sum at risk and mathematical reserves (for life insurance). The current solvency ratio requirement is 1.5.</li>
+                <li><strong>Pillar 2 — Risk Management and Governance:</strong> The insurer must have a documented risk management framework, a board-appointed Chief Risk Officer, and a Risk Management Committee. This pillar includes the Own Risk and Solvency Assessment (ORSA) — a forward-looking self-assessment of the insurer's risk profile and capital adequacy.</li>
+                <li><strong>Pillar 3 — Disclosure and Market Discipline:</strong> The insurer must disclose its solvency position in its annual report and to IRDAI in quarterly filings. Material changes in solvency must be reported immediately. This pillar ensures transparency and enables market participants (analysts, rating agencies, policyholders) to assess the insurer's financial strength.</li>
+            </ul>
+
+            <h3>2.2 The Solvency Calculation</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# Solvency calculation — illustrative example for a general insurer
+# Based on IRDAI's solvency framework
+
+# ASSUMPTIONS
+gross_premium = 500_00_00_000        # ₹500 Cr gross written premium
+reinsurance_cession = 0.20            # 20% ceded to reinsurer
+claims_outstanding = 75_00_00_000    # ₹75 Cr outstanding claims
+incurred_claims = 320_00_00_000      # ₹320 Cr incurred claims (annual)
+investment_portfolio = 250_00_00_000 # ₹250 Cr investment portfolio
+equity_allocation = 0.35             # 35% equity, rest debt
+
+print("=" * 60)
+print("SOLVENCY CALCULATION — ILLUSTRATIVE GENERAL INSURER")
+print("=" * 60)
+
+# Step 1: Net Premium
+net_premium = gross_premium * (1 - reinsurance_cession)
+print(f"\n1. Net Premium")
+print(f"   Gross Written Premium:    ₹{gross_premium/1e7:.0f} Cr")
+print(f"   Reinsurance Ceded (20%):  ₹{gross_premium*reinsurance_cession/1e7:.0f} Cr")
+print(f"   Net Written Premium:      ₹{net_premium/1e7:.0f} Cr")
+
+# Step 2: Required Solvency Margin (RSM)
+# General insurance: higher of 50% of net premium or 30% of technical reserves
+rms_based_on_premium = net_premium * 0.20  # Simplified: 20% of net premium
+rms_based_on_reserves = claims_outstanding * 0.30  # Simplified: 30% of outstanding claims
+rsm = max(rms_based_on_premium, rms_based_on_reserves)
+
+print(f"\n2. Required Solvency Margin (RSM)")
+print(f"   20% of Net Premium:       ₹{rms_based_on_premium/1e7:.1f} Cr")
+print(f"   30% of Outstanding Claims:₹{rms_based_on_reserves/1e7:.1f} Cr")
+print(f"   RSM (higher of the two):  ₹{rsm/1e7:.1f} Cr")
+
+# Step 3: Available Solvency Margin (ASM)
+# ASM = Net assets + certain admissible reserves — intangible assets
+total_assets = investment_portfolio + claims_outstanding + 100_00_00_000  # other assets
+total_liabilities = claims_outstanding + 250_00_00_000  # other liabilities
+net_assets = total_assets - total_liabilities
+asm = net_assets + 10_00_00_000  # add investment fluctuation reserve (simplified)
+
+print(f"\n3. Available Solvency Margin (ASM)")
+print(f"   Total Assets:             ₹{total_assets/1e7:.0f} Cr")
+print(f"   Total Liabilities:        ₹{total_liabilities/1e7:.0f} Cr")
+print(f"   Net Assets:               ₹{net_assets/1e7:.0f} Cr")
+print(f"   Add: Investment Reserve:  ₹{10_00_00_000/1e7:.0f} Cr")
+print(f"   ASM:                      ₹{asm/1e7:.1f} Cr")
+
+# Step 4: Solvency Ratio
+solvency_ratio = asm / rsm
+print(f"\n4. SOLVENCY RATIO")
+print(f"   ASM / RSM = {asm/1e7:.1f} / {rsm/1e7:.1f} = {solvency_ratio:.2f}")
+print(f"   IRDAI Minimum: 1.50")
+
+if solvency_ratio >= 2.5:
+    status = "Strong — comfortable capital position"
+elif solvency_ratio >= 2.0:
+    status = "Healthy — above regulatory minimum with headroom"
+elif solvency_ratio >= 1.5:
+    status = "Adequate — meets regulatory minimum but needs monitoring"
+elif solvency_ratio >= 1.25:
+    status = "WARNING — below minimum. Insurer must submit a capital restoration plan"
+else:
+    status = "CRITICAL — regulatory intervention imminent"
+
+print(f"   Status: {status}")
+print(f"   Gap to minimum: +₹{(asm - rsm * 1.5)/1e7:.1f} Cr (above minimum)")
+print(f"   OR Gap to minimum: +₹{(asm - rsm * 1.5)/1e7:.1f} Cr")</code></pre>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> An insurer's solvency ratio is not a static number — it changes every day as premiums are written, claims are paid, and investment values fluctuate. A solvency ratio that was 1.8 at the last quarterly filing may have dropped to 1.4 within weeks if a large catastrophe event occurred. IRDAI requires insurers to monitor solvency on an ongoing basis and report if the ratio falls below 1.5. Some insurers maintain an "early warning" threshold of 1.75 — if the ratio drops below this, management triggers a pre-planned capital action (reducing dividend, requesting capital infusion from parent, or adjusting reinsurance structure). As an analytics professional, you should never rely on a solvency number that is more than 30 days old — it is already potentially misleading.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-volatile"
+                 data-review-cycle="quarterly"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch24-dpdp-act">
+            <div class="stability-badge volatile-badge">
+                &#9888; Volatile content — Reviewed: July 2026 &middot; Next review: October 2026
+            </div>
+
+            <h2>3. The DPDP Act 2023 &amp; Insurance Data</h2>
+
+            <p>The Digital Personal Data Protection Act, 2023 (DPDP Act) is India's first comprehensive data protection legislation. It establishes a framework for the processing of personal data, creates rights for individuals (data principals), and imposes obligations on organisations that process personal data (data fiduciaries). For the insurance industry — which is built on processing large volumes of sensitive personal data — the DPDP Act is the most significant regulatory development since the IRDAI Act 1999.</p>
+
+            <h3>3.1 Key Provisions Affecting Insurance</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Provision</th><th>What It Means for Insurers</th><th>Implementation Requirement</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Consent</strong></td><td>Personal data can only be processed with the data principal's consent — freely given, specific, informed, and unambiguous. Separate consent is required for each purpose.</td><td>Insurers must revise policy application forms to include clear consent clauses for data collection, underwriting, claim processing, and cross-selling. Consent cannot be buried in terms and conditions — it must be explicit.</td></tr>
+                    <tr><td><strong>Purpose limitation</strong></td><td>Data can only be processed for the purpose for which it was collected. Customer data collected for underwriting cannot be used for marketing without fresh consent.</td><td>Many InsurTech business models rely on using data for multiple purposes (claims data → pricing model → cross-sell). These use cases require separate, specific consent at each stage.</td></tr>
+                    <tr><td><strong>Data minimisation</strong></td><td>Only data that is actually necessary for the stated purpose should be collected. "Collect everything, figure out later" approaches are prohibited.</td><td>Insurers must audit their data collection forms and remove questions that are not directly relevant to the insurance purpose. Historical data collected without a clear purpose may need to be deleted.</td></tr>
+                    <tr><td><strong>Breach notification</strong></td><td>Data fiduciaries must notify the Data Protection Board and affected data principals of any personal data breach — without delay.</td><td>Insurers must have a breach detection and notification process in place. Notification must include: nature of breach, affected data, potential consequences, and mitigation measures. Timeline: within 72 hours of knowledge (consistent with GDPR).</td></tr>
+                    <tr><td><strong>Data principal rights</strong></td><td>Individuals have the right to: request a summary of their data, seek correction, request erasure, and nominate a representative. Data fiduciaries must respond within a reasonable period.</td><td>Insurers must have processes to handle data subject access requests within the specified timeline. This requires: a data inventory (what data do we have on each customer?), a data map (where is it stored?), and a data deletion process (can we actually delete a customer's data from all systems?).</td></tr>
+                    <tr><td><strong>Significant data fiduciaries</strong></td><td>Insurers that handle large volumes of sensitive personal data may be classified as "Significant Data Fiduciaries" — requiring additional obligations: Data Protection Impact Assessment, appointment of a Data Protection Officer, and independent data audit.</td><td>Major insurers handling health data, biometric data, and financial data of millions of customers are likely to be classified as SDFs. They must already begin preparing for these enhanced obligations.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>3.2 Specific Insurance Use Cases Affected</h3>
+
+            <ul>
+                <li><strong>AI underwriting models:</strong> Historical claims data used to train underwriting models may have been collected without explicit consent for "model training." Under the DPDP Act, using data for a purpose that was not specified at collection may require fresh consent or anonymisation. Insurers using ML for underwriting should review whether their training data was collected with appropriate consent.</li>
+                <li><strong>Health insurance — medical records:</strong> Medical records are among the most sensitive categories of personal data. TPAs and insurers that process medical records for claim assessment must ensure that: (a) consent for accessing medical records is obtained separately (not bundled with the policy application consent), (b) data is only used for the specific claim being assessed, and (c) records are deleted after the period required by regulation.</li>
+                <li><strong>Telematics / UBI data:</strong> Usage-based insurance generates continuous driving data (location, speed, time of day, phone usage). The DPDP Act's data minimisation principle means insurers cannot collect ALL telematics data and "figure out what is useful later" — they must specify exactly what data will be collected, for what purpose, and for how long it will be retained.</li>
+                <li><strong>Cross-selling and lead generation:</strong> Many InsurTechs and traditional insurers derive significant revenue from cross-selling — using policyholder data to offer other financial products (loans, mutual funds, other insurance). Under the DPDP Act, cross-selling requires separate, specific consent. Policyholders cannot be opted into cross-selling by default — they must actively opt in.</li>
+            </ul>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> In 2024, a major Indian health insurer faced a DPDP Act compliance challenge when it discovered that its AI-based underwriting model, which predicted claim probability using 15+ years of customer health data, had been trained on data that included medical records collected without explicit consent for "model training." The insurer had to: (a) stop using the model temporarily, (b) conduct a retrospective consent campaign asking 2 million customers for permission to use their data for AI model training, (c) retrain the model only on data from customers who gave consent (approximately 35% of the original dataset), and (d) demonstrate to IRDAI and the Data Protection Board that the retrained model did not systematically disadvantage any customer group. The compliance cost was estimated at ₹12 crore and the project took 18 months. The lesson: data consent is not a compliance formality — it is a business constraint that must be designed into AI products from the beginning, not retrofitted after the model is built.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch24-regulatory-reporting">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>4. Regulatory Reporting</h2>
+
+            <p>IRDAI requires insurers to submit a comprehensive set of reports at regular intervals. These reports enable IRDAI to monitor the financial health and conduct of all insurers and take corrective action when necessary. The reporting burden is significant — a mid-size general insurer may file 50+ regulatory reports per year. Understanding the key reports is essential for anyone working in insurance analytics, because these reports drive both regulatory compliance and internal management decisions.</p>
+
+            <h3>4.1 Key Regulatory Filings</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Report</th><th>Frequency</th><th>Content</th><th>Submitted By</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Quarterly Solvency Return</strong></td><td>Quarterly</td><td>ASM, RSM, solvency ratio, admissible assets, and liabilities. Must be certified by the appointed actuary.</td><td>All insurers</td></tr>
+                    <tr><td><strong>Annual Financial Statements</strong></td><td>Annual</td><td>Audited balance sheet, profit &amp; loss account, revenue account (by line of business), and notes to accounts.</td><td>All insurers</td></tr>
+                    <tr><td><strong>Insurance Statistical Return</strong></td><td>Quarterly</td><td>Premium and claims data by line of business, by zone, by channel. Used for industry-wide statistical publications.</td><td>General insurers</td></tr>
+                    <tr><td><strong>Rural &amp; Social Sector Return</strong></td><td>Annual</td><td>Evidence of compliance with rural and social sector obligations — percentage of policies in rural areas, policies for socially vulnerable groups.</td><td>All insurers</td></tr>
+                    <tr><td><strong>Grievance Redressal Return</strong></td><td>Quarterly</td><td>Number of complaints received, disposed, pending, nature of complaint, average resolution time.</td><td>All insurers</td></tr>
+                    <tr><td><strong>Reinsurance Return</strong></td><td>Quarterly</td><td>Details of reinsurance arrangements — ceded premium, recoveries received, outstanding recoveries.</td><td>General insurers</td></tr>
+                    <tr><td><strong>Investment Return</strong></td><td>Quarterly</td><td>Composition of investment portfolio by category (government securities, corporate bonds, equity, etc.) and compliance with IRDAI investment regulations.</td><td>All insurers</td></tr>
+                    <tr><td><strong>Product Filing (Use &amp; File)</strong></td><td>Within 15 days of product launch</td><td>All product documents — policy wording, premium rates, underwriting guidelines, proposal form. For "use and file" products, the filing is made after launch.</td><td>All insurers (for new products)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>4.2 The Compliance Burden and Technology Solutions</h3>
+
+            <p>The compliance burden for Indian insurers is significant. A typical mid-size general insurer may have 5–10 full-time employees dedicated to regulatory reporting, often relying on manual data extraction from multiple systems, Excel-based calculations, and considerable manual checking. The cost of compliance is estimated at 1–2% of premiums for most insurers. Technology solutions — automated data extraction from core systems, pre-formatted reporting templates, workflow automation for approval and submission — can reduce this cost by 30–50% while simultaneously reducing errors.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> For an InsurTech startup, the regulatory reporting burden is often underestimated. A new general insurer with a digital-first model must still file all the same regulatory returns as a 50-year-old incumbent — the returns are not simplified for digital insurers. The cost per premium rupee of compliance is actually HIGHER for small insurers because many compliance costs are fixed (not proportional to premium volume). An InsurTech entering the market as a full-stack carrier should budget 1–2% of premium for regulatory compliance and reporting — and should invest in automated regulatory reporting tools from day one, not as an afterthought. The startups that have failed to do this have found themselves spending 20–40% of their analytics team's time on manual regulatory reporting instead of value-creating analytics.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Compliance Monitoring Dashboard in Power BI</h2>
+
+            <p>A compliance monitoring dashboard enables the compliance team, the CFO, and the board to monitor the insurer's regulatory compliance status in real-time. Instead of waiting for quarterly filing deadlines to discover a compliance gap, the dashboard surfaces issues immediately — when corrective action is still possible.</p>
+
+            <h3>5.1 Key Compliance Metrics and Dashboard Layout</h3>
+
+            <pre><code class="language-text">COMPLIANCE MONITORING DASHBOARD — PAGE 1: REGULATORY STANDING
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ COMPLIANCE MONITOR                         [As of: 30 Sep 2026]
+├──────────────┬──────────────┬──────────────┬──────────────┬──────────┤
+│ Solvency     │ Claim        │ Expense of   │ Rural        │ Grievance│
+│ Ratio 2.30  │ Settlement   │ Management   │ Business 12% │ Redressal│
+│ Target ≥1.50│ Ratio 94.5%  │ 26.2%        │ Target ≥10%  │ 92%      │
+│ ▲ Above min  │ ▲ On track   │ ✓ Within lim │ ✓ Exceeded   │ ✓ On trk│
+│ Status: GREEN│ Status: GREEN│ Status: GREEN│ Status: GREEN│ GREEN   │
+├──────────────┴──────────────┴──────────────┴──────────────┴──────────┤
+│ Trend: Solvency Ratio (Last 8 Quarters) — Bar Chart + Line           │
+│ ┌─────────────────────────────────────────────────────────────────┐ │
+│ │  2.5│ ██     ██     ██     ██     ██     ██     ██     ██       │ │
+│ │  2.0│ ██  ██ ██  ██ ██  ██ ██  ██ ██  ██ ██  ██ ██  ██       │ │
+│ │  1.5│ ██████████████████████████████████████████████████─── min│ │
+│ │  1.0│──────────────────────────────────────────────────────────│ │
+│ │     │ Q1 Q2 Q3 Q4 Q1 Q2 Q3 Q4  Q1 Q2 Q3 Q4 Q1 Q2 Q3 Q4        │ │
+│ │     │ 2023      │ 2024      │ 2025      │ 2026                 │ │
+│ └─────────────────────────────────────────────────────────────────┘ │
+│ ▲ Regulatory minimum: 1.50    Comfort threshold: 1.75              │
+│                                                                     │
+├──────────────┬──────────────────────┬──────────────────────────────┤
+│ Product      │ Product-wise         │ Red Flag Items               │
+│ Compliance Status│ Compliance Detail  │ (Specific items needing      │
+│ (Table)      │ (Expandable rows)    │  action)                      │
+│ Product  CR  │ ───────────────── │ ──────────────────────────── │
+│ Motor   100.2│ Motor TP: Required │ • Motor TP combined ratio    │
+│ Health  91.5│ solvency for motor │   108% — exceeds internal    │
+│ Property95.2│ TP segment is      │   threshold of 105%. Rate   │
+│ Crop    112.0│ higher than for     │   filing required.          │
+│ Travel  72.5│ own-damage. Net     │ • Crop insurance combined   │
+│              │ premium growth 18%  │   ratio 112% — 3rd quarter  │
+│              │ vs 25% expected in  │   in a row above 105%.      │
+│              │ business plan.      │   Revisit pricing model     │
+│              │ Expense ratio 24.5% │   and review reinsurance.   │
+│              │ vs 26% budget.      │                             │
+└──────────────┴──────────────────────┴──────────────────────────────┘</code></pre>
+
+            <h3>5.2 DAX Measures for Compliance Monitoring</h3>
+
+            <pre><code class="language-dax">-- Solvency Compliance
+Solvency Ratio = [ASM] / [RSM]  -- From financial data
+
+Solvency Status = IF(
+    [Solvency Ratio] >= 1.75, "Strong",
+    IF([Solvency Ratio] >= 1.50, "Adequate",
+    IF([Solvency Ratio] >= 1.25, "Warning — Action Required",
+    "Critical — Regulatory Risk")))
+
+-- Expense of Management (as % of GWP)
+Expense of Management Ratio = DIVIDE(
+    SUM('Financial'[operating_expenses]),
+    SUM('Financial'[gross_written_premium]),
+    0
+)
+
+-- Claim Settlement Ratio (specific to health insurance where IRDAI publishes benchmarks)
+Claim Settlement Ratio = DIVIDE(
+    CALCULATE([Claim Count], Claims[status] = "Settled"),
+    CALCULATE([Claim Count], Claims[status] <> "Pending"),
+    0
+)
+
+-- Rural Business Compliance
+Rural Business % = DIVIDE(
+    CALCULATE([Total Premium], Policies[location_type] = "Rural"),
+    [Total Premium],
+    0
+)
+
+-- Grievance Redressal Rate
+Grievances Resolved Rate = DIVIDE(
+    SUM(Complaints[resolved_count]),
+    SUM(Complaints[received_count]),
+    0
+)
+
+-- Grievance Resolution Time (Average Days)
+Avg Grievance Resolution Days = AVERAGE(Complaints[days_to_resolve])
+
+-- Compliance Composite Index (weighted average of all compliance KPIs)
+Compliance Index = (
+    [Solvency Status Weight] * 0.30 +
+    [Claim Settlement Weight] * 0.20 +
+    [Expense Ratio Weight] * 0.20 +
+    [Rural Business Weight] * 0.15 +
+    [Grievance Weight] * 0.15
+)
+
+-- Each component weight is a score from 0-100 based on how far from target</code></pre>
+
+            <h3>5.3 Building the Dashboard — Key Steps</h3>
+
+            <ol>
+                <li><strong>Data sources:</strong> Load quarterly financial data (premium, claims, expenses, solvency), claims data with settlement status, policy data with rural/urban classification, and complaint/grievance data. Each data source should be in a separate table with date relationships.</li>
+                <li><strong>Measures:</strong> Create all the DAX measures from Section 5.2 plus standard time-intelligence measures for quarter-over-quarter and year-over-year comparisons.</li>
+                <li><strong>Top row — KPI cards:</strong> Five scorecards with conditional formatting: green if compliant, red if non-compliant, amber if approaching the threshold. Each scorecard should show the current value, the regulatory target, and the gap.</li>
+                <li><strong>Solvency trend chart:</strong> Line chart with solvency ratio by quarter. Add a constant line at 1.50 (regulatory minimum) and another at 1.75 (internal alert threshold). The gap between the current ratio and the minimum line is the "capital headroom" — one of the most important metrics for the board.</li>
+                <li><strong>Compliance matrix:</strong> A table showing each product line with key compliance metrics (combined ratio, expense ratio, growth rate). Conditional formatting: combined ratio above 105 → red, expense ratio above regulatory limit → red.</li>
+                <li><strong>Red flag items:</strong> A table at the bottom listing specific items requiring management attention. This is the "action list" — the most important element on the dashboard. Each red flag should have: the metric, the current value, the threshold, the business impact, and the recommended action.</li>
+            </ol>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A mid-size Indian general insurer built a compliance monitoring dashboard that integrated solvency data, claims data, policy data, and complaint data into a single Power BI report. The dashboard was reviewed by the Risk Management Committee every month. In the second month after deployment, the dashboard revealed that the insurer's expense of management ratio had crept above the IRDAI-prescribed limit for motor insurance. The finance team had not noticed because they had been calculating the expense ratio on an annual basis — and the monthly data showed the breach 5 months earlier than the annual calculation would have. The insurer was able to implement cost-control measures within 30 days and brought the ratio back below the limit before the quarterly filing — avoiding a regulatory notice and potential penalty. The dashboard paid for itself in that single incident.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch24-sandbox">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>6. Regulatory Sandbox &amp; Innovation</h2>
+
+            <p>IRDAI's regulatory sandbox framework — officially the "Revised Regulatory Sandbox Regulations, 2022" — is one of the most innovation-friendly regulatory initiatives in Indian financial services. It allows insurers, InsurTechs, and other entities to test innovative products, processes, and business models with real customers in a controlled environment, with relaxed regulatory requirements for the duration of the test.</p>
+
+            <h3>6.1 How the Sandbox Works</h3>
+
+            <p>The sandbox operates in five stages, each with defined timelines and deliverables:</p>
+            <ol>
+                <li><strong>Application (30 days for review):</strong> The innovator submits a detailed proposal including: the innovation description, the target customer segment, the expected outcomes, the test parameters (maximum number of policyholders, maximum sum insured, geographical scope), the risk assessment, and the policyholder protection measures. IRDAI reviews and either accepts or rejects.</li>
+                <li><strong>Testing (6–12 months):</strong> The innovator launches the product in the market at limited scale. During the test: customers must be informed that the product is part of a regulatory sandbox, monthly progress reports must be submitted to IRDAI, and any customer complaints must be reported immediately.</li>
+                <li><strong>Evaluation (60 days):</strong> At the end of the test period, the innovator submits a comprehensive evaluation report covering: test results, customer outcomes, financial performance, lessons learned, and any regulatory changes needed for full-scale rollout.</li>
+                <li><strong>Market Rollout (if approved):</strong> If IRDAI is satisfied with the test results, the innovator can apply for full regulatory approval. The sandbox experience accelerates the approval process — products that have been through the sandbox are typically approved within 60–90 days, compared to 6–12 months for a standard product filing.</li>
+                <li><strong>Post-rollout monitoring:</strong> Even after full approval, IRDAI may require enhanced monitoring for the first 12 months of commercial operation — quarterly reporting, customer satisfaction surveys, and any adjustments required based on real-world experience.</li>
+            </ol>
+
+            <h3>6.2 What Has Been Tested in the Sandbox?</h3>
+
+            <ul>
+                <li><strong>Parametric weather insurance:</strong> At least 4 sandbox-tested parametric products have been market-launched — including rainfall-index products for farmers in Maharashtra and cyclone-trigger products for businesses in coastal Tamil Nadu.</li>
+                <li><strong>AI-based underwriting models:</strong> Several insurers used the sandbox to test fully automated underwriting for motor and health insurance — where no human underwriting review occurs for policies below a threshold sum insured.</li>
+                <li><strong>Blockchain-based travel insurance:</strong> A travel insurance product using smart contracts for automatic claim settlement on flight delays was tested. The product did not proceed to market — the operational complexity of verifying flight data across multiple airline systems proved higher than anticipated — but the sandbox provided valuable learning without the cost of a full product failure.</li>
+                <li><strong>Micro-insurance for gig workers:</strong> Two sandbox tests focused on daily-wage micro-insurance products — health and accident cover with daily premium deduction from the worker's digital wallet. Both progressed to market and are now used by over 100,000 gig workers combined.</li>
+                <li><strong>Peer-to-peer insurance:</strong> An innovative model where groups of policyholders pool their premiums, pay claims from the pool, and receive refunds if claims are below expectations. The sandbox test helped IRDAI understand the regulatory implications of the P2P model — leading to a separate regulatory framework for P2P insurance platforms.</li>
+            </ul>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The regulatory sandbox is the single most important pathway for InsurTech innovation in India. If you have an idea that does not fit neatly into existing regulatory categories — a new distribution model, a non-traditional risk pool, an AI-driven product — the sandbox is where it belongs. The key to a successful sandbox application: (a) clearly define the regulatory relaxation you need (which specific regulation would your product otherwise violate?), (b) demonstrate that customer protections are at least as strong as the existing framework provides (even if the form is different), and (c) define clear success criteria and test boundaries upfront. A well-prepared sandbox application is reviewed within 30 days. The application form and guidelines are publicly available on IRDAI's website.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch24-global-comparison">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Global Regulatory Comparison</h2>
+
+            <p>Insurance regulation varies significantly across jurisdictions. Understanding the differences is important for: (a) Indian insurers expanding internationally (or competing with foreign InsurTechs in India), (b) global investors evaluating Indian insurance companies, and (c) understanding what aspects of Indian regulation are unique vs. common across markets.</p>
+
+            <div class="data-table-container" data-source="chains" data-table="regulations">
+                <noscript><p>Enable JavaScript to see the regulatory comparison table.</p></noscript>
+            </div>
+
+            <h3>7.1 Key Differences and Their Implications</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>India (IRDAI)</th><th>EU (EIOPA / Solvency II)</th><th>US (NAIC)</th><th>Singapore (MAS)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Regulatory philosophy</strong></td>
+                        <td>Principles-based with detailed prescriptive regulations for specific areas. IRDAI combines development and regulation in one body.</td>
+                        <td>Principles-based with extensive quantitative requirements (Solvency II has 1,000+ pages of technical standards).</td>
+                        <td>Rules-based, state-by-state with NAIC providing model laws that states may or may not adopt. Highly fragmented.</td>
+                        <td>Risk-based and proportionality-focused. Same rules for all insurers but applied proportional to complexity.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Solvency framework</strong></td>
+                        <td>Three-pillar structure (quantitative, risk management, disclosure) similar to Solvency II but simplified. Solvency ratio ≥ 1.5.</td>
+                        <td>Solvency II — the world's most comprehensive solvency framework. Three pillars, quantitative (SCR, MCR), internal models approval, extensive reporting.</td>
+                        <td>Risk-Based Capital (RBC) — formula-based capital requirements. Simpler than Solvency II but less risk-sensitive.</td>
+                        <td>Risk-Based Capital framework with enhanced risk management requirements. Increasing convergence with Solvency II principles.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Product regulation</strong></td>
+                        <td>Mix of "file-and-use" and "use-and-file." IRDAI must approve certain products before launch. Others can be filed after launch but can be withdrawn if non-compliant.</td>
+                        <td>Most products do not require pre-approval (freedom to design within framework). But regulators can intervene if products are unfair.</td>
+                        <td>State-based — some states require rate and form filing before use, others after. Highly variable.</td>
+                        <td>Product filing required for all products. MAS reviews for compliance with fair dealing outcomes.</td>
+                    </div>
+                    <tr>
+                        <td><strong>Data protection</strong></td>
+                        <td>DPDP Act 2023 — comprehensive framework. Specific consent required. Breach notification mandatory. Penalties up to ₹250 Cr.</td>
+                        <td>GDPR — the world's most comprehensive data protection law. Extraterritorial scope. Very high penalties (up to €20M or 4% of global turnover).</td>
+                        <td>Sectoral — no comprehensive federal privacy law. State laws (CCPA in California, others emerging). Sectoral regulation of health (HIPAA) and financial data (GLBA).</td>
+                        <td>PDPA — comprehensive but more business-friendly than GDPR. Consent requirements with some exceptions for business purposes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sandbox / Innovation support</strong></td>
+                        <td>Formal regulatory sandbox — active, well-utilised, with clear pathway to market. Used by InsurTechs and insurers.</td>
+                        <td>Innovation hubs and sandboxes in UK (FCA), Netherlands (DNB), France (ACPR). EU-wide framework emerging.</td>
+                        <td>Most states do not have formal sandbox. Some allow "test-and-learn" approaches under existing regulatory authority.</td>
+                        <td>MAS Sandbox — one of the most established in Asia. Clear framework, well-documented processes, strong track record.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The difference in data protection regimes creates a practical challenge for Indian InsurTechs that want to expand globally. An Indian InsurTech that builds an AI underwriting model trained on Indian customer data may find that the same model cannot be deployed in Europe because the training data was collected under Indian consent standards (which may not meet GDPR requirements for "explicit consent" for automated decision-making). The cost of re-collecting training data under GDPR-compliant consent can be prohibitive. Several Indian InsurTechs have solved this by: (a) building their core ML models in a "data-regime-agnostic" way — separate data pipelines for each jurisdiction, (b) designing their consent collection processes to meet the HIGHEST standard they plan to operate under (GDPR), not the lowest (Indian DPDP Act), and (c) partnering with European insurers who provide GDPR-compliant data for model training. The lesson: global data protection standards are diverging, not converging — and building for the strictest regime from day one is cheaper than retrofitting compliance later.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a Compliance Monitoring Dashboard</h2>
+            <div class="project-brief">
+                <p>You are the compliance analytics lead at "ComplySure Insurance," a mid-size general insurer. The Risk Management Committee has requested a compliance monitoring dashboard that tracks the company's regulatory compliance status in real-time. The dashboard must cover: solvency, claim settlement ratio, expense of management, rural business obligations, and grievance redressal.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Data preparation:</strong> Create a Google Sheets (or CSV) dataset with quarterly data for the past 8 quarters for all compliance KPIs. Use realistic values based on the solvency calculation from Section 2 and industry benchmarks. Include: solvency ratio, combined ratio by product, expense ratio, claim settlement ratio, rural business %, and grievance resolution rate.</li>
+                    <li><strong>DAX measures:</strong> Write DAX measures for each compliance KPI (as shown in Section 5.2). Include: Solvency Ratio, Claim Settlement Ratio, Expense of Management Ratio, Rural Business %, Grievance Redressal Rate, and a Compliance Composite Index.</li>
+                    <li><strong>Build Page 1 — Regulatory Standing:</strong> Include: five KPI scorecards with conditional formatting (green/amber/red), a solvency ratio trend chart with regulatory minimum and alert threshold lines, a compliance matrix by product line, and a red flag items table with recommended actions.</li>
+                    <li><strong>Compliance report:</strong> Using the solvency calculation from Section 2, calculate the solvency ratio for a hypothetical insurer with: GWP ₹750 Cr, 22% reinsurance cession, outstanding claims ₹110 Cr, net assets ₹380 Cr, and investment fluctuation reserve ₹15 Cr. Show whether the insurer meets the 1.5 minimum.</li>
+                    <li><strong>DPDP Act compliance checklist:</strong> Create a 10-point checklist for an insurer to assess its readiness for the DPDP Act. For each item, specify: what needs to be done, which department is responsible, and a timeline. Format as a table.</li>
+                    <li><strong>Write a 500-word regulatory compliance memo</strong> to the Board Risk Committee covering: (a) Current compliance status summary (all KPIs vs. regulatory targets), (b) Key compliance risks identified, (c) Recommended actions for each risk, (d) DPDP Act readiness assessment, (e) Regulatory outlook — upcoming regulatory changes expected in the next 12 months.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Regulatory Compliance Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> Board Risk Committee, ComplySure Insurance<br>
+                    <strong>From:</strong> Compliance Analytics<br>
+                    <strong>Subject:</strong> Regulatory Compliance Status — Q3 2026 Assessment</p>
+
+                    <p><strong>Current Compliance Status Summary:</strong><br>
+                    All five primary compliance KPIs are within regulatory targets this quarter. The solvency ratio stands at 2.30 — well above the 1.50 regulatory minimum and the 1.75 internal threshold, providing comfortable capital headroom. Claim settlement ratio of 94.5% meets the IRDAI focus area target of > 95% (narrow miss, within acceptable range). Expense of management ratio of 26.2% is within the regulatory limit for all lines of business. Rural business at 12% exceeds the 10% threshold. Grievance redressal rate of 92% and average resolution time of 12 days are both within acceptable parameters. The Compliance Composite Index is 87/100 — a strong position, but with identifiable areas for improvement.</p>
+
+                    <p><strong>Key Compliance Risks Identified:</strong><br>
+                    Two items require attention. First, the motor third-party combined ratio of 108% — while not a direct regulatory breach (combined ratio is a management metric, not a regulatory filing metric), it signals pricing inadequacy that will eventually affect the motor portfolio's contribution to a solvency margin. The motor TP pool deficit is a known industry issue, but the company's exposure is slightly above the peer average. Second, the Company's DPDP Act readiness assessment (10-point checklist completed this quarter) reveals three gaps: (a) consent forms for health data processing have not been updated to include "AI model training" as a separate consent category, (b) the data map — which identifies where each customer's personal data is stored across systems — is incomplete for 24% of customer records, and (c) the breach notification process has not been tested since the DPDP Act came into effect. These gaps have been assigned to the CTO, Chief Data Officer, and CISO respectively, with a target closure date of 31 December 2026.</p>
+
+                    <p><strong>Recommended Actions:</strong><br>
+                    (1) Motor TP pricing — submit a rate revision filing to IRDAI before the end of Q4 2026. The actuarial team estimates that a 12% rate increase combined with tighter underwriting on high-risk vehicle classes would bring the product-level combined ratio to approximately 102% within 12 months. (2) DPDP Act remediation — the three identified gaps must be closed by the December deadline. We recommend engaging external legal counsel specialising in data protection to review the updated consent forms and breach notification process. Budget estimate: ₹12–15 lakh. (3) Expense management — while the overall expense ratio is within limits, the IT expenses line has grown 28% YoY, driven by cloud migration costs. We recommend the CTO present a cloud cost optimisation plan to the next Risk Committee meeting.</p>
+
+                    <p><strong>Regulatory Outlook — Next 12 Months:</strong><br>
+                    Three regulatory developments are expected to affect the company in the next 12 months: (a) IRDAI is expected to issue revised guidelines on AI governance in insurance — following consultation papers released in 2025. These guidelines will likely require insurers to document and validate all AI models used for underwriting, pricing, and claims decisions. The company should begin preparing an AI model inventory and documentation framework now. (b) The DPDP Act's final rules on data retention periods for the insurance sector are expected. The current "reasonable period" guidance is too vague for compliance. (c) IRDAI's Bima Sugam digital marketplace is expected to go live in phased rollout. The company's IT and product teams should actively participate in the Bima Sugam pilot to ensure readiness. We recommend allocating budget for each of these initiatives in the FY2027 planning cycle.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>IRDAI's solvency framework requires a minimum solvency ratio of 1.5× (Available Solvency Margin / Required Solvency Margin). The framework follows a three-pillar structure: Quantitative Requirements, Risk Management & Governance, and Disclosure & Market Discipline.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>The DPDP Act 2023 fundamentally changes how insurers handle personal data — requiring specific consent for each processing purpose, data minimisation, breach notification within 72 hours, and new customer rights (access, correction, erasure). Non-compliance penalties can reach ₹250 crore.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>A compliance monitoring dashboard in Power BI tracks solvency, claim settlement ratio, expense of management, rural business obligations, and grievance redressal against regulatory targets. The dashboard should include a "red flag items" table that drives action — not just visibility.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>IRDAI's regulatory sandbox provides a structured pathway for testing innovative insurance products without full regulatory approval. Successful sandbox graduates include parametric insurance, AI underwriting, and micro-insurance for gig workers. The key is defining clear test parameters and customer protection measures upfront.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>Insurance regulation varies significantly across India (IRDAI), EU (Solvency II), US (state-based NAIC), and Singapore (MAS). Indian regulation is comparatively innovation-friendly with its sandbox framework and development mandate — but divergence in data protection standards (DPDP vs. GDPR) creates challenges for InsurTechs expanding globally.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s24-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. An insurer's Available Solvency Margin (ASM) is ₹350 Cr and its Required Solvency Margin (RSM) is ₹190 Cr. The solvency ratio is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) 0.54 — below the minimum, regulatory intervention required</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) 1.84 — above the 1.50 regulatory minimum, capital position is adequate</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) 5.40 — well above the minimum, excellent capital position</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Cannot be calculated without net premium information</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. Under the DPDP Act 2023, an insurer that wants to use customer medical records to train an AI underwriting model must:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Ensure that the AI model output is reviewed by a human before any underwriting decision is made</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Obtain specific, separate consent from each customer for the use of their medical data for AI model training — the consent for general claim processing is not sufficient for model training purposes</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Anonymise the data before training the model, which removes the requirement for consent</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Register the model with IRDAI before training begins</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. An insurer notices that its expense of management ratio has exceeded the regulatory limit for motor insurance. The compliance dashboard flags this as RED. The most appropriate management response is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) Ignore it — expense ratio limits are advisory, not mandatory</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) Immediately implement cost-control measures in the motor insurance line, document the steps taken, and monitor the ratio monthly to ensure it returns below the limit before the next quarterly regulatory filing</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Increase motor premiums by 20% to offset the expense ratio breach</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) Reclassify some expenses from "motor" to "other lines" to bring the ratio down</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. An InsurTech startup wants to test a new parametrics-based micro-insurance product for gig workers that does not fit within existing product approval categories. The best regulatory pathway is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Launch the product without regulatory approval — it is a small-scale pilot</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Apply for a full insurance license before launching any product</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Apply for IRDAI's regulatory sandbox — propose a defined test (maximum policyholders, maximum sum insured, fixed duration) and obtain IRDAI approval before launching the test</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Partner with an existing insurer that files the product under its own license — the startup provides technology only</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. An Indian InsurTech wants to expand into the European market with its AI-based motor insurance underwriting model. The MOST significant regulatory challenge is likely:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Europe does not allow foreign-owned insurance companies to operate</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) GDPR's requirements for "explicit consent" for automated decision-making (including AI underwriting) are stricter than the DPDP Act's consent requirements. The AI model may need to be retrained on GDPR-compliant data or redesigned to provide explanations for each underwriting decision as required by the EU AI Act</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) European motor insurance pricing is entirely government-regulated</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The EU bans the use of AI in insurance underwriting entirely</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s24-quiz', ['b','b','b','c','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s24-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-23.html" class="nav-link">&larr; Previous: Looker Studio for Executive Reporting</a>
+            <a href="session-25.html" class="nav-link next">Next: Ethical AI &amp; Responsible Insurance &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script>
+        /* Inline data for data-driven tables.
+           Used first so tables render when opened directly from disk (file://),
+           where browsers block fetch() to local files. Mirrors data/chains.json. */
+        window.DATA_TABLES = window.DATA_TABLES || {};
+        window.DATA_TABLES.chains = {
+            "regulations": [
+                {"jurisdiction": "India", "regulator": "IRDAI", "keyFrameworks": "Insurance Act 1938, IRDAI Act 1999, DPDP Act 2023", "sandboxAvailable": true},
+                {"jurisdiction": "EU", "regulator": "EIOPA", "keyFrameworks": "Solvency II, GDPR, DORA", "sandboxAvailable": true},
+                {"jurisdiction": "USA", "regulator": "NAIC (State-level)", "keyFrameworks": "State insurance codes, CCPA (California)", "sandboxAvailable": false},
+                {"jurisdiction": "UK", "regulator": "PRA / FCA", "keyFrameworks": "Solvency II (UK), UK GDPR, Consumer Duty", "sandboxAvailable": true},
+                {"jurisdiction": "Singapore", "regulator": "MAS", "keyFrameworks": "Insurance Act, PDPA, FEAT Principles", "sandboxAvailable": true}
+            ]
+        };
+    </script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

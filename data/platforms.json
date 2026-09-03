@@ -1,0 +1,74 @@
+{
+  "platforms": [
+    {
+      "id": "policybazaar",
+      "name": "PolicyBazaar",
+      "url": "https://www.policybazaar.com",
+      "type": "Aggregator / Marketplace",
+      "founded": 2008,
+      "headquarters": "Gurugram, India",
+      "products": ["Life", "Health", "Motor", "Travel"],
+      "businessModel": "Lead generation + commission",
+      "requiresKYC": true,
+      "lastVerified": "2026-07-01"
+    },
+    {
+      "id": "acko",
+      "name": "Acko General Insurance",
+      "url": "https://www.acko.com",
+      "type": "Digital Carrier",
+      "founded": 2016,
+      "headquarters": "Mumbai, India",
+      "products": ["Motor", "Health", "Travel"],
+      "businessModel": "Direct digital insurance",
+      "requiresKYC": true,
+      "lastVerified": "2026-07-01"
+    },
+    {
+      "id": "digit",
+      "name": "Digit Insurance",
+      "url": "https://www.godigit.com",
+      "type": "Digital Carrier",
+      "founded": 2017,
+      "headquarters": "Bengaluru, India",
+      "products": ["Motor", "Health", "Travel", "Property"],
+      "businessModel": "Direct digital + partner distribution",
+      "requiresKYC": true,
+      "lastVerified": "2026-07-01"
+    },
+    {
+      "id": "plum",
+      "name": "Plum",
+      "url": "https://www.plumhq.com",
+      "type": "InsurTech — Group Health",
+      "founded": 2019,
+      "headquarters": "Bengaluru, India",
+      "products": ["Group Health", "Employee Wellness"],
+      "businessModel": "B2B SaaS + insurance",
+      "requiresKYC": false,
+      "lastVerified": "2026-07-01"
+    },
+    {
+      "id": "lemonade",
+      "name": "Lemonade",
+      "url": "https://www.lemonade.com",
+      "type": "Digital Carrier (Global)",
+      "founded": 2015,
+      "headquarters": "New York, USA",
+      "products": ["Renters", "Homeowners", "Pet", "Life", "Motor"],
+      "businessModel": "AI-driven, flat-fee, giveback model",
+      "requiresKYC": true,
+      "lastVerified": "2026-07-01"
+    }
+  ],
+  "comparisons": {
+    "traditionalVsDigital": [
+      {"dimension": "Distribution", "traditional": "Agent/broker network, bancassurance", "digital": "Online, app, API, embedded"},
+      {"dimension": "Underwriting", "traditional": "Manual, rule-based, paper forms", "digital": "AI/ML, automated, data-driven"},
+      {"dimension": "Claims", "traditional": "Manual FNOL, surveyor visits, weeks to settle", "digital": "Digital FNOL, photo/video, instant settlement"},
+      {"dimension": "Customer Experience", "traditional": "In-person, phone, paper policy docs", "digital": "App-first, self-service, instant policy issuance"},
+      {"dimension": "Pricing", "traditional": "One-size-fits-all, annual premium", "digital": "Personalized, usage-based, monthly subscription"},
+      {"dimension": "Data Usage", "traditional": "Limited — application form data", "digital": "Extensive — IoT, telematics, social, third-party APIs"}
+    ]
+  }
+}

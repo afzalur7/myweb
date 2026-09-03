@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 15: Insurance Fraud Analytics — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-14.html" class="nav-link">&larr; Previous: Generative AI in Insurance</a>
+            <a href="session-16.html" class="nav-link next">Next: Fraud Detection Using ML &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #2c0a0a 0%, #4a1a1a 100%); color: #fff;">
+            <div class="chapter-badge">Module 5 &middot; Session 15 &middot; 90 min &middot; Power BI + Python</div>
+            <h1>Session 15: Insurance Fraud Analytics</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lecture &amp; Lab (Power BI/Python) &middot; Power BI + Jupyter required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Classify insurance fraud into application fraud, claims fraud, and provider fraud — and identify red flags for each type</li>
+                <li>Apply the fraud analytics framework — detection, investigation, prevention — to structure an anti-fraud programme</li>
+                <li>Build a Power BI fraud monitoring dashboard with KPI cards, trend analysis, and risk-scored claims tables</li>
+                <li>Calculate fraud rates by segment using Python and identify the top 5 fraud indicators by predictive power</li>
+                <li>Analyse the economics of fraud management — the tradeoff between detection investment and fraud losses</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. The Fraud Problem in Insurance</h2>
+
+            <p>Insurance fraud is estimated to cost the global insurance industry $80–$120 billion annually. In India, conservative estimates place annual fraud losses at ₹45,000 crore or more — approximately 8–12% of total claims spend. Frauds are not a tax that must be accepted; they are a cost that can be aggressively reduced through analytics, and every rupee saved on fraud flows directly to the bottom line.</p>
+
+            <h3>1.1 Why Insurance is Vulnerable to Fraud</h3>
+
+            <p>Insurance has structural characteristics that make it uniquely vulnerable to fraud — vulnerabilities that fraudsters exploit systematically:</p>
+            <ul>
+                <li><strong>Information asymmetry:</strong> The policyholder knows more about their risk, their behaviour, and the circumstances of a loss than the insurer does. Fraud exploits this information gap — the insurer cannot independently verify every detail of every claim.</li>
+                <li><strong>Volume pressure:</strong> A typical Indian general insurer processes thousands of claims per day. Fraud detection must work at scale — most fraud is hidden in high-volume, low-value claims where manual review is impractical.</li>
+                <li><strong>Payment timing:</strong> Insurers are expected to pay legitimate claims quickly. Fraudsters exploit the pressure to settle fast — especially in lines where customer satisfaction is measured by settlement speed (motor, health, travel).</li>
+                <li><strong>Low detection, low consequence:</strong> Studies suggest that only 10–20% of insurance fraud is detected. Even when detected, prosecution rates are low — insurers often settle rather than litigate because the cost of prosecution exceeds the claim value. This creates a low-risk, high-reward environment for fraudsters.</li>
+            </ul>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> In 2023, a coordinated fraud ring in Delhi-NCR was uncovered that had filed over 500 fake motor insurance claims across 12 insurers over 3 years. The ring operated by: buying written-off vehicles, staging minor accidents with pre-arranged witnesses, inflating repair bills through partnered garages, and splitting claims across insurers to stay below each company's individual fraud detection threshold. Total estimated fraud: ₹18 crore. The ring was detected not by any single insurer's fraud system — each insurer saw only a handful of claims from the ring — but by a cross-industry data-sharing initiative that identified the common pattern of same-vehicle, same-address, same-garage claims across multiple insurers. This case underscores the importance of industry-wide fraud data sharing, which IRDAI has been promoting through initiatives like the Fraud Monitoring System (FMS).
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Fraud Typology &amp; Red Flags</h2>
+
+            <p>Insurance fraud falls into three broad categories. Each has different perpetrators, detection methods, and economic characteristics. An effective anti-fraud programme must address all three.</p>
+
+            <h3>2.1 The Three Types of Insurance Fraud</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Fraud Type</th><th>Description</th><th>Who Benefits</th><th>Typical Detection Method</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Application Fraud</strong></td>
+                        <td>Misrepresenting information on the insurance application to obtain lower premiums or coverage that would otherwise be denied. This includes: understating mileage, hiding pre-existing medical conditions, overstating income, providing false identity documents, under-reporting claim history.</td>
+                        <td>The policyholder — they get cheaper insurance or coverage they would not otherwise qualify for.</td>
+                        <td>Data validation against external databases (credit bureau, medical databases, vehicle registration). Red flag: inconsistency between declared and verified data.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Claim Fraud</strong></td>
+                        <td>Exaggerating or fabricating a claim after a loss has occurred. The loss may be genuine but the claim is inflated (building material costs, medical procedure costs, repair estimates) OR the entire claim is fabricated (reporting a theft that never happened, claiming an injury that never occurred).</td>
+                        <td>The policyholder, often in collusion with third parties (garages, medical providers, lawyers, witnesses).</td>
+                        <td>Statistical anomaly detection, network analysis (same garage, same doctor, same lawyer appearing repeatedly), inconsistent claim narratives, social media investigation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Provider / Intermediary Fraud</strong></td>
+                        <td>Fraud committed by professionals in the insurance ecosystem — doctors, hospitals, garages, agents, brokers, surveyors — who exploit their position to extract money from the insurance system. Examples: a hospital billing for procedures not performed (phantom billing), a garage inflating repair estimates and sharing the excess with the policyholder, an agent submitting fake policies to earn commissions.</td>
+                        <td>The provider, sometimes sharing a portion with the policyholder or intermediary who facilitated the fraud.</td>
+                        <td>Provider profiling (billing patterns, average claim amounts, procedure mix), network analysis, whistleblower reports, audit.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.2 The 25+ Red Flags of Insurance Fraud</h3>
+
+            <p>The following red flags, when present individually, are not conclusive evidence of fraud — but when multiple flags appear on the same claim or policy, the probability of fraud increases significantly.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Category</th><th>Red Flags</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Timing</strong></td><td>Claim filed within 30 days of policy inception ("immediate claim"). Claim filed just before policy expiry. Claim filed late (90+ days after incident, no explanation). Gap between loss date and claim date too long for the claim type.</td></tr>
+                    <tr><td><strong>Amount</strong></td><td>Claim amount exactly equals sum insured. Claim amount just below the automatic review threshold. Claim amount is a round number (₹50,000, ₹1,00,000). Multiple small claims from the same policyholder in quick succession.</td></tr>
+                    <tr><td><strong>Documentation</strong></td><td>No police FIR for motor theft (required in India). Photos of damage do not match the accident description. Repair estimate from a garage with no physical address. Medical records appear templated or inconsistent with the diagnosis. Witness statements are identical word-for-word.</td></tr>
+                    <tr><td><strong>Behavioural</strong></td><td>Policyholder is unusually eager to settle quickly. Policyholder provides excessive detail unsolicited. Policyholder is vague about circumstances but specific about policy coverage. Phone number disconnected when investigator calls. Address does not match policy address.</td></tr>
+                    <tr><td><strong>Network</strong></td><td>Same vehicle/patient/address appears in multiple claims across different insurers. Same garage/lawyer/doctor appears in multiple suspicious claims. Policyholder and witness share the same address or phone number. Multiple claims from the same neighbourhood filed on the same day.</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> Red flags are indicators, not proof. A claim with 5 red flags may still be legitimate (bad luck can produce coincidence). A claim with 1 red flag may be fraudulent (sophisticated fraudsters deliberately avoid triggering obvious flags). The purpose of the red flag framework is to <strong>prioritise investigation resources</strong> — claims with more flags get investigated first. It is not a guilt-determining system. This distinction is important for both customer fairness and regulatory compliance.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. The Fraud Analytics Framework</h2>
+
+            <p>Fraud analytics operates on a continuous three-stage cycle: <strong>Detection → Investigation → Prevention.</strong> Each stage feeds into the next — detection identifies suspicious claims, investigation confirms or clears them, and the lessons from investigation are fed back into improved detection. The analytics team that masters this cycle is more effective than the one that builds the most sophisticated model in isolation.</p>
+
+            <h3>3.1 The Detection → Investigation → Prevention Cycle</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│                    FRAUD ANALYTICS CYCLE                            │
+│                                                                     │
+│                          ┌──────────────┐                           │
+│                          │  DETECTION   │                           │
+│                          │  • Rules     │                           │
+│                          │  • ML Models │                           │
+│                          │  • Networks  │                           │
+│                          │  • Anomalies │                           │
+│                          └──────┬───────┘                           │
+│                                 │  Suspicious claims flagged       │
+│                                 ▼                                   │
+│                          ┌──────────────┐                           │
+│                     ┌───│ INVESTIGATION│───┐                       │
+│                     │   │ • Triage     │   │                       │
+│                     │   │ • Field inv. │   │                       │
+│                     │   │ • Data check │   │                       │
+│                     │   │ • Resolution │   │                       │
+│                     │   └──────┬───────┘   │                       │
+│                     │          │           │                       │
+│                     ▼          ▼           ▼                       │
+│               ┌─────────┐ ┌─────────┐ ┌─────────┐                 │
+│               │ Fraud   │ │ Not     │ │ Unable  │                 │
+│               │ Confirmed│ │ Fraud   │ │ to Det. │                 │
+│               └────┬────┘ └────┬────┘ └────┬────┘                 │
+│                    │           │           │                       │
+│                    ▼           ▼           ▼                       │
+│                 ┌──────────────────────────────┐                   │
+│                 │        PREVENTION            │                   │
+│                 │  • Update rules/models        │                   │
+│                 │  • Update red flag library   │                   │
+│                 │  • File FIR / share data     │                   │
+│                 │  • Train claims team          │                   │
+│                 │  • Add new network links     │                   │
+│                 └──────────────┬───────────────┘                   │
+│                                │  Loop back to Detection           │
+│                                ▼                                   │
+│                          ┌──────────────┐                           │
+│                          │  DETECTION   │ (Improved)               │
+│                          └──────────────┘                           │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>3.2 The Analytics Tools at Each Stage</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Stage</th><th>Descriptive Analytics (What happened?)</th><th>Diagnostic Analytics (Why did it happen?)</th><th>Predictive Analytics (What will happen?)</th><th>Prescriptive Analytics (What should we do?)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Detection</strong></td><td>Fraud rate dashboards, red flag counts, trend reports</td><td>Root cause analysis of fraud spikes, segment-level fraud rate decomposition</td><td>ML models predicting fraud probability, anomaly detection scoring</td><td>Claims triage rules (fast-track vs. investigate), automated fraud score-based routing</td></tr>
+                    <tr><td><strong>Investigation</strong></td><td>Case management dashboards, investigator workload tracking</td><td>Link analysis (network graphs connecting entities across claims)</td><td>Risk scoring of open investigations to prioritise effort</td><td>Next-best-action recommendations for investigators</td></tr>
+                    <tr><td><strong>Prevention</strong></td><td>Post-payment fraud audit reports, recovery tracking</td><td>Fraud pattern evolution (what methods are fraudsters using now?)</td><td>Emerging fraud trend detection (before it becomes widespread)</td><td>Automated blocking of known fraud patterns at FNOL</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The most effective fraud analytics teams spend 40% of their time on Detection, 30% on Investigation, and 30% on Prevention. Many teams over-invest in Detection (building ever-more-sophisticated models) while under-investing in Prevention — which is where the structural reduction in fraud losses comes from. A fraud model that catches 80% of fraud is excellent — but if the Prevention loop is broken (investigators don't feed findings back into model updates, or the model is retrained only annually), the fraud rate will creep back up as fraudsters adapt. Prevention is not the end of the cycle — it is the bridge to a better Detection.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Building Fraud Indicator Dashboards in Power BI</h2>
+
+            <p>A fraud monitoring dashboard serves three audiences: <strong>operations</strong> (claims managers who need to see today's flagged claims), <strong>analytics</strong> (fraud data scientists who need to monitor model performance), and <strong>management</strong> (CFO/COO who need to see fraud trends and ROI of anti-fraud investments). The dashboard design must serve all three without overwhelming any.</p>
+
+            <h3>4.1 Dashboard Layout</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│ FRAUD MONITORING DASHBOARD  [Slicers: Product ▼] [Time Period ▼]   │
+├──────────────────┬──────────────────┬──────────────────┬─────────────┤
+│ Fraud Rate       │ Fraud Amount     │ Flags Raised     │ Investig'n  │
+│ X.X%             │ ₹X.X Cr         │ X,XXX            │ Rate XX%    │
+│ vs target: ±X.X% │ Recovery rate X% │ Flag hit rate X% │ Avg days XX │
+├──────────────────┼──────────────────┴──────────────────┴─────────────┤
+│ Total Claims vs  │ Fraud Amount Over Time (Line Chart)              │
+│ Fraud Rate (Bar  │ • Monthly fraud amount                            │
+│ + Line combo)    │ • Rolling 3-month average                        │
+│                  │ • Target line                                     │
+├──────────────────┬──────────────────────────────────────────────────┤
+│ Fraud by Claim   │ Top Fraud Indicators (Horizontal Bar)            │
+│ Type (Donut/Pie) │ • Indicator name vs. Confirm rate                │
+│ [Accident, Theft,│ • Sorted by confirm rate descending              │
+│  Fire, Health]   │ • Color-coded by effectiveness                   │
+├──────────────────┴──────────────────────────────────────────────────┤
+│ High-Risk Claims Table — Claims with Fraud Score > 70              │
+│ [Claim ID, Customer, Amount, Status, Score, Indicators, Days Open] │
+│ Conditional formatting: Red if >90 days, Yellow if score > 80      │
+│ Drill-through to claim detail page                                  │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>4.2 Power BI Measures for Fraud Monitoring</h3>
+
+            <pre><code class="language-dax">-- Load the fraud_indicators table alongside insurance_cleaned
+-- Create relationships between Claims and Fraud Indicators tables
+
+-- Core Fraud KPIs
+Fraud Claim Count = CALCULATE(
+    [Claim Count],
+    insurance_cleaned[fraud_flag] = 1
+)
+
+Fraud Rate = DIVIDE([Fraud Claim Count], [Claim Count], 0)
+
+Fraud Amount = CALCULATE(
+    [Total Claims],
+    insurance_cleaned[fraud_flag] = 1
+)
+
+Recovery Amount = SUM(fraud_indicators[recovery_amount])
+
+Recovery Rate = DIVIDE([Recovery Amount], [Fraud Amount], 0)
+
+-- Average fraud score from indicator table
+Avg Fraud Score = AVERAGE(fraud_indicators[score])
+
+-- Claims with multiple indicators (high suspicion)
+High Suspicion Claims = CALCULATE(
+    [Claim Count],
+    fraud_indicators[score] > 70
+)
+
+-- Indicator effectiveness
+Indicator Hit Rate = DIVIDE(
+    COUNTROWS(FILTER(fraud_indicators, fraud_indicators[review_status] = "Confirmed")),
+    COUNTROWS(fraud_indicators),
+    0
+)
+
+-- Fraud rate by product
+Fraud Rate by Product = DIVIDE(
+    CALCULATE([Fraud Claim Count]),
+    CALCULATE([Claim Count]),
+    0
+)
+
+-- Year-over-year fraud rate change
+Fraud Rate PY = CALCULATE(
+    [Fraud Rate],
+    SAMEPERIODLASTYEAR('DateTable'[Date])
+)
+
+Fraud Rate YoY Change = [Fraud Rate] - [Fraud Rate PY]
+
+-- Fraud detection ROI (simplified)
+Fraud Detection ROI = DIVIDE(
+    [Fraud Amount] - [Fraud Amount] * DIVIDE([Fraud Rate PY], [Fraud Rate]),
+    [Fraud Amount] * 0.05  -- Assume 5% of fraud spend on detection infrastructure
+)</code></pre>
+
+            <h3>4.3 Configuring the Dashboard in Power BI</h3>
+
+            <ol>
+                <li><strong>Import data:</strong> Load both the `insurance_cleaned.csv` and `fraud_indicators.csv` tables. Create a 1-to-many relationship from Claims.claim_id to Fraud Indicators.claim_id.</li>
+                <li><strong>Create measures:</strong> All the DAX measures from Section 4.2. Set appropriate formats (Fraud Rate as %, Fraud Amount as ₹ Crores, Score as decimal).</li>
+                <li><strong>Top KPI row:</strong> Add 4 KPI cards — Fraud Rate, Fraud Amount, Flags Raised, Investigation Rate. Use the KPI visual type for Fraud Rate with a goal of [Fraud Rate PY] (year-on-year improvement).</li>
+                <li><strong>Fraud trend chart:</strong> Line and stacked column chart. Columns: Monthly claim count. Line: Fraud Rate (%). Dula axis formatting. Add a constant line at the industry average fraud rate (4–5% for general insurance).</li>
+                <li><strong>Fraud by type donut:</strong> Donut chart with claim_type as legend and Fraud Claim Count as value. Add category labels showing fraud rate per type.</li>
+                <li><strong>Top indicators bar chart:</strong> Horizontal bar chart with indicator_type as axis and Confirm Rate (confirmed ÷ total flagged for each indicator type) as value. Sorted descending by confirm rate.</li>
+                <li><strong>High-risk claims table:</strong> Table with claim_id, customer_id, claim_amount, fraud_score, status. Conditionally format: background = red if fraud_score > 80, amber if > 60, green if ≤ 60. Add a drill-through to the claim detail page.</li>
+                <li><strong>Slicers:</strong> Add policy_type (dropdown), claim_date (relative date: "last 12 months"), and fraud_score_range (pre-defined range). Sync across all pages.</li>
+            </ol>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A mid-size Indian general insurer built a Power BI fraud dashboard that consolidated data from its claims system, a third-party fraud database, and investigator reports. The dashboard automatically flagged claims with a composite fraud score above 70 and assigned them to investigators. Within the first quarter, the fraud detection rate increased from 2.1% to 4.8% — without hiring additional investigators. The key was not better models but <strong>better prioritisation</strong>: investigators were no longer drowning in low-probability cases but were focused on the 15% of flagged claims that the dashboard identified as high confidence. The false positive rate (investigated but no fraud found) remained stable at 60% — meaning 40% of investigated claims were confirmed as fraudulent, up from 22% before the dashboard.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Fraud Data Analysis in Python</h2>
+
+            <p>Python is used for the behind-the-scenes analysis that feeds the Power BI dashboard — calculating fraud rates by segment, identifying the most predictive fraud indicators, and building statistical profiles of fraudulent vs. legitimate claims.</p>
+
+            <h3>5.1 Loading and Exploring Fraud Data</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load merged dataset with fraud flags
+df = pd.read_csv('data/insurance_cleaned.csv')
+
+# Load fraud indicators (if available as separate table)
+try:
+    fraud_indicators = pd.read_csv('data/fraud_indicators.csv')
+    print(f"Fraud indicators loaded: {len(fraud_indicators):,} records")
+except:
+    print("Fraud indicators file not found. Using fraud_flag from main dataset.")
+    fraud_indicators = None
+
+# Basic fraud statistics
+fraud_rate = df['fraud_flag'].mean() * 100
+fraud_count = df['fraud_flag'].sum()
+total_claims = len(df)
+fraud_amount = df[df['fraud_flag'] == 1]['claim_amount'].sum()
+total_amount = df['claim_amount'].sum()
+
+print("=" * 55)
+print("FRAUD OVERVIEW")
+print("=" * 55)
+print(f"Total claims:          {total_claims:>8,.0f}")
+print(f"Fraud claims:          {fraud_count:>8,.0f} ({fraud_rate:.2f}%)")
+print(f"Fraud amount:          ₹{fraud_amount/1e7:>8.1f} Cr")
+print(f"Total claims amount:   ₹{total_amount/1e7:>8.1f} Cr")
+print(f"Fraud % of amount:     {fraud_amount/total_amount*100:>8.2f}%")
+print(f"Avg fraud claim:      ₹{fraud_amount/fraud_count:>8,.0f}")
+print(f"Avg legitimate claim: ₹{(total_amount-fraud_amount)/(total_claims-fraud_count):>8,.0f}")</code></pre>
+
+            <h3>5.2 Fraud Rate by Segment</h3>
+
+            <pre><code class="language-python"># Fraud rate by policy type
+fraud_by_product = df.groupby('policy_type').agg(
+    total_claims=('claim_id', 'count'),
+    fraud_claims=('fraud_flag', 'sum'),
+    total_amount=('claim_amount', 'sum'),
+    fraud_amount=('claim_amount', lambda x: x[df.loc[x.index, 'fraud_flag'] == 1].sum())
+).reset_index()
+
+fraud_by_product['fraud_rate'] = fraud_by_product['fraud_claims'] / fraud_by_product['total_claims'] * 100
+fraud_by_product = fraud_by_product.sort_values('fraud_rate', ascending=False)
+
+print("=" * 75)
+print(f"{'Policy Type':15s} {'Total Claims':>15s} {'Fraud Claims':>15s} {'Fraud Rate':>12s} {'Fraud Amount':>20s}")
+print("-" * 75)
+for _, row in fraud_by_product.iterrows():
+    print(f"{row['policy_type']:15s} {row['total_claims']:>10,.0f}      {row['fraud_claims']:>8,.0f}      {row['fraud_rate']:>5.2f}%   ₹{row['fraud_amount']/1e7:>8.2f} Cr")
+
+# Fraud rate by customer age group
+df['age_group'] = pd.cut(df['age'], bins=[18, 30, 40, 50, 60, 100],
+                          labels=['18-30', '31-40', '41-50', '51-60', '60+'])
+fraud_by_age = df.groupby('age_group', observed=False).agg(
+    total_claims=('fraud_flag', 'count'),
+    fraud_claims=('fraud_flag', 'sum')
+).reset_index()
+fraud_by_age['fraud_rate'] = fraud_by_age['fraud_claims'] / fraud_by_age['total_claims'] * 100
+
+print(f"\n{'Age Group':12s} {'Fraud Rate':12s} {'Claims':10s}")
+print("-" * 34)
+for _, row in fraud_by_age.iterrows():
+    bar = '█' * int(row['fraud_rate'] * 2)
+    print(f"{str(row['age_group']):12s} {row['fraud_rate']:>5.2f}%     {row['total_claims']:>6,.0f}  {bar}")</code></pre>
+
+            <h3>5.3 Identifying the Top Fraud Indicators</h3>
+
+            <pre><code class="language-python"># Create fraud indicators from available data
+# Each indicator is a binary variable: 1 = red flag present, 0 = not present
+
+if 'days_to_settle' in df.columns:
+    df['ind_rapid_settlement'] = (df['days_to_settle'] < 3).astype(int)
+if 'claim_amount' in df.columns:
+    threshold = df['claim_amount'].quantile(0.95)
+    df['ind_amount_high'] = (df['claim_amount'] > threshold).astype(int)
+if 'premium' in df.columns and 'claim_amount' in df.columns:
+    df['claim_premium_ratio'] = df['claim_amount'] / (df['premium'] + 1)
+    df['ind_high_ratio'] = (df['claim_premium_ratio'] > df['claim_premium_ratio'].quantile(0.90)).astype(int)
+if 'credit_score' in df.columns:
+    df['ind_low_credit'] = (df['credit_score'] < 600).astype(int)
+if 'age' in df.columns:
+    df['ind_young'] = (df['age'] < 25).astype(int)
+if 'income' in df.columns:
+    df['ind_low_income'] = (df['income'] < df['income'].quantile(0.25)).astype(int)
+
+# Collect all indicator columns
+indicator_cols = [c for c in df.columns if c.startswith('ind_')]
+
+if len(indicator_cols) > 0:
+    # Calculate the fraud rate for each indicator
+    indicator_analysis = []
+    for col in indicator_cols:
+        flagged = df[df[col] == 1]
+        not_flagged = df[df[col] == 0]
+        if len(flagged) > 0 and len(not_flagged) > 0:
+            fraud_rate_flagged = flagged['fraud_flag'].mean() * 100
+            fraud_rate_not = not_flagged['fraud_flag'].mean() * 100
+            lift = fraud_rate_flagged / fraud_rate_not if fraud_rate_not > 0 else 0
+            indicator_analysis.append({
+                'indicator': col.replace('ind_', '').replace('_', ' ').title(),
+                'claims_flagged': len(flagged),
+                'fraud_rate_flagged': fraud_rate_flagged,
+                'fraud_rate_not': fraud_rate_not,
+                'lift': lift,
+                'total_fraud_caught': flagged['fraud_flag'].sum()
+            })
+
+    indicator_df = pd.DataFrame(indicator_analysis).sort_values('lift', ascending=False)
+
+    print("=" * 85)
+    print("TOP FRAUD INDICATORS (by lift — how much more fraud is found when this flag is present)")
+    print("=" * 85)
+    print(f"{'Indicator':25s} {'Flagged':>10s} {'Fraud Rate':>15s} {'Base Rate':>12s} {'Lift':>8s} {'Fraud Caught':>15s}")
+    print("-" * 85)
+    for _, row in indicator_df.iterrows():
+        print(f"{row['indicator']:25s} {row['claims_flagged']:>8,.0f}     {row['fraud_rate_flagged']:>5.2f}%      {row['fraud_rate_not']:>5.2f}%    {row['lift']:>4.1f}x   {row['total_fraud_caught']:>6,.0f}")
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(10, 5))
+    top_n = indicator_df.head(8)
+    bars = ax.barh(top_n['indicator'], top_n['lift'], color='#e17055', edgecolor='white')
+    ax.axvline(x=1, color='gray', linestyle='--', alpha=0.7, label='No Predictive Power (Lift=1)')
+    for bar, val in zip(bars, top_n['lift']):
+        ax.text(val + 0.1, bar.get_y() + bar.get_height()/2, f'{val:.1f}x',
+                va='center', fontsize=9, fontweight='bold')
+    ax.set_xlabel('Lift (Fraud rate when flagged ÷ baseline fraud rate)')
+    ax.set_title('Top Fraud Indicators by Predictive Lift', fontweight='bold')
+    ax.legend()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.tight_layout()
+    plt.show()</code></pre>
+
+            <h3>5.4 Building a Weighted Fraud Risk Score</h3>
+
+            <pre><code class="language-python"># Combine indicators into a composite fraud score
+# Each indicator adds points proportional to its lift
+
+if len(indicator_cols) > 0:
+    # Normalise lifts to create weights
+    max_lift = indicator_df['lift'].max()
+    indicator_df['weight'] = indicator_df['lift'] / max_lift * 10  # scale to 0-10
+
+    # Create score dictionary
+    weight_dict = dict(zip(['ind_' + row['indicator'].lower().replace(' ', '_') for _, row in indicator_df.iterrows()],
+                           indicator_df['weight']))
+
+    # Calculate composite fraud score for each claim
+    df['fraud_score'] = 0
+    for col, weight in weight_dict.items():
+        if col in df.columns:
+            df['fraud_score'] += df[col] * weight
+
+    # Scale to 0-100
+    df['fraud_score'] = (df['fraud_score'] / df['fraud_score'].max() * 100)
+
+    # Evaluate the score
+    score_bins = pd.qcut(df['fraud_score'], q=10, labels=False, duplicates='drop')
+    df['score_decile'] = score_bins
+
+    score_eval = df.groupby('score_decile').agg(
+        count=('fraud_flag', 'count'),
+        actual_fraud=('fraud_flag', 'sum'),
+        fraud_rate=('fraud_flag', 'mean'),
+        avg_score=('fraud_score', 'mean'),
+        total_amount=('claim_amount', 'sum')
+    ).reset_index()
+
+    print(f"\nFraud Score Performance (Decile Analysis)")
+    print(f"{'Decile':8s} {'Claims':>10s} {'Fraud':>8s} {'Fraud Rate':>12s} {'Avg Score':>12s} {'Cum. Fraud':>15s}")
+    print("-" * 65)
+    cum_fraud = 0
+    total_fraud = score_eval['actual_fraud'].sum()
+    for _, row in score_eval.iterrows():
+        cum_fraud += row['actual_fraud']
+        cum_pct = cum_fraud / total_fraud * 100
+        print(f"  {row['score_decile']+1:>1.0f}     {row['count']:>8,.0f}  {row['actual_fraud']:>6,.0f}   {row['fraud_rate']*100:>5.2f}%     {row['avg_score']:>6.1f}      {cum_fraud:>6,.0f} ({cum_pct:.0f}%)")
+
+    print(f"\nInterpretation: The top 2 deciles capture approximately {cum_fraud / total_fraud * 100:.0f}%")
+    print(f"of all fraud while requiring investigation of only 20% of claims.")
+    print(f"This is the power of a scored fraud detection system vs. random review.")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> When building a fraud risk score, <strong>never</strong> include fraud_flag (the label you are trying to predict) or claim_amount (which creates a circular dependency — large claims get higher scores because they are more likely to be investigated and flagged as fraud, not because they are inherently more fraudulent). The fraud score must be built only from features that are available <strong>before</strong> the fraud outcome is known — exactly as it would be in a real-time claims triage system. Leaking future information into the score is the most common error in fraud analytics.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch15-fraud-economics">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>6. The Economics of Fraud Management</h2>
+
+            <p>Fraud detection is itself an economic decision. Every rupee spent on fraud detection — investigators, software, data, operations, legal — must be justified by a corresponding reduction in fraud losses plus the deterrent effect on future fraud. The economics are not always straightforward, and the optimal investment level depends on factors specific to each insurer's portfolio, customer base, and operating environment.</p>
+
+            <h3>6.1 The Fraud Detection Investment Tradeoff</h3>
+
+            <p>Increased fraud detection investment has three effects on the total cost of fraud:</p>
+            <ul>
+                <li><strong>Direct reduction:</strong> More fraud is caught before payment. This saves the claim amount plus investigation costs — but only for the claims that would have been paid fraudulently.</li>
+                <li><strong>Deterrent effect:</strong> As fraudsters learn that a particular insurer has strong detection, they submit fewer fraudulent claims to that insurer. The deterrent effect can be 2–5× the direct detection savings — but it takes 6–18 months to materialise and is difficult to measure.</li>
+                <li><strong>False positive cost:</strong> Increased detection investment inevitably increases false positives — legitimate claims that are flagged for investigation. Each false positive costs: the time of the investigator (₹300–₹800 per claim), the delay in settlement (which may increase customer dissatisfaction and complaints), and the potential regulatory risk if a legitimate claimant is treated unfairly.</li>
+            </ul>
+
+            <h3>6.2 The Optimal Detection Investment Model</h3>
+
+            <pre><code class="language-python"># Simulate the economics of fraud detection investment
+fraud_rate = 0.05           # 5% of claims are fraudulent
+total_claims = 20000        # Claims per month
+avg_claim = 45000           # Average claim amount
+avg_fraud = 75000           # Average fraud claim amount (fraud tends to be larger)
+
+# Current situation: no systematic detection
+current_fraud_loss = total_claims * fraud_rate * avg_fraud
+print(f"Current annual fraud loss (no detection): ₹{current_fraud_loss*12/1e7:.1f} Cr")
+
+# Invest in detection: hiring investigators and building analytics
+detection_investments = [0, 10, 25, 50, 75, 100, 150]  # Lakhs per year
+detection_rates = [0, 0.15, 0.30, 0.45, 0.55, 0.62, 0.68]  # Detection rate achievable
+false_positive_rates = [0, 0.05, 0.10, 0.18, 0.25, 0.30, 0.35]  # FPR (of non-fraud claims flagged)
+
+print(f"\n{'=' * 85}")
+print(f"FRAUD DETECTION ECONOMICS — OPTIMAL INVESTMENT ANALYSIS")
+print(f"{'=' * 85}")
+print(f"{'Investment':15s} {'Detection':12s} {'Fraud Saved':15s} {'FP Cost':12s} {'Net Benefit':15s} {'ROI':10s}")
+print("-" * 85)
+
+results = []
+for inv, det_rate, fpr in zip(detection_investments, detection_rates, false_positive_rates):
+    inv_actual = inv * 100000  # Convert to rupees
+
+    # Fraud saved
+    fraud_saved = total_claims * fraud_rate * avg_fraud * det_rate * 12
+    # Annual fraud that would have been paid but is now caught
+
+    # False positive cost
+    non_fraud_claims = total_claims * (1 - fraud_rate) * 12
+    fp_count = non_fraud_claims * fpr
+    fp_cost = fp_count * 500  # ₹500 per false positive investigation
+
+    # Net benefit
+    net_benefit = fraud_saved - fp_cost - inv_actual
+    roi = (fraud_saved - fp_cost) / inv_actual if inv_actual > 0 else 0
+
+    results.append({'inv': inv, 'det_rate': det_rate, 'fraud_saved': fraud_saved,
+                    'fp_cost': fp_cost, 'net_benefit': net_benefit, 'roi': roi})
+    print(f"₹{inv:>5}L       {det_rate*100:>4.0f}%      ₹{fraud_saved/1e7:>5.2f}Cr    ₹{fp_cost/1e7:>4.2f}Cr   ₹{net_benefit/1e7:>5.2f}Cr   {roi:>4.0f}x")
+
+# Find optimal
+optimal = max(results, key=lambda r: r['net_benefit'])
+print(f"\n{'─' * 85}")
+print(f"OPTIMAL INVESTMENT: ₹{optimal['inv']}L/year — max net benefit of ₹{optimal['net_benefit']/1e7:.2f}Cr")
+print(f"At this level: Detection rate = {optimal['det_rate']*100:.0f}%, ROI = {optimal['roi']:.0f}x")
+
+# Plot the tradeoff
+fig, ax1 = plt.subplots(figsize=(10, 6))
+investments = [r['inv'] for r in results]
+net_benefits = [r['net_benefit']/1e7 for r in results]
+
+ax1.plot(investments, net_benefits, 'o-', color='#6c5ce7', linewidth=2.5, markersize=8)
+optimal_idx = net_benefits.index(max(net_benefits))
+ax1.plot(investments[optimal_idx], net_benefits[optimal_idx], 'ro', markersize=12)
+ax1.annotate(f'Optimal: ₹{investments[optimal_idx]}L/yr\nNet: ₹{net_benefits[optimal_idx]:.2f}Cr',
+            xy=(investments[optimal_idx], net_benefits[optimal_idx]),
+            xytext=(investments[optimal_idx] + 20, net_benefits[optimal_idx]),
+            fontsize=10, fontweight='bold', color='red',
+            arrowprops=dict(arrowstyle='->', color='red'))
+ax1.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+ax1.set_xlabel('Annual Fraud Detection Investment (₹ Lakhs)')
+ax1.set_ylabel('Net Benefit (₹ Crores)')
+ax1.set_title('Fraud Detection Investment — Optimal Point Analysis', fontweight='bold')
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print(f"\nKey insight: Beyond the optimal point, additional investment generates")
+print(f"diminishing returns and eventually negative net benefit — because the")
+print(f"false positive costs and detection infrastructure costs exceed the")
+print(f"additional fraud savings from catching the last few fraud cases.")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The optimal fraud detection investment simulation above uses assumptions that vary significantly by insurer and product line. Motor insurance (high volume, relatively standardised fraud patterns) typically has a higher optimal detection investment than property insurance (lower volume, more variable claim sizes). Health insurance fraud detection economics are complicated by the involvement of TPAs and provider networks. The simulation framework is valid — but the parameters must be calibrated to your specific portfolio using actual data on fraud rates, false positive costs, and detection effectiveness. A generic benchmark can mislead more than it informs.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch15-indian-cases">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. Indian Insurance Fraud Landscape</h2>
+
+            <p>Insurance fraud in India has distinctive characteristics shaped by the market structure, regulatory environment, and enforcement context. Understanding these characteristics is essential for designing effective fraud detection systems in the Indian insurance market.</p>
+
+            <h3>7.1 The Indian Fraud Profile</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Characteristic</th><th>Indian Context</th><th>Implication for Fraud Analytics</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Motor insurance dominates fraud</strong></td><td>Motor insurance accounts for ~35–40% of general insurance premiums and an even higher share of fraud cases — staged accidents, inflated repair bills, ghost garages.</td><td>Fraud detection investment should be weighted toward motor first. The volume of motor claims creates enough data to build statistically robust models.</td></tr>
+                    <tr><td><strong>Organised fraud rings are common</strong></td><td>Fraud in India is not just individual opportunism — organised rings with lawyers, doctors, garage owners, and fraudulent witnesses operate at scale across multiple insurers and jurisdictions.</td><td>Network analysis and cross-insurer data sharing are essential. A single-insurer view cannot detect patterns distributed across 5+ insurers.</td></tr>
+                    <tr><td><strong>Health insurance fraud is growing</strong></td><td>Post-COVID, health insurance fraud has grown rapidly, particularly provider-side fraud: hospitals billing for non-performed procedures, extending length of stay unnecessarily, collusion with TPAs.</td><td>Medical coding analysis, provider profiling, and TPA audit are more important than individual claim scoring for health fraud detection.</td></tr>
+                    <tr><td><strong>Digital channel fraud is emerging</strong></td><td>As insurance moves online, new fraud vectors emerge — synthetic identities (fake Aadhaar + PAN combinations), aggregator fraud (artificially generating leads for commission), app-based claim fabrications.</td><td>Digital-first fraud detection (device fingerprinting, behavioural biometrics, identity verification APIs) must supplement traditional claims fraud analytics.</td></tr>
+                    <tr><td><strong>Enforcement is limited</strong></td><td>Prosecution rates for insurance fraud in India are low. Police and courts have limited capacity for white-collar insurance crime. Even when fraud is confirmed, recovery rates are 10–20%.</td><td>The economics of fraud detection in India are different from markets with strong enforcement — the deterrent effect of prosecution is weaker, making detection and prevention more important.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 Notable Indian Insurance Fraud Cases</h3>
+
+            <ul>
+                <li><strong>The Delhi-NCR Motor Fraud Ring (2023):</strong> As described in Section 1 — a coordinated ring that filed 500+ fake claims across 12 insurers using written-off vehicles, staged accidents, and inflated repair bills. Detection came through cross-industry data sharing, not individual insurer systems.</li>
+                <li><strong>The Hospital Collusion Case (2022):</strong> A network of 8 hospitals, 3 TPAs, and 15 patients in the NCR region was found to be filing fraudulent health insurance claims totaling ₹25 crore. The scheme involved admitting patients for non-existent procedures, creating fake medical records, and splitting payments. Detection triggered by a whistleblower.</li>
+                <li><strong>The Ghost Policy Agent (2021):</strong> An insurance agent in Maharashtra used the Aadhaar details of 500+ villagers (collected for government scheme enrolment) to issue fake life insurance policies worth ₹50 crore in sum assured. The agent collected commissions for 18 months before the fraud was detected during a policy verification drive.</li>
+                <li><strong>The Aggregator Click Fraud (2023):</strong> A digital insurance aggregator in India was found to be generating fake quote requests using bots and scripts, earning lead generation fees from partner insurers. The fraud was detected when the conversion rate from "quote request" to "actual purchase" dropped below 1% — far below the industry average of 8–15% for genuine leads.</li>
+            </ul>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> IRDAI's Fraud Monitoring System (FMS) is a centralised database that collects and shares insurance fraud data across the industry. Participating insurers submit information on confirmed fraud cases — including details of fraudulent policyholders, claim amounts, involved providers (hospitals, garages, agents), and known fraud patterns. The FMS enables an insurer to check, before paying a claim, whether the policyholder, vehicle, hospital, or garage has been associated with confirmed fraud at any other insurer. This cross-industry view is the single most powerful fraud detection tool in the Indian market, precisely because organised fraud rings operate across multiple insurers. As one investigator put it: "Without the FMS, we are fighting fraud with one hand tied behind our backs."
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a Fraud Analytics System</h2>
+            <div class="project-brief">
+                <p>You are the fraud analytics lead at "SecureGuard Insurance." The company processes 20,000 claims per month and estimates its fraud rate at 5% of claims (8% of claims amount). Your task is to build a fraud analytics system comprising: a Python-based fraud indicator analysis, a weighted fraud risk scoring model, a Power BI monitoring dashboard design, and an investment recommendation for the fraud detection budget.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Fraud data exploration:</strong> Load the merged dataset. Calculate the overall fraud rate, fraud rate by policy type, and the average amount of fraudulent vs. legitimate claims. Print a summary.</li>
+                    <li><strong>Fraud indicator analysis:</strong> Create at least 7 fraud indicator variables from the available data. Calculate the lift of each indicator. Identify the top 5 indicators by lift. Create a bar chart.</li>
+                    <li><strong>Fraud risk score:</strong> Build a weighted composite fraud score (0–100) using the lift-based weighting method from Section 5.4. Create a decile analysis table showing the fraud capture rate at each decile.</li>
+                    <li><strong>Dashboard design:</strong> Design (on paper or in a mockup tool) a 1-page Power BI fraud monitoring dashboard. Include: 4 KPI cards, 1 fraud trend chart, 1 fraud-by-type chart, 1 top indicators bar chart, and a high-risk claims table. Specify the slicers and DAX measures needed.</li>
+                    <li><strong>Economics analysis:</strong> Using the simulation framework from Section 6 with your portfolio's actual fraud parameters: compute the optimal fraud detection investment. Show the net benefit curve. Recommend an annual investment level.</li>
+                    <li><strong>Write a 500-word fraud management strategy memo</strong> to the Chief Risk Officer covering: (a) Current fraud landscape and detection gaps, (b) Recommended investment in fraud analytics (people, technology, data), (c) Key metrics to monitor, (d) Expected ROI with timeline.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Strategy Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> Chief Risk Officer, SecureGuard Insurance<br>
+                    <strong>From:</strong> Fraud Analytics Lead<br>
+                    <strong>Subject:</strong> Fraud Management Strategy — Investment Recommendation and Implementation Plan</p>
+
+                    <p><strong>Current Fraud Landscape:</strong> Our portfolio analysis estimates a fraud rate of approximately 4.8% of claims (higher in motor at 6.2%, lower in health at 3.1%). The fraud amount is estimated at ₹7.2 crore annually, representing approximately 8% of total claims spend. Our current detection infrastructure — a rule-based system with 12 manual rules and ad-hoc investigator review — catches an estimated 15% of fraudulent claims post-payment (detection only after the claim has been paid and flagged during audit). We are effectively paying ₹6.1 crore in undetected fraud annually.</p>
+
+                    <p><strong>Recommended Investment:</strong> Based on the economics simulation, the optimal annual investment in fraud analytics is ₹50 lakh. This breaks down as: ₹15 lakh for one senior fraud data scientist, ₹10 lakh for fraud analytics software/licensing (including network analytics and cross-industry data access), ₹10 lakh for incremental investigator capacity (one additional investigator dedicated to analytics-driven cases), ₹10 lakh for data infrastructure and systems integration, and ₹5 lakh for training and operational expenses. At this investment level, the model projects a detection rate of 45%, saving ₹3.2 crore in fraud losses annually. After accounting for the cost of detection infrastructure, false positive investigation costs (estimated ₹42 lakh), and programme costs, the net benefit is ₹2.3 crore annually — an ROI of 4.6:1.</p>
+
+                    <p><strong>Key Metrics to Monitor:</strong> (1) Fraud detection rate — % of fraudulent claims identified before payment. Target: 45% within 12 months. (2) False positive rate — % of investigated claims that are confirmed legitimate. Target: below 60% (industry standard for initial deployment). (3) Fraud loss ratio — fraud amount as % of earned premium. Target: reduction from current 8% to 5% within 18 months. (4) Investigation ROI — value of fraud confirmed per rupee of investigation cost. Target: 10:1 minimum. (5) Detection-to-prevention cycle time — days from fraud confirmation to rule/model update. Target: under 7 days. (6) Dashboard adoption — % of claims team actively using the fraud dashboard. Target: 90% within 3 months.</p>
+
+                    <p><strong>ROI and Timeline:</strong> Month 1–3: Build fraud indicators, deploy Python risk score, build Power BI dashboard, train claims team. Investment: ₹20 lakh. Month 4–6: Go-live with scored claims routing, begin investigator workflow integration, establish cross-industry data sharing connections. Expected detection rate: 30%. Month 7–12: Model retraining with confirmed fraud feedback, expansion to health and property fraud indicators, provider profiling. Expected detection rate: 45%. Cumulative 12-month fraud savings: ₹2.8 crore. Net programme benefit after investment: ₹1.8 crore in Year 1, rising to ₹3.5 crore in Year 2 as the deterrent effect accumulates.</p>
+
+                    <p><strong>Key Risk and Mitigation:</strong> The primary risk is that false positives damage customer trust and legitimate claims are delayed. Mitigation: (a) claims with fraud score > 80 are investigated before payment, claims with score 60–80 are flagged for post-payment audit only (not delayed), (b) any claim delayed > 7 days for investigation is automatically escalated to a senior manager who can override the fraud hold, and (c) a monthly audit of false positives identifies whether any legitimate customer was treated unfairly — with compensation and apology protocol ready for such cases. A fraud management system that achieves its detection goals at the cost of treating honest customers poorly is a failure, not a success.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Insurance fraud costs the global industry $80–$120B annually and Indian insurers ₹45,000+ Cr. The industry's structural vulnerabilities — information asymmetry, volume pressure, payment speed requirements — make fraud a persistent challenge that requires systematic analytics, not just vigilance.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Fraud falls into three categories: application fraud (misrepresentation at purchase), claims fraud (exaggerated or fabricated losses), and provider fraud (professionals exploiting the system). Each requires different detection approaches — data validation, anomaly detection, and provider profiling respectively.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Effective fraud analytics follows a continuous cycle: Detection → Investigation → Prevention. The Prevention stage — feeding investigation findings back into improved models — is the most commonly neglected but most impactful step. Teams that master the full cycle outperform those that over-invest in detection alone.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>A fraud risk score (0–100) built from weighted indicators can capture 60–80% of fraud in the top 20% of scored claims — dramatically improving investigator efficiency over random or manual triage. The score must be built from pre-outcome features only — never leaking the fraud label into the scoring formula.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>Fraud detection economics follow a diminishing-returns curve. Beyond the optimal investment point, the cost of false positives and detection infrastructure exceeds the additional fraud savings. The optimal point depends on each insurer's portfolio and must be calibrated with actual data, not generic benchmarks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s15-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. A hospital that bills an insurance company for medical procedures that were never performed is committing which type of fraud?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Application fraud — because the hospital submitted a claim application</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Claims fraud — because a false claim was submitted</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Provider fraud — because the fraud is committed by a professional service provider (hospital) exploiting its position in the insurance ecosystem, not by a policyholder</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Intermediary fraud — because the hospital acts as an intermediary between the patient and the insurer</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. In the fraud analytics cycle (Detection → Investigation → Prevention), the most commonly neglected step is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Detection — most insurers do not invest enough in fraud detection models</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Investigation — because it is the most expensive and time-consuming stage</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Prevention — feeding investigation findings back into updated rules and models. Without this feedback loop, fraud detection stays static while fraudsters adapt their methods</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) All three are equally neglected in most fraud programmes</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A fraud indicator analysis shows that claims flagged with "ind_rapid_settlement" (settled in < 3 days) have a fraud rate of 2.0%, while claims not flagged have a fraud rate of 4.5%. The lift of this indicator is approximately:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) 2.25 — rapid settlement is a strong fraud indicator</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) 0.44 — rapid settlement is associated with LOWER fraud risk, meaning it is a "negative indicator" that reduces suspicion rather than increasing it</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) 1.00 — the indicator has no predictive power</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The calculation cannot be done with the information provided</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. The optimal fraud detection investment is the point at which:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) The detection rate reaches 100% — all fraud is caught</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) The net benefit (fraud savings − false positive costs − detection infrastructure costs) is maximised. Beyond this point, additional investment produces diminishing returns</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) The insurer has spent its entire annual fraud detection budget, regardless of results</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) The false positive rate reaches zero</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A claim has 6 fraud indicators triggered, giving it a fraud score of 82 (out of 100). The claim amount is ₹12,000. According to ethical claims management, the correct action is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Immediately reject the claim — the fraud score is well above 75, indicating near-certain fraud</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Pay the claim without investigation — ₹12,000 is not worth the investigation cost</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Investigate the claim before any decision — the fraud score warrants suspicion but is not proof. The investigation should not delay the claim unreasonably. If fraud is confirmed, the claim is denied; if cleared, it is paid</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) Pay the claim but report the policyholder to IRDAI's fraud database</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s15-quiz', ['c','c','b','b','c'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s15-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-14.html" class="nav-link">&larr; Previous: Generative AI in Insurance</a>
+            <a href="session-16.html" class="nav-link next">Next: Fraud Detection Using ML &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

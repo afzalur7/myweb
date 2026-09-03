@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 10: Embedded &amp; Usage-Based Insurance — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* Editable answer fields — students can type directly in the page.
+           Input is NOT saved anywhere; it only lives in the browser session
+           so students can try their answer before revealing the solution. */
+        .write-in {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+            box-sizing: border-box;
+        }
+        .write-in:focus {
+            border-color: var(--primary);
+            border-style: solid;
+            background: var(--surface-hover);
+        }
+        .write-in::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .write-in-tall { min-height: 72px; }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-09.html" class="nav-link">&larr; Previous: Digital Customer Acquisition</a>
+            <a href="session-11.html" class="nav-link next">Next: AI &amp; Machine Learning Fundamentals &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #1a1a3e 0%, #2c1f52 100%); color: #fff;">
+            <div class="chapter-badge">Module 3 &middot; Session 10 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 10: Embedded &amp; Usage-Based Insurance</h1>
+            <div class="chapter-meta">
+                CILO-1, CILO-2 &middot; Domain Knowledge &amp; Analytics &middot; Lecture &amp; Data Analysis (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Explain the economics of embedded insurance and why conversion rates are 3–5× higher than standalone digital channels</li>
+                <li>Map the Indian embedded insurance landscape across mobility, e-commerce, travel, and fintech platforms</li>
+                <li>Distinguish between Usage-Based Insurance models — PAYD (Pay-As-You-Drive) vs. PHYD (Pay-How-You-Drive) — and understand their risk selection mechanics</li>
+                <li>Calculate risk scores from telematics-style driving data using a weighted composite model in Python</li>
+                <li>Analyse the privacy, ethics, and regulatory trade-offs of data-driven insurance pricing and articulate a defensible position</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. What is Embedded Insurance?</h2>
+
+            <p>Embedded insurance is the integration of insurance products into the purchase journey of another product or service — at the moment the customer needs it, in the context where they need it, without requiring a separate insurance purchase process. The insurance is "embedded" into the customer experience of a non-insurance platform.</p>
+
+            <p>This is not simply "selling insurance through a partner." The distinction is fundamental: in a traditional partnership, the partner is a distribution channel — the customer must still actively choose to buy insurance. In embedded insurance, the insurance is part of the product experience. The customer buying a flight ticket on MakeMyTrip does not "buy travel insurance" — they check a box during checkout. The customer booking a ride on Ola does not "buy personal accident cover" — they accept a ₹5 add-on. The insurance is invisible until it is needed. This invisibility is the core innovation.</p>
+
+            <h3>1.1 Embedded vs. Traditional Distribution</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Traditional Digital Distribution</th><th>Embedded Insurance</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Customer intent</td><td>Customer actively seeks insurance</td><td>Customer seeks another product; insurance is a contextual add-on</td></tr>
+                    <tr><td>Purchase trigger</td><td>Renewal reminder, life event, need awareness</td><td>Purchase of primary product (flight, gadget, ride, loan)</td></tr>
+                    <tr><td>Conversion rate</td><td>1–5% (from site visitors to purchase)</td><td>15–50% (of primary product buyers who see offer)</td></tr>
+                    <tr><td>Customer acquisition cost</td><td>₹1,500–5,000 (paid search, aggregator commission)</td><td>₹0–500 (near-zero — the platform covers acquisition)</td></tr>
+                    <tr><td>CAC savings source</td><td>Marketing spend to attract insurance intenders</td><td>The platform's existing traffic is the audience; no separate marketing needed</td></tr>
+                    <tr><td>Customer context</td><td>Customer is comparing insurance options</td><td>Customer is in a buying mindset for the primary product — insurance is a natural addition</td></tr>
+                    <tr><td>Policy complexity</td><td>Full product details, terms, comparisons</td><td>Simplified offer — one price, one coverage summary, one click to accept</td></tr>
+                    <tr><td>Trust model</td><td>Insurer brand or aggregator platform trust</td><td>Trust transfers from the primary platform (Amazon, Ola, MakeMyTrip)</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> When Amazon India partnered with Acko to offer gadget protection during checkout for electronic devices, the conversion rate — customers who saw the offer and accepted it — exceeded 25% in its first month. Compare this to a standalone insurance website where 2–5% of visitors convert to purchase. The customer who just added a ₹25,000 smartphone to their cart is in a buying mindset. They understand the value of the device. The insurance offer (typically ₹499–₹999 for 1–2 years of accidental damage + liquid damage cover) is a trivial addition to the purchase decision. The context does the selling that insurance marketing budgets can never achieve.
+                </div>
+            </div>
+
+            <!-- Exercise 1.1 — Embedded or Not? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128722; Exercise 1.1 — Embedded or Not?</h4>
+                    <p>Classify each purchase journey into <strong>Embedded insurance</strong> or <strong>Traditional digital distribution</strong> using the §1.1 distinction — is insurance part of the primary product experience, or is the customer actively seeking insurance?</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Purchase Journey</th><th style="width: 190px;">Type</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A customer adds gadget protection while buying a ₹25,000 smartphone on Amazon.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Embedded</option><option>Traditional</option></select></td></tr>
+                        <tr><td>2</td><td>A customer clicks a Google ad for "term insurance" and compares plans on PolicyBazaar.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Embedded</option><option>Traditional</option></select></td></tr>
+                        <tr><td>3</td><td>An Ola ride app adds a ₹5 personal-accident cover to the fare during ride booking.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Embedded</option><option>Traditional</option></select></td></tr>
+                        <tr><td>4</td><td>A bank's partner insurer calls a loan applicant to offer health cover — the customer must decide.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Embedded</option><option>Traditional</option></select></td></tr>
+                        <tr><td>5</td><td>MakeMyTrip shows a travel-insurance checkbox during flight checkout.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Embedded</option><option>Traditional</option></select></td></tr>
+                        <tr><td>6</td><td>A customer opens a renewal-reminder SMS and follows the link to the insurer's app.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Embedded</option><option>Traditional</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> Embedded insurance converts at 15–50% vs 1–5% for standalone digital. What makes the checkout decision psychologically easier for the customer?</p>
+                <textarea class="write-in write-in-tall" placeholder="Your reflection..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Classifications</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Embedded</strong> — insurance rides the primary purchase (the phone); the customer is already in a buying mindset.</li>
+                            <li><strong>Traditional</strong> — the customer actively seeks insurance; the ad is a distribution channel, not part of a product experience.</li>
+                            <li><strong>Embedded</strong> — the cover is added to the fare during ride booking; enrolment is automatic (opt-out).</li>
+                            <li><strong>Traditional</strong> — the bank is a distribution channel; the customer must still actively choose to buy insurance.</li>
+                            <li><strong>Embedded</strong> — the offer appears at the moment of booking the primary product (the flight).</li>
+                            <li><strong>Traditional</strong> — the customer must decide and go through a separate insurance purchase process.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Reflection note:</strong> the customer has already answered the hard questions ("should I spend money? which product? do I trust this?") when they buy the primary product. The insurance is a small, contextual add-on to a decision they have already made — "one price, one coverage summary, one click." The context does the selling that marketing budgets cannot. This is why conversion is 3–5× higher and CAC near zero.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. The Economics of Embedded Insurance</h2>
+
+            <p>The economic advantage of embedded insurance over traditional distribution is not incremental — it is structural. Embedded models change the fundamental unit economics of insurance distribution in four ways that standalone digital channels cannot replicate.</p>
+
+            <h3>2.1 The Four-Part Economics Advantage</h3>
+
+            <ol>
+                <li><strong>Near-zero marginal CAC:</strong> The platform already pays to acquire its users (through marketing, product investment, brand). Adding insurance as an offer at checkout costs almost nothing — the marginal cost of displaying a checkbox on a checkout page that already exists. This compares to ₹2,000–₹5,000 CAC for a standalone digital insurance channel. The economic difference is enormous — and it is structural, not a matter of optimization.</li>
+
+                <li><strong>Contextual conversion:</strong> Embedded insurance converts at 15–50% because the customer is already in a purchase mindset. They have already decided to spend money — the incremental decision to add insurance is psychologically easy. In contrast, a standalone insurance website requires the customer to overcome multiple cognitive barriers: "Should I buy insurance? Which one? Is this a good price? Will the claim actually work?" By the time embedded insurance offers appear, the customer has already answered most of these questions implicitly.</li>
+
+                <li><strong>Adverse selection reversal:</strong> In standard insurance, the customers most likely to buy are those who believe they have the highest risk — a problem insurers manage through underwriting. In embedded insurance, the customer is buying the primary product (a flight, a phone, a ride) for reasons unrelated to the insurance. The insurance purchase is almost incidental. This dramatically reduces adverse selection — the insurance pool looks more like the general population, not a self-selected high-risk segment. This structural advantage can improve loss ratios by 5–15 points compared to standalone channels.</li>
+
+                <li><strong>Trust transfer:</strong> Customers trust Amazon with their payments, their address, and their product choices. When Amazon offers insurance on a phone purchase, some of that trust transfers to the insurance product. The customer does not need to research the insurer's claim settlement ratio — they trust Amazon to have vetted the partner. This trust transfer reduces the "trust barrier" that is one of the biggest friction points in standalone insurance purchase. In marketing terms, embedded insurance turns "pull" (I need to research and decide) into "push" (here is an offer from a platform I already trust).</li>
+            </ol>
+
+            <h3>2.2 The Revenue Split Model</h3>
+
+            <p>In a typical embedded insurance arrangement, the premium is split three ways:</p>
+            <ul>
+                <li><strong>Platform (distribution partner):</strong> 30–50% of premium — the platform's commission for providing access to its customer base and handling the checkout experience. This is their "take rate." For platforms with thin margins (e-commerce, mobility), insurance can be a high-margin incremental revenue stream.</li>
+                <li><strong>Insurer (risk carrier):</strong> 40–60% of premium — after paying claims (typically 50–75% of this share) and expenses (15–25%), the insurer earns an underwriting margin of 5–20% on its share.</li>
+                <li><strong>Enabler (API infrastructure provider):</strong> 5–15% of premium or a SaaS fee — the technology layer connecting the platform to multiple insurers. This is Riskcovry, Zopper, and similar API enabler business models.</li>
+            </ul>
+
+            <p>For the insurer, the trade-off is simple: in embedded insurance it <strong>keeps a smaller slice of each premium</strong>. Of a ₹1,000 premium, the platform takes its commission and the enabler its fee, leaving the insurer roughly ₹400–600 — versus the full ₹1,000 it would keep on a standalone policy. The key question is whether the smaller slice still produces a better business.</p>
+
+            <p><strong>It does, because the insurer's costs are also far smaller.</strong> Acquisition is nearly free — the platform's existing traffic is the audience, so there is no ₹1,500–5,000 CAC to recover and no aggregator commission. The pool is also better risk (the adverse-selection reversal from §2.1), so claims run lower. A standalone insurer must spend heavily to acquire each customer and then recover that spend across several years of renewals; an embedded insurer starts making money on the first policy.</p>
+
+            <p><strong>The correct measure is therefore profit per policy, not premium per policy.</strong> Example, on a ₹1,000 premium: an embedded insurer keeps ₹500 after platform and enabler cuts, pays ₹300 in claims and ₹100 in expenses, and banks <strong>₹100 profit with zero acquisition cost — immediately</strong>. A standalone insurer keeps the full ₹1,000, but after a 70% loss ratio (₹700), expenses (₹150) and a ₹1,500 acquisition cost, its first-year profit is often negative — it reaches ₹100 profit only after the customer renews for 2–3 years. And renewal is where embedded insurance compounds: embedded customers often <strong>auto-renew</strong> because the platform handles renewal as part of its ecosystem, while standalone renewal must be won again every year. Lower cost + better risk + higher retention together mean the embedded profit per policy can match or beat standalone — and it repeats every renewal.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> When evaluating an embedded insurance opportunity, do not focus on premium volume alone. The key metric is <strong>profit per policy</strong>, not premium per policy. An embedded product with ₹500 premium but ₹200 profit may be more valuable than a standalone product with ₹1,000 premium and ₹100 profit — because the embedded product consumes less capital per rupee of profit and scales faster through the platform's growth. This is the metric that matters for shareholder value.
+                </div>
+            </div>
+
+            <!-- Exercise 2.1 — The Embedded Economics Math -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#129518; Exercise 2.1 — The Embedded Economics Math</h4>
+                    <p>Work the §2.2 revenue split on a real product, then make the Pro Tip's "profit per policy" call.</p>
+                </div>
+                <p style="margin-top: var(--space-md);"><strong>Part A — calculate:</strong> A ₹600 gadget-protection premium is split Platform 40% / Enabler 10% / Insurer 50%. The insurer pays claims = 60% of its share and expenses = 18% of its share. Fill in the table:</p>
+                <table>
+                    <thead>
+                        <tr><th>Player</th><th>Share of ₹600</th><th style="width: 190px;">Your Answer (₹)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Platform (distribution partner)</td><td>40%</td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                        <tr><td>Enabler (API provider)</td><td>10%</td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                        <tr><td>Insurer (risk carrier)</td><td>50%</td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                        <tr><td>Insurer profit per policy = insurer share − claims − expenses</td><td>—</td><td><input class="write-in" type="text" placeholder="₹___"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Part B — decide:</strong> Two products compete for capital: <em>Embedded</em> — ₹500 premium, ₹200 profit per policy; <em>Standalone</em> — ₹1,000 premium, ₹100 profit per policy. Which creates more shareholder value, and why (use the Pro Tip)?</p>
+                <textarea class="write-in" placeholder="The embedded product creates more value because..."></textarea>
+                <p style="margin-top: var(--space-md);"><strong>Part C — explain:</strong> Why can an embedded pool improve loss ratios by 5–15 points even before the insurer prices for it?</p>
+                <textarea class="write-in" placeholder="Adverse selection reversal: ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Math</summary>
+                    <div class="solution-content">
+                        <p><strong>Part A:</strong> Platform ₹240 · Enabler ₹60 · Insurer ₹300 · claims ₹180 (60% × 300) · expenses ₹54 (18% × 300) → <strong>insurer profit = ₹300 − ₹180 − ₹54 = ₹66 per policy.</strong> Note the insurer earns a healthy margin on a ₹600 product because its capital is deployed only on the risk it carries.</p>
+                        <p style="margin-top: var(--space-md);"><strong>Part B:</strong> the <strong>embedded product</strong> — ₹200 profit per policy at ₹500 premium (40% margin) vs ₹100 on ₹1,000 (10% margin). It consumes less capital per rupee of profit, scales with the platform's growth, and typically auto-renews. <strong>Profit per policy, not premium per policy, is what builds shareholder value.</strong></p>
+                        <p style="margin-top: var(--space-md);"><strong>Part C:</strong> <strong>adverse selection reversal</strong> — the customer buys the primary product (the phone, the ride, the flight) for reasons unrelated to insurance, so the insurance pool resembles the general population instead of a self-selected high-risk segment. The self-selection that normally loads the insurance pool works in reverse here, improving the loss ratio structurally — before any behavioural pricing.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-volatile"
+                 data-review-cycle="quarterly"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch10-embedded-india">
+            <div class="stability-badge volatile-badge">
+                &#9888; Volatile content — Reviewed: July 2026 &middot; Next review: October 2026
+            </div>
+
+            <h2>3. Embedded Insurance in India</h2>
+
+            <p>India's embedded insurance market has grown rapidly, driven by the combination of digital public infrastructure (India Stack), large consumer platforms, and InsurTech enablers that provide the API plumbing to connect them. The ecosystem can be mapped across four primary distribution contexts.</p>
+
+            <h3>3.1 Embedded Insurance by Platform Type</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Platform Type</th><th>Platform Example</th><th>Insurance Product(s)</th><th>Enabler / Insurer</th><th>How It Works</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Mobility &amp; Ride-Hailing</strong></td>
+                        <td>Ola, Uber, Rapido</td>
+                        <td>Personal accident cover per ride, auto driver insurance</td>
+                        <td>Acko (on Ola), ICICI Lombard (on Uber)</td>
+                        <td>₹0.5–₹5 per ride added to fare. Covers accidental death, permanent disability. Policy active for duration of ride. No separate purchase — enrolment is automatic (opt-out, not opt-in).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>E-Commerce &amp; Retail</strong></td>
+                        <td>Amazon, Flipkart, Myntra</td>
+                        <td>Product protection plans (gadget damage + liquid + theft), extended warranty</td>
+                        <td>Zopper (on Flipkart/Myntra), Acko (on Amazon)</td>
+                        <td>Offered at checkout when purchasing electronics. 1–4 year plans. Customer enrolled instantly. Claims: WhatsApp photo → AI assessment → replacement or repair. 15–30% conversion of eligible purchases.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Travel &amp; Hospitality</strong></td>
+                        <td>MakeMyTrip, IRCTC (via Acko), Yatra, EaseMyTrip</td>
+                        <td>Travel insurance (medical abroad, trip cancellation, lost baggage, flight delay)</td>
+                        <td>Acko, ICICI Lombard, Tata AIG</td>
+                        <td>Offered during flight or hotel booking checkout. Premium: ₹99–₹999 depending on destination and trip duration. Highly contextual — destination with high medical costs = more likely to purchase.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fintech &amp; Payments</strong></td>
+                        <td>PhonePe, Paytm, Cred, Google Pay</td>
+                        <td>Life insurance (sachet), accident cover, travel insurance, device protection</td>
+                        <td>Multiple insurers through Riskcovry and other enablers</td>
+                        <td>Offered within the payments/fintech app as a "sachet" product — very low premium (₹5–₹99), very short term (1 month to 1 year). High volume, low value. Low friction purchase — no forms, UPI-click to buy.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3.2 The Enabler Model: Riskcovry and Zopper</h3>
+
+            <p>Two companies have built the infrastructure that powers embedded insurance at scale in India. Understanding their model is essential to understanding how embedded insurance works operationally.</p>
+
+            <p><strong>Riskcovry</strong> positions itself as "insurance middleware" — an API platform that connects insurers to any distribution platform. A mobility app, e-commerce site, or fintech app can integrate Riskcovry's API in 2–4 weeks and offer insurance products from multiple carriers without building insurance-specific capabilities. Riskcovry handles: product configuration, API connection to multiple insurers, quote engine, policy issuance, claims API, and compliance. It earns a per-transaction fee or a revenue share. Riskcovry does not underwrite risk — it provides the technology layer. This is a capital-light, high-margin business model.</p>
+
+            <p><strong>Zopper</strong> started as an extended warranty company and evolved into an embedded insurance platform focused on e-commerce. Zopper partners with Flipkart, Myntra, Tata CLiQ, and others to offer product protection plans at checkout. Unlike Riskcovry (which is a pure technology enabler), Zopper works with insurers to design specific products for the e-commerce context — product protection plans that cover accidental damage, liquid damage, and theft, with AI-based claims assessment via photo upload.</p>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning — Platform concentration risk:</strong> embedded insurance's strength and its risk are the same thing: the InsurTech borrows another company's customers. That is what makes acquisition nearly free — but it also means the <strong>platform owns the relationship, and the InsurTech's access is rented, not owned</strong>.
+
+                    <p style="margin-top: var(--space-sm); margin-bottom: var(--space-sm);">The power imbalance is one-sided. When one platform supplies most of an InsurTech's volume, the platform can:</p>
+                    <ul style="margin-top: 0; margin-bottom: var(--space-sm);">
+                        <li><strong>Demand a higher commission</strong> — the InsurTech can hardly refuse without losing most of its book.</li>
+                        <li><strong>Invite a second insurer to bid</strong> — competition squeezes the InsurTech's price and margin.</li>
+                        <li><strong>Replace the partner at renewal</strong> — partnerships are exclusive or semi-exclusive only for a fixed period; then they are renegotiated or ended.</li>
+                        <li><strong>Build its own insurance capability</strong> — the platform takes the margin itself.</li>
+                    </ul>
+
+                    <p style="margin-bottom: 0;">That is why analysts watch one number: <strong>the share of volume from the single largest platform.</strong> Above roughly <strong>40%</strong>, the business's survival depends on one counterparty's decisions — losing that partner means losing nearly half the business overnight, so investors treat it as a structural vulnerability. Below it, losing a partner is painful but survivable. When you evaluate any embedded InsurTech, ask: <em>"What share of volume comes from platform #1 — and what would happen if that platform disappeared tomorrow?"</em></p>
+                </div>
+            </div>
+
+            <!-- Exercise 3.1 — Match the Platform -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#127757; Exercise 3.1 — Match the Platform</h4>
+                    <p>For each embedded-insurance offer, pick the <strong>platform type</strong> it belongs to (from the §3.1 table) and the likely <strong>enabler/insurer</strong>.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Offer</th><th style="width: 175px;">Platform Type</th><th style="width: 180px;">Enabler / Insurer</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A ₹1-per-ride accident cover added to a ride-hailing fare.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Mobility &amp; Ride-Hailing</option><option>E-Commerce &amp; Retail</option><option>Travel &amp; Hospitality</option><option>Fintech &amp; Payments</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Riskcovry</option><option>Zopper</option><option>Acko</option><option>Multiple via Riskcovry</option></select></td></tr>
+                        <tr><td>2</td><td>A 2-year screen + liquid damage plan at smartphone checkout.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Mobility &amp; Ride-Hailing</option><option>E-Commerce &amp; Retail</option><option>Travel &amp; Hospitality</option><option>Fintech &amp; Payments</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Riskcovry</option><option>Zopper</option><option>Acko</option><option>Multiple via Riskcovry</option></select></td></tr>
+                        <tr><td>3</td><td>A ₹299 travel-medical cover checkbox at flight checkout.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Mobility &amp; Ride-Hailing</option><option>E-Commerce &amp; Retail</option><option>Travel &amp; Hospitality</option><option>Fintech &amp; Payments</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Riskcovry</option><option>Zopper</option><option>Acko</option><option>Multiple via Riskcovry</option></select></td></tr>
+                        <tr><td>4</td><td>A ₹50 sachet health plan inside a payments app.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Mobility &amp; Ride-Hailing</option><option>E-Commerce &amp; Retail</option><option>Travel &amp; Hospitality</option><option>Fintech &amp; Payments</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Riskcovry</option><option>Zopper</option><option>Acko</option><option>Multiple via Riskcovry</option></select></td></tr>
+                        <tr><td>5</td><td>An extended-warranty plan on a laptop bought from an e-commerce marketplace.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Mobility &amp; Ride-Hailing</option><option>E-Commerce &amp; Retail</option><option>Travel &amp; Hospitality</option><option>Fintech &amp; Payments</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Riskcovry</option><option>Zopper</option><option>Acko</option><option>Multiple via Riskcovry</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> The §3.2 Warning says platform concentration risk is the biggest strategic risk for embedded insurers. What specific power does a platform have over an embedded InsurTech once the partnership exists?</p>
+                <textarea class="write-in write-in-tall" placeholder="The platform can ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Matches</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Mobility &amp; Ride-Hailing · Acko</strong> — per-ride cover on Ola; enrolment is opt-out.</li>
+                            <li><strong>E-Commerce &amp; Retail · Acko (or Zopper)</strong> — checkout product protection on Amazon/Flipkart/Myntra.</li>
+                            <li><strong>Travel &amp; Hospitality · Acko</strong> — flight/hotel checkout on MakeMyTrip/IRCTC/Yatra.</li>
+                            <li><strong>Fintech &amp; Payments · Multiple via Riskcovry</strong> — sachet products inside PhonePe/Paytm/Cred/GPay.</li>
+                            <li><strong>E-Commerce &amp; Retail · Zopper</strong> — extended warranty / product protection on marketplaces.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Reflection note:</strong> the platform owns the customer relationship and the checkout — it can demand a higher commission, invite a second insurer tomorrow, or build its own insurance capability. If one platform is &gt;40% of an InsurTech's volume, that single partner's decisions are existential. Diversification of distribution is the only durable defence.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Usage-Based Insurance (UBI)</h2>
+
+            <p>Usage-Based Insurance uses data about actual behaviour — how much someone drives, how well they drive, what time of day they drive — to price insurance more accurately than traditional risk factors (age, gender, vehicle type, location). UBI is the most significant innovation in personal lines insurance pricing since the actuarial table, because it replaces <em>inferred</em> risk (what group you belong to) with <em>observed</em> risk (what you actually do).</p>
+
+            <h3>4.1 PAYD vs. PHYD</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>PAYD — Pay-As-You-Drive</th><th>PHYD — Pay-How-You-Drive</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Data collected</td><td>Distance driven (kilometres/miles)</td><td>Distance + speed + braking + cornering + time of day + phone usage</td></tr>
+                    <tr><td>Data source</td><td>Odometer reading, GPS, smartphone sensor</td><td>Telematics device (OBD-II dongle), smartphone app, or vehicle API</td></tr>
+                    <tr><td>Pricing model</td><td>Flat rate per km (may vary by road type)</td><td>Variable rate per km adjusted by behavioural risk score (higher risk = higher per-km rate)</td></tr>
+                    <tr><td>Risk accuracy vs. traditional</td><td>Moderate improvement — mileage is a strong predictor of claim frequency</td><td>Significant improvement — driving behaviour predicts both claim frequency and severity</td></tr>
+                    <tr><td>Premium savings for safe driver</td><td>10–25% (if they drive less than average)</td><td>20–60% (if they drive safely AND less than average)</td></tr>
+                    <tr><td>Customer adoption</td><td>Higher — less intrusive, fewer privacy concerns</td><td>Lower — requires device installation or app permissions; privacy concerns higher</td></tr>
+                    <tr><td>Regulatory acceptance</td><td>Higher — regulators view mileage-based pricing as fair</td><td>Mixed — some regulators concerned about behavioural scoring fairness and data privacy</td></tr>
+                    <tr><td>Leading vendors</td><td>Allstate Milewise (US), Zego (UK)</td><td>Root Insurance (US), Progressive Snapshot (US), ICICI Lombard DriveTrack (India)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>4.2 Data Sources for UBI</h3>
+
+            <p>UBI data comes from four sources, each with different cost, accuracy, and customer friction profiles:</p>
+            <ul>
+                <li><strong>Smartphone app:</strong> Uses the phone's GPS, accelerometer, and gyroscope to track speed, braking, cornering, and phone use while driving. Lowest hardware cost (customers already have smartphones). Highest data quality challenge (phone position varies, cannot distinguish driver from passenger). Requires significant signal-processing investment to clean the data.</li>
+                <li><strong>OBD-II dongle:</strong> Plugs into the vehicle's diagnostic port. Reads real-time vehicle data: speed, RPM, engine load, fuel consumption, GPS. Most accurate driving data. High hardware cost (~₹2,000–₹5,000 per device) and installation friction (customer must plug it in). Widely used in early UBI programmes globally.</li>
+                <li><strong>Black-box / OEM integration:</strong> Some modern vehicles (Tesla, connected cars) natively capture telematics data and can share it via API. No additional hardware needed. Limited by the number of connected vehicles on the road — currently a small fraction of the Indian vehicle fleet.</li>
+                <li><strong>Dashcam with computer vision:</strong> Emerging — dashcam footage analysed by AI to detect driving events (hard braking, lane deviation, following distance, phone use). Combines the accuracy of OBD with the contextual richness of video. High data processing cost.</li>
+            </ul>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The key UBI insight that many observers miss is: <strong>UBI customers are self-selected safer drivers.</strong> A driver who is willing to install a telematics device or an app that tracks their driving is, on average, a more conscientious driver than one who refuses. This creates a "reverse adverse selection" effect — the UBI pool has a better risk profile than the general pool BEFORE the behavioural data is even used to adjust prices. This self-selection effect may account for 40–60% of the observed loss ratio improvement in UBI programmes, with behavioural pricing adjustments accounting for the rest. When evaluating UBI results, separate the selection effect from the pricing effect.
+                </div>
+            </div>
+
+            <!-- Exercise 4.1 — PAYD or PHYD? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128663; Exercise 4.1 — PAYD or PHYD?</h4>
+                    <p>Classify each pricing decision, then run the PAYD vs PHYD arithmetic.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Pricing Decision</th><th style="width: 160px;">PAYD / PHYD</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A driver pays a flat ₹1.50 per km regardless of how they drive.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>PAYD</option><option>PHYD</option></select></td></tr>
+                        <tr><td>2</td><td>A driver's per-km rate rises 50% after a month of hard-braking alerts.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>PAYD</option><option>PHYD</option></select></td></tr>
+                        <tr><td>3</td><td>A night-shift driver pays 1.3× the base rate for kilometres driven 10pm–5am.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>PAYD</option><option>PHYD</option></select></td></tr>
+                        <tr><td>4</td><td>A low-mileage driver gets a 20% discount simply for driving 800 km/month.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>PAYD</option><option>PHYD</option></select></td></tr>
+                        <tr><td>5</td><td>An app scores braking, cornering, and phone use and adjusts the renewal discount.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>PAYD</option><option>PHYD</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Calculate:</strong> A driver does 1,800 km/month in the Moderate tier. Compute the monthly premium under PAYD (₹1.50/km) and PHYD (₹0.80/km × 1.10 multiplier).</p>
+                <table>
+                    <thead>
+                        <tr><th>Model</th><th style="width: 200px;">Monthly Premium (₹)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>PAYD</td><td><input class="write-in" type="text" placeholder="1,800 × ₹1.50 = ?"></td></tr>
+                        <tr><td>PHYD</td><td><input class="write-in" type="text" placeholder="1,800 × ₹0.80 × 1.10 = ?"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> Which model risks <em>underpricing</em> an aggressive low-mileage driver — and why is that an adverse-selection risk for the insurer?</p>
+                <textarea class="write-in write-in-tall" placeholder="PAYD because ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Answers</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>PAYD</strong> — flat per-km, no behaviour adjustment.</li>
+                            <li><strong>PHYD</strong> — behaviour (hard braking) changes the rate.</li>
+                            <li><strong>PHYD</strong> — time-of-day behaviour adjusts the per-km rate.</li>
+                            <li><strong>PAYD</strong> — the discount comes from distance alone, not behaviour.</li>
+                            <li><strong>PHYD</strong> — a behavioural score drives the adjustment.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Calculation:</strong> PAYD = 1,800 × ₹1.50 = <strong>₹2,700</strong> · PHYD = 1,800 × ₹0.80 × 1.10 = <strong>₹1,584</strong>. The safe moderate driver pays ₹1,116 less under PHYD than PAYD — behaviour is rewarded, not just mileage.</p>
+                        <p style="margin-top: var(--space-md);"><strong>Reflection note:</strong> <strong>PAYD</strong> underprices an aggressive low-mileage driver — at 500 km/month they pay ₹750 (500 × ₹1.50) while driving dangerously, far below the ₹2,500 they would pay under a traditional flat premium. The insurer collects a premium that does not reflect the claim risk, and if such drivers self-select into PAYD, the pool's loss ratio worsens — adverse selection. PHYD fixes this with a behavioural multiplier on the per-km rate, so risky behaviour is priced even at low mileage. PHYD prices <em>observed behaviour</em>; PAYD prices only <em>exposure</em>.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. UBI Data Analysis in Python</h2>
+
+            <p>In this section, we work with a synthetic telematics dataset. The data represents a month of driving behaviour for 500 policyholders, including mileage, driving events, time-of-day patterns, and claims history. The objective is to build a risk score from behavioural data and compare PAYD (Pay-As-You-Drive) Vs PHYD (Pay-How-You-Drive).</p>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128279;</div>
+                <div class="callout-content">
+                    <strong>How to run this section:</strong> the §5.1–§5.3 blocks below are <em>one continuous script split across the page</em> — each continues from the previous one, so copy them <strong>in order</strong> into the same Jupyter notebook cell sequence. The data file <code>data/telematics_data.csv</code> is provided in the lab folder (<code>InsuranceTech_code/data/</code>) and on GitHub (link below) — save your notebook in <code>InsuranceTech_code/</code> so the relative path works. A single complete runnable script is available at the end of §5 (and as <code>session_10_ubi_analysis.py</code> in <code>InsuranceTech_code/</code>): run <code>venv/bin/python session_10_ubi_analysis.py</code> to reproduce everything at once. GitHub: <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-10/telematics_data.csv" target="_blank" rel="noopener">telematics_data.csv</a> · <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/session-10/session_10_ubi_analysis.py" target="_blank" rel="noopener">complete script</a>.
+                </div>
+            </div>
+
+            <h3>5.1 Loading the Telematics Data</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load synthetic telematics data
+telematics = pd.read_csv('data/telematics_data.csv')
+
+print(f"Drivers: {telematics.shape[0]:,}")
+print(f"Columns: {telematics.columns.tolist()}")
+print(f"\nData types:\n{telematics.dtypes}")
+print(f"\nSummary statistics:\n{telematics.describe()}")
+
+# Key columns:
+# driver_id — Unique driver identifier
+# total_km — Kilometres driven in the month
+# avg_speed_kmph — Average speed
+# hard_braking_events — Count of hard braking events
+# hard_accel_events — Count of rapid acceleration events
+# night_driving_pct — Percentage of driving at night (10pm-5am)
+# phone_use_events — Count of phone usage events while driving
+# previous_claims — Number of claims in the last 3 years
+# claim_amount_last_3y — Total claim amount in the last 3 years</code></pre>
+
+            <h3>5.2 Building a Behavioural Risk Score</h3>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);"><strong>&#9654; Prerequisite:</strong> run the §5.1 block first in the same notebook — <code>telematics</code> is defined there. This block will not run standalone.</p>
+
+            <pre><code class="language-python"># Define risk factor weights (these would be calibrated from claims data)
+RISK_WEIGHTS = {
+    'km_risk': 0.20,              # Higher mileage = more exposure
+    'braking_risk': 0.25,         # Hard braking = unsafe driving pattern
+    'accel_risk': 0.15,           # Hard acceleration = aggressive driving
+    'night_risk': 0.20,           # Night driving = higher accident risk
+    'phone_risk': 0.20            # Phone use = distraction risk
+}
+
+# Set thresholds for each risk factor
+KM_THRESHOLD_HIGH = 2000       # km/month — above this is high mileage
+BRAKING_THRESHOLD = 15         # events/month — above this is aggressive
+ACCEL_THRESHOLD = 10           # events/month
+NIGHT_THRESHOLD = 25           # % of driving at night
+PHONE_THRESHOLD = 5            # events/month
+
+# Calculate risk sub-scores (each normalised to 0–100)
+telematics['km_risk'] = np.clip(
+    (telematics['total_km'] / KM_THRESHOLD_HIGH) * 100, 0, 100
+)
+
+telematics['braking_risk'] = np.clip(
+    (telematics['hard_braking_events'] / BRAKING_THRESHOLD) * 100, 0, 100
+)
+
+telematics['accel_risk'] = np.clip(
+    (telematics['hard_accel_events'] / ACCEL_THRESHOLD) * 100, 0, 100
+)
+
+telematics['night_risk'] = np.clip(
+    (telematics['night_driving_pct'] / NIGHT_THRESHOLD) * 100, 0, 100
+)
+
+telematics['phone_risk'] = np.clip(
+    (telematics['phone_use_events'] / PHONE_THRESHOLD) * 100, 0, 100
+)
+
+# Composite risk score (weighted average)
+telematics['risk_score'] = (
+    telematics['km_risk'] * RISK_WEIGHTS['km_risk'] +
+    telematics['braking_risk'] * RISK_WEIGHTS['braking_risk'] +
+    telematics['accel_risk'] * RISK_WEIGHTS['accel_risk'] +
+    telematics['night_risk'] * RISK_WEIGHTS['night_risk'] +
+    telematics['phone_risk'] * RISK_WEIGHTS['phone_risk']
+)
+
+# Classify into risk tiers
+telematics['risk_tier'] = pd.cut(
+    telematics['risk_score'],
+    bins=[0, 20, 40, 60, 100],
+    labels=['Very Low', 'Low', 'Moderate', 'High']
+)
+
+print("Risk Score Distribution:")
+print(telematics['risk_tier'].value_counts().sort_index())
+print(f"\nMean risk score: {telematics['risk_score'].mean():.1f}")
+print(f"Median risk score: {telematics['risk_score'].median():.1f}")
+print(f"Std dev: {telematics['risk_score'].std():.1f}")</code></pre>
+
+            <h3>5.3 PAYD vs. PHYD Pricing Comparison</h3>
+
+            <p style="color: var(--text-light); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);"><strong>&#9654; Prerequisite:</strong> continues from §5.1–§5.2 — <code>telematics</code> must include <code>risk_score</code> and <code>risk_tier</code>. <em>pandas 3.x note:</em> mapping a categorical with a dict can fail on arithmetic — write <code>telematics['risk_tier'].astype(str).map(PHYD_RISK_MULTIPLIER).astype(float)</code> instead of <code>.map(...)</code> directly.</p>
+
+            <pre><code class="language-python"># PAYD: flat rate per km (traditional UBI)
+PAYD_RATE = 1.50  # ₹1.50 per km
+
+# PHYD: base rate + behavioural adjustment
+PHYD_BASE_RATE = 0.80        # ₹0.80 per km (lower base because behaviour-adjusted)
+PHYD_RISK_MULTIPLIER = {
+    'Very Low': 0.60,
+    'Low': 0.85,
+    'Moderate': 1.10,
+    'High': 1.50
+}
+
+# Calculate monthly premium under each model
+telematics['payd_premium'] = telematics['total_km'] * PAYD_RATE
+
+telematics['phyd_rate'] = telematics['risk_tier'].map(PHYD_RISK_MULTIPLIER)
+telematics['phyd_premium'] = telematics['total_km'] * PHYD_BASE_RATE * telematics['phyd_rate']
+
+# Calculate savings vs. traditional flat premium (assume ₹2,500/month)
+TRADITIONAL_FLAT = 2500
+telematics['traditional_premium'] = TRADITIONAL_FLAT
+
+telematics['payd_savings'] = TRADITIONAL_FLAT - telematics['payd_premium']
+telematics['phyd_savings'] = TRADITIONAL_FLAT - telematics['phyd_premium']
+
+# Aggregate by risk tier
+comparison = telematics.groupby('risk_tier', observed=False).agg(
+    driver_count=('driver_id', 'count'),
+    avg_km=('total_km', 'mean'),
+    avg_risk_score=('risk_score', 'mean'),
+    avg_payd=('payd_premium', 'mean'),
+    avg_phyd=('phyd_premium', 'mean'),
+    avg_traditional=('traditional_premium', 'mean'),
+    avg_payd_savings=('payd_savings', 'mean'),
+    avg_phyd_savings=('phyd_savings', 'mean'),
+).round(0)
+
+print("=" * 110)
+print(f"{'Risk Tier':12s} {'Drivers':>8s} {'Avg Km':>8s} {'Risk':>6s} {'PAYD ₹':>9s} {'PHYD ₹':>9s} {'Trad ₹':>9s} {'PAYD Save':>10s} {'PHYD Save':>10s}")
+print("=" * 110)
+for tier in ['Very Low', 'Low', 'Moderate', 'High']:
+    r = comparison.loc[tier]
+    print(f"{tier:12s} {r['driver_count']:>5.0f}   {r['avg_km']:>5,.0f}  {r['avg_risk_score']:>4.0f}  ₹{r['avg_payd']:>6,.0f}  ₹{r['avg_phyd']:>6,.0f}  ₹{r['avg_traditional']:>5,.0f}  {'+' if r['avg_payd_savings'] > 0 else ''}₹{r['avg_payd_savings']:>6,.0f}  {'+' if r['avg_phyd_savings'] > 0 else ''}₹{r['avg_phyd_savings']:>6,.0f}")
+
+# Visualize
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# LEFT: Premium comparison by tier
+tiers = ['Very Low', 'Low', 'Moderate', 'High']
+x = np.arange(len(tiers))
+width = 0.25
+
+ax1.bar(x - width, comparison.loc[tiers, 'avg_traditional'], width, label='Traditional (Flat)', color='#a29bfe', alpha=0.7)
+ax1.bar(x, comparison.loc[tiers, 'avg_payd'], width, label='PAYD', color='#6c5ce7')
+ax1.bar(x + width, comparison.loc[tiers, 'avg_phyd'], width, label='PHYD', color='#00d2d3')
+ax1.set_xlabel('Risk Tier')
+ax1.set_ylabel('Monthly Premium (₹)')
+ax1.set_title('Premium Comparison by Risk Tier', fontweight='bold')
+ax1.set_xticks(x)
+ax1.set_xticklabels(tiers)
+ax1.legend()
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+# RIGHT: Scatter — risk score vs. claims
+if 'claim_amount' in telematics.columns:
+    ax2.scatter(telematics['risk_score'], telematics['claim_amount'],
+               alpha=0.4, color='#6c5ce7', s=20)
+    # Add trend line
+    z = np.polyfit(telematics['risk_score'], telematics['claim_amount'], 1)
+    p = np.poly1d(z)
+    x_line = np.linspace(telematics['risk_score'].min(), telematics['risk_score'].max(), 100)
+    ax2.plot(x_line, p(x_line), 'r--', linewidth=2, label='Trend')
+    corr = telematics['risk_score'].corr(telematics['claim_amount'])
+    ax2.annotate(f'Correlation: {corr:.2f}', xy=(0.05, 0.95),
+                transform=ax2.transAxes, fontsize=11,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    ax2.set_title('Risk Score vs. Claim Amount', fontweight='bold')
+    ax2.set_xlabel('Behavioural Risk Score (0–100)')
+    ax2.set_ylabel('Claim Amount (₹)')
+    ax2.legend()
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.show()</code></pre>
+
+            <h3>5.4 Interpreting the Results</h3>
+
+            <p>The analysis reveals the core UBI insight: <strong>PAYD primarily rewards low-mileage drivers regardless of their driving quality, while PHYD rewards safe driving behaviour regardless of mileage.</strong></p>
+
+            <ul>
+                <li>A driver who drives 500 km/month very aggressively (hard braking, phone use, night driving) gets a low premium from PAYD (₹750, saving ₹1,750 vs. traditional) — even though they are high-risk. This is an <strong>adverse selection risk</strong> for the insurer.</li>
+                <li>A driver who drives 3,000 km/month very safely gets a high premium from PAYD (₹4,500, paying ₹2,000 more than traditional) — even though they are low-risk. This is a <strong>customer retention risk</strong>.</li>
+                <li>PHYD solves both problems. The aggressive low-mileage driver's premium is adjusted upward by their behavioural multiplier (₹750 × 1.50 = ₹1,125). The safe high-mileage driver's premium is adjusted downward (₹4,500 × 0.60 = ₹2,700). Both are treated more fairly than under either traditional or PAYD pricing.</li>
+            </ul>
+
+            <p>This is why PHYD is a better risk selection mechanism than PAYD — but it requires more data, more customer trust, and more regulatory acceptance to deploy at scale.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> ICICI Lombard's DriveTrack programme in India uses an OBD-II dongle plugged into the car's diagnostic port to collect driving data. The device tracks speed, braking, acceleration, cornering, and time of day. At each renewal, the customer receives a driving score and a premium adjustment — safe drivers can save up to 25%. DriveTrack was one of the first telematics programmes in India and has provided ICICI Lombard with a rich dataset that it uses to calibrate its traditional pricing models as well. The data from DriveTrack revealed, for example, that the relationship between speeding and claims was significantly weaker in India than in the US (probably because Indian roads rarely permit sustained high-speed driving), while the relationship between night driving and claims was stronger than expected — insights that improved ICICI Lombard's pricing accuracy for all motor customers, not just DriveTrack participants.
+                </div>
+            </div>
+
+            <!-- Exercise 5.1 — Trace the Risk Score -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128187; Exercise 5.1 — Trace the Risk Score</h4>
+                    <p>Use the §5.2 thresholds and weights to hand-compute a driver's risk score, then price them under PHYD.</p>
+                </div>
+                <p style="margin-top: var(--space-md);"><strong>Given — Driver X:</strong> total_km <strong>1,000</strong> · hard_braking <strong>6</strong> · hard_accel <strong>4</strong> · night_driving <strong>10%</strong> · phone_use <strong>2</strong>. Compute each sub-score = value ÷ threshold × 100 (clip at 100):</p>
+                <table>
+                    <thead>
+                        <tr><th>Factor</th><th>Threshold</th><th style="width: 180px;">Sub-score (0–100)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>km_risk (weight 0.20)</td><td>2,000 km</td><td><input class="write-in" type="text" placeholder="1000/2000×100 = ?"></td></tr>
+                        <tr><td>braking_risk (0.25)</td><td>15 events</td><td><input class="write-in" type="text" placeholder="6/15×100 = ?"></td></tr>
+                        <tr><td>accel_risk (0.15)</td><td>10 events</td><td><input class="write-in" type="text" placeholder="4/10×100 = ?"></td></tr>
+                        <tr><td>night_risk (0.20)</td><td>25%</td><td><input class="write-in" type="text" placeholder="10/25×100 = ?"></td></tr>
+                        <tr><td>phone_risk (0.20)</td><td>5 events</td><td><input class="write-in" type="text" placeholder="2/5×100 = ?"></td></tr>
+                        <tr><td><strong>Composite risk_score</strong></td><td>weighted sum</td><td><input class="write-in" type="text" placeholder="= ?"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Then price:</strong> Which tier is Driver X in (§5.2 bins)? What PHYD multiplier applies (§5.3)? What is the monthly PHYD premium at ₹0.80/km?</p>
+                <textarea class="write-in" placeholder="Tier: __ · multiplier: __ · PHYD premium = 1000 × ₹0.80 × __ = ₹__"></textarea>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> Why does the composite weight braking (0.25) more than acceleration (0.15)?</p>
+                <textarea class="write-in write-in-tall" placeholder="Braking is weighted higher because ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Score</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>km_risk</strong> = 1000/2000 × 100 = <strong>50</strong></li>
+                            <li><strong>braking_risk</strong> = 6/15 × 100 = <strong>40</strong></li>
+                            <li><strong>accel_risk</strong> = 4/10 × 100 = <strong>40</strong></li>
+                            <li><strong>night_risk</strong> = 10/25 × 100 = <strong>40</strong></li>
+                            <li><strong>phone_risk</strong> = 2/5 × 100 = <strong>40</strong></li>
+                            <li><strong>Composite</strong> = 0.20(50) + 0.25(40) + 0.15(40) + 0.20(40) + 0.20(40) = 10 + 10 + 6 + 8 + 8 = <strong>42</strong></li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Pricing:</strong> 42 falls in the <strong>Moderate</strong> tier (40–60) → multiplier <strong>1.10</strong> → PHYD premium = 1,000 × ₹0.80 × 1.10 = <strong>₹880/month</strong>. Under PAYD the same driver pays ₹1,500 — PHYD's lower base rate rewards their moderate behaviour.</p>
+                        <p style="margin-top: var(--space-md);"><strong>Reflection note:</strong> hard braking is the strongest single predictor of claim <em>severity</em> (and, with the §5.3 scatter, of claim amount), so it carries the largest weight. Acceleration correlates with aggression but is a weaker predictor on Indian roads than night driving or phone use — the weights mirror real calibration, where braking and night driving typically dominate.</p>
+                    </div>
+                
+
+                </details>
+            </div>
+            <!-- Complete Runnable Script -->
+            <details class="solution-toggle">
+                <summary>Complete Runnable Script — Copy &amp; Run (sections 5.1–5.4)</summary>
+                <div class="solution-content">
+                    <p>Everything from §5.1–§5.4 in one script, so nothing is left undefined. Save as <code>session_10_ubi_analysis.py</code> inside <code>InsuranceTech_code/</code> and run <code>venv/bin/python session_10_ubi_analysis.py</code>, or paste it into one Jupyter cell. Requires <code>data/telematics_data.csv</code> (provided in the lab folder and on GitHub — link in the §5 run note). Outputs: the console tables below plus <code>ubi_premium_comparison.png</code>.</p>
+                    <pre><code class="language-python"># ============================================================================
+# Session 10 — Usage-Based Insurance: UBI Data Analysis (COMPLETE RUNNABLE SCRIPT)
+# InsurTech &amp; Digital Risk Solutions (MBA) — Woxsen University
+#
+# HOW TO RUN:
+#   venv/bin/python session_10_ubi_analysis.py
+#   (or run top-to-bottom in one Jupyter notebook — the page's §5.1–§5.4 blocks
+#    are merged here in order so nothing is left undefined)
+#
+# DATA FILE: data/telematics_data.csv (provided) — 500 drivers, one month of
+#            synthetic driving behaviour. Falls back to telematics_data.csv
+#            in the current folder.
+#
+# OUTPUTS:   console tables + ubi_premium_comparison.png + ubi_risk_scatter.png
+# ============================================================================
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ----------------------------------------------------------------------------
+# SECTION 5.1 — Loading the Telematics Data
+# ----------------------------------------------------------------------------
+try:
+    telematics = pd.read_csv('data/telematics_data.csv')
+except FileNotFoundError:
+    telematics = pd.read_csv('telematics_data.csv')
+
+print(f"Drivers: {telematics.shape[0]:,}")
+print(f"Columns: {telematics.columns.tolist()}")
+print(f"\nData types:\n{telematics.dtypes}")
+print(f"\nSummary statistics:\n{telematics.describe().round(1)}")
+
+# Key columns:
+# driver_id — Unique driver identifier
+# total_km — Kilometres driven in the month
+# avg_speed_kmph — Average speed
+# hard_braking_events — Count of hard braking events
+# hard_accel_events — Count of rapid acceleration events
+# night_driving_pct — Percentage of driving at night (10pm-5am)
+# phone_use_events — Count of phone usage events while driving
+# previous_claims — Number of claims in the last 3 years
+# claim_amount_last_3y — Total claim amount in the last 3 years
+
+# ----------------------------------------------------------------------------
+# SECTION 5.2 — Building a Behavioural Risk Score
+# ----------------------------------------------------------------------------
+RISK_WEIGHTS = {
+    'km_risk': 0.20,              # Higher mileage = more exposure
+    'braking_risk': 0.25,         # Hard braking = unsafe driving pattern
+    'accel_risk': 0.15,           # Hard acceleration = aggressive driving
+    'night_risk': 0.20,           # Night driving = higher accident risk
+    'phone_risk': 0.20            # Phone use = distraction risk
+}
+
+KM_THRESHOLD_HIGH = 2000       # km/month — above this is high mileage
+BRAKING_THRESHOLD = 15         # events/month — above this is aggressive
+ACCEL_THRESHOLD = 10           # events/month
+NIGHT_THRESHOLD = 25           # % of driving at night
+PHONE_THRESHOLD = 5            # events/month
+
+telematics['km_risk'] = np.clip((telematics['total_km'] / KM_THRESHOLD_HIGH) * 100, 0, 100)
+telematics['braking_risk'] = np.clip((telematics['hard_braking_events'] / BRAKING_THRESHOLD) * 100, 0, 100)
+telematics['accel_risk'] = np.clip((telematics['hard_accel_events'] / ACCEL_THRESHOLD) * 100, 0, 100)
+telematics['night_risk'] = np.clip((telematics['night_driving_pct'] / NIGHT_THRESHOLD) * 100, 0, 100)
+telematics['phone_risk'] = np.clip((telematics['phone_use_events'] / PHONE_THRESHOLD) * 100, 0, 100)
+
+telematics['risk_score'] = (
+    telematics['km_risk'] * RISK_WEIGHTS['km_risk'] +
+    telematics['braking_risk'] * RISK_WEIGHTS['braking_risk'] +
+    telematics['accel_risk'] * RISK_WEIGHTS['accel_risk'] +
+    telematics['night_risk'] * RISK_WEIGHTS['night_risk'] +
+    telematics['phone_risk'] * RISK_WEIGHTS['phone_risk']
+)
+
+telematics['risk_tier'] = pd.cut(
+    telematics['risk_score'],
+    bins=[0, 20, 40, 60, 100],
+    labels=['Very Low', 'Low', 'Moderate', 'High'],
+    include_lowest=True
+)
+
+print("Risk Score Distribution:")
+print(telematics['risk_tier'].value_counts().sort_index())
+print(f"\nMean risk score: {telematics['risk_score'].mean():.1f}")
+print(f"Median risk score: {telematics['risk_score'].median():.1f}")
+print(f"Std dev: {telematics['risk_score'].std():.1f}")
+
+# ----------------------------------------------------------------------------
+# SECTION 5.3 — PAYD vs. PHYD Pricing Comparison
+# ----------------------------------------------------------------------------
+PAYD_RATE = 1.50  # ₹1.50 per km
+PHYD_BASE_RATE = 0.80        # ₹0.80 per km (lower base because behaviour-adjusted)
+PHYD_RISK_MULTIPLIER = {
+    'Very Low': 0.60,
+    'Low': 0.85,
+    'Moderate': 1.10,
+    'High': 1.50
+}
+
+telematics['payd_premium'] = telematics['total_km'] * PAYD_RATE
+# pandas 3.x: map a categorical with a dict can return a non-arithmetic dtype,
+# so cast to str first, then to float.
+telematics['phyd_rate'] = telematics['risk_tier'].astype(str).map(PHYD_RISK_MULTIPLIER).astype(float)
+telematics['phyd_premium'] = telematics['total_km'] * PHYD_BASE_RATE * telematics['phyd_rate']
+
+TRADITIONAL_FLAT = 2500
+telematics['traditional_premium'] = TRADITIONAL_FLAT
+telematics['payd_savings'] = TRADITIONAL_FLAT - telematics['payd_premium']
+telematics['phyd_savings'] = TRADITIONAL_FLAT - telematics['phyd_premium']
+
+comparison = telematics.groupby('risk_tier', observed=False).agg(
+    driver_count=('driver_id', 'count'),
+    avg_km=('total_km', 'mean'),
+    avg_risk_score=('risk_score', 'mean'),
+    avg_payd=('payd_premium', 'mean'),
+    avg_phyd=('phyd_premium', 'mean'),
+    avg_traditional=('traditional_premium', 'mean'),
+    avg_payd_savings=('payd_savings', 'mean'),
+    avg_phyd_savings=('phyd_savings', 'mean'),
+).round(0)
+
+print("=" * 110)
+print(f"{'Risk Tier':12s} {'Drivers':&gt;8s} {'Avg Km':&gt;8s} {'Risk':&gt;6s} {'PAYD ₹':&gt;9s} {'PHYD ₹':&gt;9s} {'Trad ₹':&gt;9s} {'PAYD Save':&gt;10s} {'PHYD Save':&gt;10s}")
+print("=" * 110)
+for tier in ['Very Low', 'Low', 'Moderate', 'High']:
+    r = comparison.loc[tier]
+    print(f"{tier:12s} {r['driver_count']:&gt;5.0f}   {r['avg_km']:&gt;5,.0f}  {r['avg_risk_score']:&gt;4.0f}  ₹{r['avg_payd']:&gt;6,.0f}  ₹{r['avg_phyd']:&gt;6,.0f}  ₹{r['avg_traditional']:&gt;5,.0f}  {'+' if r['avg_payd_savings'] &gt; 0 else ''}₹{r['avg_payd_savings']:&gt;6,.0f}  {'+' if r['avg_phyd_savings'] &gt; 0 else ''}₹{r['avg_phyd_savings']:&gt;6,.0f}")
+
+# Visualize
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+tiers = ['Very Low', 'Low', 'Moderate', 'High']
+x = np.arange(len(tiers))
+width = 0.25
+
+ax1.bar(x - width, comparison.loc[tiers, 'avg_traditional'], width, label='Traditional (Flat)', color='#a29bfe', alpha=0.7)
+ax1.bar(x, comparison.loc[tiers, 'avg_payd'], width, label='PAYD', color='#6c5ce7')
+ax1.bar(x + width, comparison.loc[tiers, 'avg_phyd'], width, label='PHYD', color='#00d2d3')
+ax1.set_xlabel('Risk Tier')
+ax1.set_ylabel('Monthly Premium (₹)')
+ax1.set_title('Premium Comparison by Risk Tier', fontweight='bold')
+ax1.set_xticks(x)
+ax1.set_xticklabels(tiers)
+ax1.legend()
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+if 'claim_amount' in telematics.columns:
+    ax2.scatter(telematics['risk_score'], telematics['claim_amount'],
+               alpha=0.4, color='#6c5ce7', s=20)
+    z = np.polyfit(telematics['risk_score'], telematics['claim_amount'], 1)
+    p = np.poly1d(z)
+    x_line = np.linspace(telematics['risk_score'].min(), telematics['risk_score'].max(), 100)
+    ax2.plot(x_line, p(x_line), 'r--', linewidth=2, label='Trend')
+    corr = telematics['risk_score'].corr(telematics['claim_amount'])
+    ax2.annotate(f'Correlation: {corr:.2f}', xy=(0.05, 0.95),
+                transform=ax2.transAxes, fontsize=11,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    ax2.set_title('Risk Score vs. Claim Amount', fontweight='bold')
+    ax2.set_xlabel('Behavioural Risk Score (0–100)')
+    ax2.set_ylabel('Claim Amount (₹)')
+    ax2.legend()
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.savefig('ubi_premium_comparison.png', dpi=120)   # artifact for submission
+plt.show()
+
+# ----------------------------------------------------------------------------
+# SECTION 5.4 — Interpreting the Results (worked examples from the page)
+# ----------------------------------------------------------------------------
+print("\n" + "=" * 70)
+print("SECTION 5.4 — Interpretation examples")
+print("=" * 70)
+
+aggressive_low_km = 500     # km/month, aggressive driving (High tier)
+payd = aggressive_low_km * PAYD_RATE
+phyd = aggressive_low_km * PHYD_BASE_RATE * 1.50
+print(f"Aggressive low-mileage driver (500 km, High tier):")
+print(f"  PAYD = ₹{payd:.0f}  |  PHYD = ₹{phyd:.0f}  |  Traditional = ₹{TRADITIONAL_FLAT}")
+print(f"  -&gt; PAYD underprices the risk; PHYD adjusts it up by the behavioural multiplier.")
+
+safe_high_km = 3000        # km/month, safe driving (Very Low tier)
+payd = safe_high_km * PAYD_RATE
+phyd = safe_high_km * PHYD_BASE_RATE * 0.60
+print(f"\nSafe high-mileage driver (3000 km, Very Low tier):")
+print(f"  PAYD = ₹{payd:.0f}  |  PHYD = ₹{phyd:.0f}  |  Traditional = ₹{TRADITIONAL_FLAT}")
+print(f"  -&gt; PAYD overcharges the safe driver; PHYD rewards them with a discount.")
+
+print("\nCharts saved: ubi_premium_comparison.png")
+</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch10-ubi-leaders">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>6. Global UBI Leaders</h2>
+
+            <p>Usage-Based Insurance has a 15+ year history globally, with several companies reaching significant scale. Their experiences provide lessons for any market — including India — where UBI is still nascent.</p>
+
+            <h3>6.1 Root Insurance (US)</h3>
+
+            <p>Root Insurance (founded 2015, IPO 2020 at $6B+) was the most ambitious UBI InsurTech globally. Root's model was PHYD-only: customers install a smartphone app that tracks driving for 2–4 weeks, Root calculates a driving score, and if the score is good enough, Root offers a premium. If the score is poor, Root declines to offer coverage — the customer is "uninsurable by Root's standards." This is the opposite of traditional insurance, where the insurer must accept all applicants (subject to regulatory constraints) and price accordingly.</p>
+
+            <p><strong>What went right:</strong> Root's risk selection was genuinely superior — its loss ratio on policies that went through the full telematics scoring process was approximately 15–20 points better than industry average. The self-selection effect (safer drivers are more willing to be tracked) was powerful.</p>
+
+            <p><strong>What went wrong:</strong> Root's growth stalled because <strong>nearly 70% of potential customers did not complete the app-based driving test</strong> — they either declined to install the app, installed but did not drive enough to generate a score, or scored poorly and were rejected. The customer acquisition cost for the remaining 30% was extremely high. By 2023, Root's market cap had fallen to ~$100M (a 95%+ decline from its peak) as growth stalled and underwriting losses from its early expansion years caught up.</p>
+
+            <p><strong>Key lesson:</strong> A superior risk selection mechanism is not enough if the customer acquisition funnel is so restrictive that it limits volume and drives up CAC. UBI programmes must balance risk accuracy with customer accessibility. The best UBI model may be one that does not require a pre-purchase driving test but instead adjusts premiums dynamically as driving data accumulates — "start with traditional pricing, earn a discount as you prove you are a safe driver."</p>
+
+            <h3>6.2 Progressive Snapshot (US)</h3>
+
+            <p>Progressive's Snapshot programme is the largest UBI programme in the US, with millions of active participants. It uses an OBD-II dongle (or smartphone app) that monitors driving behaviour and offers discounts of up to 30% at renewal based on safe driving. Progressive's approach differs from Root in two critical ways: (a) Snapshot is optional and available to all Progressive customers — it does not gate access to coverage on the driving score, and (b) the programme rewards safe driving with discounts rather than penalizing risky driving with surcharges. This "carrot, not stick" design makes Snapshot far more acceptable to customers and regulators.</p>
+
+            <h3>6.3 ICICI Lombard DriveTrack (India)</h3>
+
+            <p>India's most established UBI programme is ICICI Lombard's DriveTrack, which gives customers a free OBD-II dongle that tracks driving behaviour. The programme structure is closer to Progressive's model: customers enrol voluntarily, receive a driving score after each policy period, and safe drivers earn premium discounts at renewal. DriveTrack has been active since approximately 2018 and has accumulated significant data on Indian driving patterns. The programme has not been transformative for ICICI Lombard's motor insurance business (it covers a small fraction of the overall portfolio), but it has generated valuable data that the company uses to refine its pricing models for all motor customers.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> The Root Insurance case is one of the most instructive failures in InsurTech. Root's investors lost billions. Root's customers who completed the driving test got excellent insurance at fair prices. The paradox at the heart of UBI is: the customers who benefit most from usage-based pricing (high-risk drivers who would be overcharged in a traditional pool, and low-risk drivers who want to prove their safety) are the ones least likely to enrol — the first group because they know their score will be bad, the second because they do not need to prove anything to an incumbent insurer that already gives them a good rate. The customers most willing to enrol are moderate-risk drivers who believe they are better than average — and they are often right. But this self-selection creates a pool that UBI must price correctly, which requires data that only the UBI programme itself can generate. This circular dependency — "we need data to price correctly, but we need the right pricing to attract the data" — is the core UBI business model challenge.
+                </div>
+            </div>
+
+            <!-- Exercise 6.1 — UBI Strategy Clinic -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#127937; Exercise 6.1 — UBI Strategy Clinic</h4>
+                    <p>Three UBI launches need a diagnosis and a strategy call, using the §6 lessons from Root, Progressive, and DriveTrack.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Situation</th><th style="width: 175px;">Diagnosis</th><th style="width: 200px;">Strategy Call</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A startup requires a 3-week app driving test before it will quote anyone (Root-style).</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Restrictive funnel / CAC problem</option><option>Healthy risk selection</option><option>Discount-only model</option><option>Data portability issue</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Fix: ..."></td></tr>
+                        <tr><td>2</td><td>An insurer offers a discount at renewal to safe drivers, never a surcharge (Progressive-style).</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Restrictive funnel / CAC problem</option><option>Healthy risk selection</option><option>Discount-only model</option><option>Data portability issue</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Why sustainable: ..."></td></tr>
+                        <tr><td>3</td><td>A new Indian UBI launch must pick a data-collection device for mass adoption.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Restrictive funnel / CAC problem</option><option>Healthy risk selection</option><option>Discount-only model</option><option>Data portability issue</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Device + why: ..."></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Design:</strong> Write the 3-sentence product memo for the Indian launch — discount structure, observation period, and the one risk you mitigate first.</p>
+                <textarea class="write-in write-in-tall" placeholder="Base premium: ...&#10;Discount: ...&#10;Biggest risk mitigated: ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Diagnoses</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Restrictive funnel / CAC problem</strong> — Root's pre-purchase test saw ~70% of customers drop out, crushing volume and CAC. The fix: stop gating access — "start with traditional pricing, earn a discount as you prove you drive safely" (the §6.1 key lesson).</li>
+                            <li><strong>Discount-only model</strong> — the "carrot, not stick" design is why Snapshot has run at scale for a decade: no customer ever receives a higher bill, so trust and regulatory goodwill are preserved. It leaves the surcharge on the table but keeps enrolment and retention high.</li>
+                            <li><strong>Mass adoption → smartphone app</strong> — zero hardware cost (vs ₹2,000–5,000 OBD dongles) and the widest reach, per the hands-on memo's logic; OBD/OEM can follow for precision later. (Any of app-first answers with a defensible reason is acceptable.)</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Model memo:</strong> "Base premium ₹2,500 (same as traditional — no customer pays MORE by enrolling). Safe drivers earn up to 40% off at renewal after a 3-month observation period; moderate and high-risk tiers simply pay the traditional premium. The one risk we mitigate first is premium shock — a customer discovering a higher bill — because it is the single biggest reputational risk for UBI (§7 Warning)."</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-core">
+            <h2>7. Privacy, Ethics &amp; UBI</h2>
+
+            <p>Usage-Based Insurance sits at the intersection of two powerful trends — data-driven personalisation and consumer privacy — that are increasingly in tension. As UBI expands, the privacy and ethics questions it raises become not peripheral concerns but central strategic issues that will determine how quickly and how broadly UBI can be adopted.</p>
+
+            <h3>7.1 The Data Collection Question</h3>
+
+            <p>A PHYD programme may collect: GPS location every few seconds, speed, acceleration on three axes, braking force, cornering G-force, time of day, phone usage events, and — if the smartphone app is used — background location data even when not driving (to distinguish driving from other travel modes). For a customer, the question is: <strong>what does the insurer know about me, when, and for how long do they keep it?</strong> For the insurer, the question is: <strong>can we build a commercially viable UBI programme without collecting data that customers and regulators find intrusive?</strong></p>
+
+            <p>The tension is real. Studies consistently show that 40–60% of consumers say they are "very concerned" about sharing driving data with their insurer — but 60–80% say they would share data for a meaningful premium discount. The "privacy premium" — how much discount a customer demands in exchange for sharing data — varies by demographics, product type, and cultural context. Indian customers have generally shown less privacy sensitivity than European customers (where GDPR imposes strict limits), but sensitivity is rising with awareness.</p>
+
+            <h3>7.2 The Fairness Question</h3>
+
+            <p>Usage-based pricing raises three fairness questions that regulators and insurers are actively debating:</p>
+
+            <ul>
+                <li><strong>Segregation of risk pools:</strong> If the lowest-risk drivers all migrate to UBI programmes (where they get lower premiums), the traditional pool retains a higher proportion of higher-risk drivers. Their premiums must rise. Is society comfortable with a two-tier insurance system where data-rich customers pay less and data-poor customers pay more — even if the data-poor customers are not poor by choice but by privacy preference? This is the "privacy tax" problem.</li>
+                <li><strong>Behavioural discrimination by price:</strong> If an insurer charges a 50% higher per-km rate for night driving, it is effectively saying: "if you cannot avoid driving at night (because you work night shifts, have a family emergency, or live in an area with poor public transport), you will pay more." Is this fair? The customer may not have a choice about when they drive. Pricing based on behaviour that customers cannot easily change functions more like a penalty than a risk-reflective price.</li>
+                <li><strong>Data ownership and portability:</strong> Driving data belongs to the customer, but only the insurer that collected it can use it to price the risk. If a customer wants to switch insurers, their accumulated safe-driving data stays with the old insurer. The new insurer starts from scratch — either requiring a new tracking period or reverting to traditional pricing. Data portability — the ability for customers to take their driving data to any insurer — would create a more competitive UBI market but raises significant technical, privacy, and competitive challenges.</li>
+            </ul>
+
+            <h3>7.3 The DPDP Act and UBI</h3>
+
+            <p>India's Digital Personal Data Protection Act (DPDP Act, 2023) has direct implications for UBI programmes. Key requirements: explicit consent for data collection (separate from the insurance contract), purpose limitation (UBI data cannot be used for other purposes without fresh consent), data minimisation (collect only what is necessary), and the right to withdraw consent (the customer can stop sharing data at any time — which would require the insurer to revert to a non-UBI pricing mechanism).</p>
+
+            <p>For UBI providers in India, the DPDP Act means: (a) the consent form for telematics data must be written in clear, simple language — not buried in the policy terms, (b) data collection should be limited to what is actually used for pricing — collecting GPS location continuously when the purpose is mileage calculation may violate the data minimisation principle, and (c) the option to opt out of data sharing must be as easy as opting in. UBI programmes designed with the DPDP Act in mind from the start will have a significant regulatory advantage over those that treat privacy compliance as an afterthought.</p>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> The single biggest reputational risk for UBI is not a data breach — it is a customer discovering that their premium increased because of their driving data. A driver who enrols in a UBI programme expecting a discount and instead receives a surcharge is a customer who will: (a) never enrol in UBI again, (b) tell everyone they know that the programme is a "trap," and (c) potentially contact the regulator. The safest UBI programme design is "discount only" — use telematics data only to offer discounts to safe drivers, never to surcharge risky ones. This leaves money on the table (the insurer cannot capture the extra premium that risky drivers should pay), but it preserves customer trust and regulatory goodwill. Progressive's Snapshot has operated on this model for over a decade, and it is the primary reason the programme has been sustainable at scale.
+                </div>
+            </div>
+
+            <!-- Exercise 7.1 — The Privacy Tax Debate -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#9878; Exercise 7.1 — The Privacy Tax Debate</h4>
+                    <p>Identify the principle behind each UBI concern, then play regulator on a filing.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Concern</th><th style="width: 190px;">Principle</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>A night-shift driver pays 50% more per km because they cannot avoid driving at night.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Segregation / privacy tax</option><option>Behavioural discrimination by price</option><option>Data ownership &amp; portability</option><option>Data minimisation (DPDP)</option></select></td></tr>
+                        <tr><td>2</td><td>Safe drivers migrate to UBI; the remaining traditional pool's premiums must rise.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Segregation / privacy tax</option><option>Behavioural discrimination by price</option><option>Data ownership &amp; portability</option><option>Data minimisation (DPDP)</option></select></td></tr>
+                        <tr><td>3</td><td>A customer switches insurers but their safe-driving data stays with the old insurer.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Segregation / privacy tax</option><option>Behavioural discrimination by price</option><option>Data ownership &amp; portability</option><option>Data minimisation (DPDP)</option></select></td></tr>
+                        <tr><td>4</td><td>An insurer collects continuous GPS when only mileage is used for pricing.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Segregation / privacy tax</option><option>Behavioural discrimination by price</option><option>Data ownership &amp; portability</option><option>Data minimisation (DPDP)</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Be the regulator:</strong> A UBI filing collects app telematics for 6 months, then adjusts renewal premiums up to ±40%. Approve or reject — and if you approve, write the THREE DPDP conditions you impose.</p>
+                <textarea class="write-in write-in-tall" placeholder="Verdict: ...&#10;Conditions: 1. ... 2. ... 3. ..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Analysis</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Behavioural discrimination by price</strong> — pricing based on behaviour the customer cannot easily change functions more like a penalty than a risk-reflective price (§7.2).</li>
+                            <li><strong>Segregation / privacy tax</strong> — data-poor customers (by privacy preference, not by choice) pay more as the low-risk migrate out (§7.2).</li>
+                            <li><strong>Data ownership &amp; portability</strong> — driving data belongs to the customer but stays with the collecting insurer (§7.2).</li>
+                            <li><strong>Data minimisation (DPDP)</strong> — collecting more than the pricing purpose needs violates the DPDP data-minimisation principle (§7.3).</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Regulator's verdict (model):</strong> Approve with conditions — (1) <strong>explicit, plain-language consent</strong> separate from the policy contract; (2) <strong>purpose limitation</strong>: collect only the driving events used for pricing, no continuous GPS; (3) <strong>one-click opt-out</strong> as easy as opt-in, reverting the customer to traditional pricing. Also consider a cap: given the §7 Warning, many regulators would reject a ±40% surcharge and demand discount-only (±0 to −40%) to protect trust.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a UBI Risk Scoring Model</h2>
+            <div class="project-brief">
+                <p>You are a data scientist at "SafeDrive Insurance," a hypothetical InsurTech launching a Usage-Based Insurance product for private car owners in India. Your task is to build a behavioural risk scoring model from telematics data, compare PAYD vs. PHYD pricing for 100 policyholders, and recommend a product strategy.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Load the telematics data</strong> from `data/telematics_data.csv`. Explore the columns and distributions. Print summary statistics for all numeric variables. Identify any data quality issues (missing values, extreme outliers).</li>
+                    <li><strong>Build a behavioural risk score</strong> using the following factors with equal weights (20% each):
+                        <ul>
+                            <li>Hard braking events per 100 km (normalize to 0–100)</li>
+                            <li>Hard acceleration events per 100 km (normalize to 0–100)</li>
+                            <li>Night driving percentage (0–100 scale)</li>
+                            <li>Phone use events per 100 km (0–100 scale)</li>
+                            <li>Average speed deviation from the speed limit (0–100 scale, where 0 = no deviation)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Segment drivers into risk tiers</strong> using the 25th, 50th, and 75th percentiles of the risk score as thresholds. Label as Very Low (≤25th percentile), Low (25–50th), Moderate (50–75th), and High (>75th).</li>
+                    <li><strong>Calculate premium under three models</strong> for each driver:
+                        <ul>
+                            <li>Traditional: flat ₹3,000/month for all drivers</li>
+                            <li>PAYD: ₹1.75 per km driven</li>
+                            <li>PHYD: ₹1.00 per km × risk multiplier (Very Low: 0.55, Low: 0.80, Moderate: 1.15, High: 1.60)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Analyse the results:</strong> For each risk tier, calculate the average premium under each model and the savings vs. traditional. Identify: (a) Which drivers benefit most from PAYD? (b) Which benefit most from PHYD? (c) Are there drivers who would pay more under BOTH UBI models than traditional?</li>
+                    <li><strong>Create three visualizations:</strong> (a) Histogram of risk scores with quartile lines. (b) Premium comparison (grouped bar chart by risk tier for all 3 models). (c) Scatter plot of risk score vs. premium paid under PHYD, coloured by risk tier.</li>
+                    <li><strong>Write a 300-word product recommendation</strong> to the CEO of SafeDrive Insurance: would you launch PAYD, PHYD, or both? What pricing structure do you recommend? What are the key risks and how would you mitigate them? What customer segments would you target first?</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Solution Approach</h4>
+
+                    <p>The solution follows the analysis framework from Sections 5.2–5.4. Key code components are identical to the code blocks in this session. The main deliverable is the product recommendation memo. A sample memo structure is provided below.</p>
+
+                    <h4>Sample Product Recommendation Memo</h4>
+
+                    <p><strong>To:</strong> CEO, SafeDrive Insurance<br>
+                    <strong>From:</strong> Data Science — UBI Product Team<br>
+                    <strong>Subject:</strong> UBI Product Launch Recommendation</p>
+
+                    <p><strong>Executive Summary:</strong><br>
+                    Our analysis of the telematics pilot data (n=100 drivers) confirms that behavioural risk scoring predicts claim experience significantly better than traditional mileage-only metrics. The composite risk score shows a correlation of approximately 0.35 with historical claim amounts, compared to 0.18 for mileage alone. A UBI programme is strategically viable. We recommend launching a <strong>PHYD-only product</strong> with a "discount-only" pricing structure — no surcharges above the traditional premium — to minimise customer friction and regulatory risk.</p>
+
+                    <p><strong>Recommended Product Structure:</strong></p>
+                    <ul>
+                        <li>Base monthly premium: ₹2,500 (same as traditional, so no customer pays MORE by enrolling)</li>
+                        <li>Maximum discount: 40% (₹1,500/month) for Very Low risk tier</li>
+                        <li>Typical discount: 15–20% for Low risk tier</li>
+                        <li>No discount (but no surcharge) for Moderate and High risk tiers — they simply pay the traditional premium</li>
+                        <li>Discount is applied at renewal, not immediately — customers earn their discount over a 3-month observation period</li>
+                    </ul>
+
+                    <p><strong>Rationale:</strong> A discount-only PHYD model addresses the three key risks. First, it eliminates the "premium shock" risk — no customer receives a higher bill because of UBI. Second, it reduces regulatory risk — IRDAI is more likely to approve a discount-only programme than a surcharge programme. Third, it improves customer acquisition — marketing "save up to 40% on your car insurance" will drive significantly higher enrolment than a message about "fair pricing based on your driving."</p>
+
+                    <p><strong>Launch recommendation:</strong> Target a controlled pilot of 5,000 policyholders in two cities (Delhi NCR and Bengaluru — chosen for their demographic diversity and telematics coverage). Use a smartphone app (not OBD dongle) for data collection — it has zero hardware cost and reaches the widest customer base. Validate loss ratios for 6 months before expanding to 50,000 policyholders. After 12 months and statistical validation of the pricing model, consider introducing a "premium adjustment" for the High risk tier — but only with clear customer communication and regulatory approval.</p>
+
+                    <p><strong>Key risk and mitigation:</strong> The most significant risk is low enrolment due to privacy concerns. Mitigation: (1) a clear, simple privacy notice written in plain language (not legalese), (2) data collection limited to driving events (no continuous GPS tracking), (3) a monthly "privacy report" showing each customer exactly what data was collected, and (4) a one-click option to pause data collection and revert to traditional pricing for that month. We believe this combination of transparency and control will achieve an enrolment rate of 25–35% of willing customers — sufficient for a statistically viable UBI programme.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Embedded insurance converts at 3–5× the rate of standalone digital channels because it benefits from contextual conversion, near-zero marginal CAC, trust transfer from the platform, and the "reverse adverse selection" effect.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>India's embedded insurance ecosystem spans mobility, e-commerce, travel, and fintech — enabled by API platforms (Riskcovry, Zopper) that connect insurers to distribution partners. Platform concentration risk is the primary strategic vulnerability.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>PAYD (flat per-km pricing) rewards low mileage regardless of driving quality. PHYD (behaviour-adjusted per-km pricing) rewards safe driving. PHYD is a better risk selection mechanism but requires more data and customer trust.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>The global UBI experience shows that a superior risk model is not enough — if the enrolment funnel is too restrictive (Root's 30% completion rate), the CAC makes the economics unviable. The most successful UBI programmes use a "discount-only" structure and do not gate access to coverage.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>UBI raises unresolved privacy and fairness questions — the "privacy tax" on data-poor customers, behavioural discrimination (night-driving pricing), and data portability. DPDP Act compliance in India requires explicit consent, purpose limitation, and data minimisation from day one.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3-2-1 Reflection -->
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-2xl);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">&#9997;</div>
+                <div style="flex: 1;">
+                    <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-md);">3-2-1 Reflection — Before You Move On</h2>
+                    <p style="color: var(--text-light); margin-bottom: var(--space-lg);">Insurers read behaviour — practise translating today's frameworks into decisions. Write from memory, don't scroll back.</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--primary-light); margin-bottom: var(--space-md);">3 Things I Learned Today</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="3. ______________________________________"></textarea></div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--accent); margin-bottom: var(--space-md);">2 Embedded / UBI Concepts I Can Now Explain</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. (concept) → (why it matters) __________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. (concept) → (why it matters) __________________"></textarea></div>
+                        </div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-top: var(--space-md);">
+                        <h3 style="font-size: var(--font-size-base); color: var(--warning); margin-bottom: var(--space-md);">1 Question I Still Have About Embedded &amp; Usage-Based Insurance</h3>
+                        <div><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s10-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. An embedded insurance offer during e-commerce checkout consistently converts at 25% while the same insurer's standalone website converts at 3%. The MAIN reason for this difference is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) The insurer offers a better price on the embedded channel to incentivize the platform partnership</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) The e-commerce platform's customers are in a buying mindset, the offer is contextual (protecting the product they just purchased), and trust transfers from the platform to the insurance product — making the decision psychologically easy</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) The e-commerce platform requires customers to accept the insurance or their purchase will not go through</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) The embedded channel automatically renews every year without customer action</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. Under the PHYD pricing model, a driver who drives 1,500 km/month with a "High" risk tier (multiplier = 1.50) and a base rate of ₹1.00/km would pay:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) ₹1,500 (1,500 × ₹1.00)</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) ₹1,950 (1,500 × ₹1.00 × 1.30 — the average of all tier multipliers)</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) ₹2,250 (1,500 × ₹1.00 × 1.50)</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) ₹3,375 (1,500 × ₹1.50 × 1.50)</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. An InsurTech that derives 60% of its embedded insurance premium volume from a single e-commerce platform partnership faces what strategic risk?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) The e-commerce platform may demand higher commission, switch to a competing insurer, or launch its own insurance product — the InsurTech has a structural vulnerability through concentration risk</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) The e-commerce platform's customers are demographically narrow, so the InsurTech's risk pool lacks diversification</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Embedded insurance through e-commerce has inherently higher loss ratios than other channels</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) The e-commerce platform's checkout page cannot accommodate the insurance offer without slowing down the purchase flow</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. Root Insurance's UBI programme failed to achieve sustainable scale primarily because:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Its telematics data was inaccurate and could not distinguish safe from unsafe drivers</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Nearly 70% of potential customers did not complete the app-based driving test, creating a restrictive acquisition funnel with very high CAC that the remaining 30% of customers could not economically support</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Regulators in most US states banned usage-based pricing as discriminatory</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Its OBD-II dongles were too expensive to manufacture and distribute</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A "discount-only" UBI programme (where telematics data can only LOWER a customer's premium, never increase it) is recommended as the safest launch strategy because:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) It ensures the insurer will never lose money on UBI policies</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) It eliminates the risk of "premium shock" (customer outrage at paying more because of their data), preserves customer trust, and is more likely to receive regulatory approval — though it leaves the insurer unable to capture premium from the highest-risk drivers</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) It collects less personal data from customers, reducing privacy compliance burden</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) It is the only UBI model that has been tested and proven at scale globally</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s10-quiz', ['b','c','a','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s10-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-09.html" class="nav-link">&larr; Previous: Digital Customer Acquisition</a>
+            <a href="session-11.html" class="nav-link next">Next: AI &amp; Machine Learning Fundamentals &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

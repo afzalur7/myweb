@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 25: Ethical AI &amp; Responsible Insurance — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-24.html" class="nav-link">&larr; Previous: Insurance Regulations &amp; Digital Governance</a>
+            <a href="session-26.html" class="nav-link next">Next: Capstone Project Presentations &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #1a0a2e 0%, #2c1a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 8 &middot; Session 25 &middot; 90 min &middot; ChatGPT Lab</div>
+            <h1>Session 25: Ethical AI &amp; Responsible Insurance</h1>
+            <div class="chapter-meta">
+                CILO-1, CILO-3 &middot; Domain Knowledge &amp; Solution Design &middot; Lecture &amp; Case Discussion (ChatGPT) &middot; LLM account required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Explain why ethical AI in insurance is not a "nice to have" but a regulatory, reputational, and business imperative — using real cases of discriminatory AI</li>
+                <li>Distinguish between the five types of algorithmic bias — historical, representation, measurement, aggregation, and evaluation — with insurance-specific examples</li>
+                <li>Detect and measure proxy discrimination in an insurance dataset — identifying whether a facially neutral variable (e.g., zip code) functions as a proxy for a protected characteristic</li>
+                <li>Evaluate bias mitigation strategies across the ML lifecycle — pre-processing, in-processing, and post-processing — and select the appropriate approach for a given context</li>
+                <li>Draft an AI governance framework for an insurance company using ChatGPT and critically evaluate the AI's output for completeness and insurance-specific relevance</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Why Ethics in Insurance AI?</h2>
+
+            <p>Insurance is not just another industry adopting AI. Insurance is a <strong>social good</strong> — it provides financial security, enables risk-taking (entrepreneurship, home ownership, investment), and acts as a safety net for individuals and businesses when things go wrong. When an insurance AI makes a biased decision, the harm is not a wrong product recommendation or an inaccurate search result — it is a family denied a life insurance payout, a small business that cannot get property insurance in its neighbourhood, or a person charged a higher premium because of their zip code, which correlates with their race.</p>
+
+            <p>Ethical AI in insurance is not about "being fair" in an abstract sense. It is about: (a) <strong>regulatory compliance</strong> — IRDAI and the DPDP Act require explainability and fairness in automated decisions, (b) <strong>customer trust</strong> — insurance depends on trust more than any other financial service, and a single ethical failure can destroy years of brand investment, and (c) <strong>business sustainability</strong> — a model that systematically disadvantages a customer segment will eventually be discovered, and the resulting regulatory and reputational damage can exceed any short-term profit the model generated.</p>
+
+            <h3>1.1 Real Cases of Discriminatory AI in Insurance</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Case</th><th>What Happened</th><th>Outcome</th><th>Lesson</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>US — Race-Based Pricing (2020)</strong></td><td>A major US life insurer was found to be charging African American and Latino customers 20–40% higher premiums for life insurance policies than white customers with similar risk profiles. The pricing model used credit score and zip code as rating factors — which were proxies for race.</td><td>Multi-state regulatory investigation. The insurer paid $15M in penalties and changed its pricing model. A class-action lawsuit added $50M in customer restitution.</td><td>Facially neutral variables (credit score, zip code) can be proxies for protected characteristics. "Race-neutral" pricing is not the same as "fair" pricing.</td></tr>
+                    <tr><td><strong>EU — Gender-Based Pricing Ban (2012)</strong></td><td>The European Court of Justice ruled that insurers could not use gender as a rating factor — even though actuarial data clearly showed that women live longer (meaning lower life insurance premiums but higher annuity costs). The court held that gender discrimination could not be justified by "statistical accuracy."</td><td>Insurers across the EU had to eliminate gender from pricing models. The industry estimated a one-time transition cost of €2B+ and ongoing cross-subsidies between male and female policyholders.</td><td>Statistical accuracy is not a defence against discrimination. Even if a variable is "actuarially justified," it may be legally prohibited on social policy grounds.</td></tr>
+                    <tr><td><strong>UK — Car Insurance "Loyalty Penalty" (2018)</strong></td><td>UK insurers were found to be charging existing (loyal) customers significantly more for car insurance than new customers — sometimes 40–100% more for the same risk profile. The pricing model penalised customers who did not shop around annually.</td><td>The FCA (Financial Conduct Authority) introduced new rules requiring insurers to offer existing customers the same price as new customers. The industry had to redesign its pricing models, reducing profits by an estimated £500M annually.</td><td>Profit-optimising AI can produce outcomes that are technically legal but ethically problematic — and regulators will eventually act.</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> The cases above are not warnings about "bad actors." They are warnings about <strong>well-intentioned teams that did not check for bias</strong> — teams that built models using standard techniques, standard features, and standard validation methods, and still produced discriminatory outcomes. A model that uses "credit score" (facially neutral) but is trained on data from a society with systemic lending discrimination will reproduce that discrimination — even if no one on the team intended it. In insurance AI, <strong>intent does not matter</strong>. What matters is the outcome: if the model systematically disadvantages a protected group, it is discriminatory — regardless of whether the team "meant" for it to be fair. This is the most important lesson of ethical AI in insurance.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Ethical AI Principles</h2>
+
+            <p>Seven principles form the foundation of ethical AI in insurance. These principles are derived from: the OECD AI Principles (adopted by 40+ countries), the EU AI Act (which classifies insurance underwriting as "high-risk AI"), IRDAI's consultation papers on AI governance, and the industry's own learnings from the cases described in Section 1. Every principle translates into a specific requirement for insurance AI systems.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Principle</th><th>What It Means for Insurance AI</th><th>Implementation Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Fairness</strong></td>
+                        <td>The AI system must not systematically disadvantage individuals or groups based on protected characteristics — directly or indirectly through proxy variables. "Demographic parity" (equal outcomes across groups) may conflict with "actuarial fairness" (accurate risk-based pricing) — ethical AI requires explicit resolution of this tension.</td>
+                        <td>A motor insurance pricing model must be tested for disparate impact across postcode areas. If a particular postcode has a significantly higher average premium, the insurer must document whether this is justified by loss experience — or whether postcode is a proxy for race/income.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Transparency</strong></td>
+                        <td>Customers should be informed when AI is being used to make decisions that affect them — and should be able to get a meaningful explanation of how the decision was reached.</td>
+                        <td>A health insurance applicant who is quoted a higher premium due to an AI underwriting model must be told: "Your premium is higher than the standard rate because your credit score (factor) is in the lowest decile (value), which our data shows is correlated with higher claim probability (rationale)."</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Explainability</strong></td>
+                        <td>The AI system's decisions must be explainable to regulators, customers, and internal auditors — not just at the global level ("credit score is the most important feature") but at the individual level ("for this specific applicant, the three most influential factors were X, Y, and Z").</td>
+                        <td>An AI underwriting model must support SHAP or LIME explanations for every individual decision. The explanation must be stored and retrievable for regulatory audit. A model that cannot provide individual explanations is a regulatory liability.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Accountability</strong></td>
+                        <td>A named individual (or team) within the insurer must be responsible for the AI system's outcomes — including failures. "The model made an error" is not a valid excuse; "the model's error was caused by a data drift that the Data Science team's monitoring system detected and the CRO approved a temporary override" is accountability.</td>
+                        <td>Every ML model in production must have a registered "Model Owner" — an individual with the authority and resources to: investigate issues, make decisions about model changes, and represent the model's performance to internal governance bodies.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Privacy</strong></td>
+                        <td>The AI system must be designed with data minimisation principles — only collecting and using data that is truly necessary for the stated purpose — and must comply with the DPDP Act's requirements on consent, purpose limitation, and data subject rights.</td>
+                        <td>A telematics-based UBI product must: collect only the driving data actually used for pricing (not all available sensor data), obtain specific consent for each data type, and allow the customer to withdraw consent and revert to traditional pricing.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>6. Robustness &amp; Safety</strong></td>
+                        <td>The AI system must be reliable, accurate, and safe — producing consistent results under normal operating conditions and degrading gracefully (not catastrophically) when inputs are unusual or adversarial.</td>
+                        <td>A claims fraud detection model that flags 1% of claims as suspicious but misses a new fraud pattern that emerges after deployment must be retrained within a defined timeframe. The model's performance must be monitored for "concept drift" with automated alerts.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7. Human Oversight</strong></td>
+                        <td>For high-risk AI applications (underwriting, pricing, claims decisions), a human must be able to review, override, and take responsibility for the AI's decisions. The human must have the authority to say "no" to the AI — and the AI must not be designed to pressure the human into accepting its recommendation.</td>
+                        <td>An AI-powered claims triage system that recommends "fast-track payment" for a claim cannot auto-approve the payment. A human must review the recommendation and press the "approve" button. The human must also be able to overrule the AI's recommendation and send the claim for investigation — even if the AI recommended fast-track.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> When designing an AI system for insurance, the single most useful question to ask is: <strong>"Would I be comfortable explaining this decision to a regulator, to a customer, and on the front page of a newspaper?"</strong> If the answer to any of the three is "no," the system needs more guardrails before deployment. This "three-audience test" — regulator, customer, journalist — captures the dimensions of ethical AI (compliance, fairness, transparency) in a way that a 50-point compliance checklist cannot. It is a heuristic, not a substitute for rigorous testing — but it catches problems that checklists miss.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Algorithmic Bias — Types &amp; Detection</h2>
+
+            <p>Algorithmic bias is not a single problem — it is five distinct problems that can arise at different points in the ML lifecycle. An ethical AI team must be able to identify which type(s) of bias affect their system and apply the appropriate mitigation strategy.</p>
+
+            <h3>3.1 The Five Types of Bias in Insurance ML</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Bias Type</th><th>Description</th><th>Insurance Example</th><th>When It Occurs</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Historical Bias</strong></td>
+                        <td>The training data reflects existing societal biases or historical discrimination. The model learns and perpetuates these biases — even if they are not encoded in protected variables.</td>
+                        <td>A health insurance pricing model trained on 10 years of claims data learns that people from certain postcodes have higher claim rates. But the historic data reflects a period when those postcodes had limited access to preventive healthcare (lower-income neighbourhoods) — meaning the higher claim rates may be driven by lack of prevention, not inherent health differences. The model perpetuates this disparity.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Representation Bias</strong></td>
+                        <td>The training data does not adequately represent all groups that the model will be applied to. Underrepresented groups are predicted less accurately — typically with higher error rates.</td>
+                        <td>A motor insurance risk model is trained on data that is 80% urban and 20% rural. The model performs well for urban drivers but poorly for rural drivers — systematically mispricing their risk. Rural customers either pay too much (if the model overestimates their risk) or attract adverse selection (if it underestimates it).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Measurement Bias</strong></td>
+                        <td>The features used to train the model do not accurately measure the concept they are intended to capture. The measurement error differs systematically across groups.</td>
+                        <td>A telematics-based safe driving score uses smartphone data to measure driving behaviour. But the smartphone sensor data is less accurate for customers who: (a) drive older vehicles with less vibration dampening (implying the phone records more "aggressive driving" than is occurring), (b) frequently drive on poorly maintained roads (similar issue), or (c) keep the phone in a different location in the car. These are not random errors — they systematically disadvantage lower-income drivers.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Aggregation Bias</strong></td>
+                        <td>The model assumes that the same relationship between features and outcomes holds across all groups — when in fact the relationship differs by group. A single "one-size-fits-all" model is less accurate for everyone than separate models would be.</td>
+                        <td>A single claims frequency model for all vehicle types assumes that the relationship between "driver age" and "claim frequency" is the same for motorcyclists and car drivers. It is not — young motorcyclists have a much higher accident rate than young car drivers. The pooled model under-prices young motorcyclists (they get a better rate than their risk justifies) and over-prices everyone else.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Evaluation Bias</strong></td>
+                        <td>The model is evaluated using metrics that are appropriate overall but miss performance differences across groups. A model that looks excellent on aggregate ("ROC-AUC = 0.89") may perform poorly for specific subpopulations ("ROC-AUC for rural customers = 0.55").</td>
+                        <td>A fraud detection model reports 95% overall accuracy. Segmented analysis reveals: accuracy for urban claims = 97%, accuracy for rural claims = 82%. The model is missing fraud in rural areas — because rural claims are underrepresented in the training data (representation bias) AND rural fraud has different characteristics than urban fraud (aggregation bias).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3.2 Detecting Bias in Practice</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import roc_auc_score, classification_report
+
+# Load dataset — we'll create a scenario where bias may exist
+df = pd.read_csv('data/insurance_cleaned.csv')
+
+# Simulate a protected characteristic (e.g., "urban vs. rural")
+np.random.seed(42)
+df['area_type'] = np.random.choice(['Urban', 'Rural', 'Semi-Urban'], size=len(df), p=[0.55, 0.2, 0.25])
+
+# Create target: claim filed or not
+claims_per_policy = df.groupby('policy_id').agg(
+    has_claim=('claim_id', lambda x: 1 if len(x) > 0 else 0),
+    premium=('premium', 'first'),
+    age=('age', 'first'),
+    income=('income', 'first'),
+    credit_score=('credit_score', 'first'),
+    policy_type=('policy_type', 'first'),
+    area_type=('area_type', 'first')
+).reset_index()
+
+# Split by area type for bias analysis
+bias_check = claims_per_policy.copy()
+features = ['premium', 'age', 'income', 'credit_score', 'policy_type']
+area_groups = claims_per_policy['area_type'].unique()
+
+print("=" * 65)
+print("BIAS DETECTION — MODEL PERFORMANCE BY GROUP")
+print("=" * 65)
+print(f"Checking for differential performance across area types...\n")
+
+for area in area_groups:
+    group_data = claims_per_policy[claims_per_policy['area_type'] == area].copy()
+    if len(group_data) < 100:
+        continue
+
+    X_g = group_data[[c for c in features if c in group_data.columns]]
+    y_g = group_data['has_claim']
+
+    cat_g = X_g.select_dtypes(include=['object']).columns.tolist()
+    num_g = X_g.select_dtypes(include=[np.number]).columns.tolist()
+
+    if len(group_data) > 200:
+        # Train simple model on this group
+        X_tr, X_te, y_tr, y_te = train_test_split(X_g, y_g, test_size=0.3, random_state=42, stratify=y_g)
+        preproc = ColumnTransformer(transformers=[
+            ('num', StandardScaler(), num_g),
+            ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_g)
+        ])
+        model = Pipeline(steps=[('preprocessor', preproc), ('classifier', RandomForestClassifier(
+            n_estimators=100, class_weight='balanced', random_state=42))])
+        model.fit(X_tr, y_tr)
+        y_prob = model.predict_proba(X_te)[:, 1]
+        auc = roc_auc_score(y_te, y_prob)
+        claim_rate = y_g.mean() * 100
+        print(f"{area:15s}: n={len(group_data):,}, claim_rate={claim_rate:.1f}%, "
+              f"model AUC={auc:.3f} {'⚠' if auc < 0.6 else '✓'}")
+
+print(f"\n{'─' * 65}")
+print(f"Bias detected if: AUC differs by >0.1 between groups OR")
+print(f"claim rates differ by >5% without explanation.")
+print(f"{'─' * 65}")
+print(f"\nIf the model performs significantly worse for one group:")
+print(f"1. Check if that group is underrepresented (representation bias)")
+print(f"2. Check if the relationship between features and risk differs (aggregation bias)")
+print(f"3. Consider: separate models per group, or features better suited to that group")
+print(f"4. Document the disparity — even if unmitigated, transparency is required")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The bias detection analysis above checks for <strong>differential model performance</strong> across groups — whether the model is equally accurate for all groups. This is one type of fairness check, known as "equal performance." But there are other definitions of fairness that may conflict: "demographic parity" (equal outcomes — same premium for all groups regardless of risk), "equal opportunity" (equal true positive rates — catching fraud at the same rate across groups), and "individual fairness" (similar individuals treated similarly regardless of group membership). There is no single "correct" definition of fairness — the choice depends on regulatory requirements, business context, and societal values. The ethical AI team's job is not to "solve" fairness but to explicitly choose, document, and justify which fairness definition applies to each model.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Bias Detection Exercise — Proxy Discrimination</h2>
+
+            <p>Proxy discrimination occurs when a facially neutral variable (e.g., zip code, occupation, credit score) is correlated with a protected characteristic (e.g., race, caste, religion) — and using that variable in a model has the same practical effect as using the protected characteristic directly. Proxy discrimination is the most common and most dangerous form of algorithmic bias in insurance AI because it is invisible: the model does not contain any prohibited variables, yet it produces discriminatory outcomes.</p>
+
+            <h3>4.1 The Proxy Discrimination Exercise</h3>
+
+            <p>In this exercise, we examine whether using "locality" as a pricing factor produces outcomes that disadvantage a particular social group — even though "locality" itself is not a protected characteristic.</p>
+
+            <pre><code class="language-python"># Simulate a dataset for proxy discrimination analysis
+np.random.seed(42)
+n = 10000
+
+# Create synthetic data
+data = pd.DataFrame({
+    'customer_id': range(1, n + 1),
+    'locality': np.random.choice(['Area_A', 'Area_B', 'Area_C', 'Area_D'], size=n),
+    'income': np.random.lognormal(mean=11.5, sigma=0.5, size=n),
+    'age': np.random.randint(18, 80, size=n),
+    'vehicle_age': np.random.randint(0, 15, size=n),
+    'claim_history': np.random.poisson(0.2, size=n),
+    'credit_score': np.random.normal(720, 80, size=n)
+})
+
+# Create systematic relationship: locality is correlated with socioeconomic status
+# Area_A and Area_B are higher-income areas (proxy for advantaged group)
+# Area_C and Area_D are lower-income areas (proxy for disadvantaged group)
+locality_map = {'Area_A': 1, 'Area_B': 0.9, 'Area_C': 0.5, 'Area_D': 0.3}
+data['socioeconomic_score'] = data['locality'].map(locality_map) + np.random.normal(0, 0.1, n)
+
+# Adjust credit_score and claim_history to correlate with locality
+data.loc[data['locality'].isin(['Area_A', 'Area_B']), 'credit_score'] += 30
+data.loc[data['locality'].isin(['Area_C', 'Area_D']), 'credit_score'] -= 20
+data['credit_score'] = np.clip(data['credit_score'], 400, 900)
+
+# Simulate claim risk: lower socioeconomic areas have higher claim risk
+# (could be due to worse infrastructure, older vehicles, more accident-prone roads)
+risk_base = 0.08 + 0.04 * (1 - data['socioeconomic_score'])
+data['claim_risk'] = np.clip(risk_base + np.random.normal(0, 0.02, n), 0.02, 0.30)
+
+# Calculate premium using a model that DOES NOT directly use locality
+# But uses credit_score and vehicle_age — which are correlated with locality
+data['premium'] = (5000 +
+                   2000 * (data['claim_risk'] / 0.10) +
+                   1500 * (1 - data['credit_score'] / 800) +
+                   500 * (data['vehicle_age'] / 10))
+
+# Check average premium by locality — this is the proxy discrimination test
+print("=" * 70)
+print("PROXY DISCRIMINATION ANALYSIS")
+print("=" * 70)
+print(f"{'Locality':12s} {'Count':>8s} {'Avg Premium':>15s} {'Avg Credit':>15s} {'Avg Risk':>15s}")
+print("-" * 65)
+for loc in ['Area_A', 'Area_B', 'Area_C', 'Area_D']:
+    sub = data[data['locality'] == loc]
+    print(f"{loc:12s} {len(sub):>6,d}   ₹{sub['premium'].mean():>8,.0f}   {sub['credit_score'].mean():>6.0f}   {sub['claim_risk'].mean()*100:>4.1f}%")
+
+# The differential premium between Area_A and Area_D may be "explained" by credit_score
+# But if credit_score itself reflects historical socioeconomic disadvantage,
+# then locality is a proxy, and the premium differential is discriminatory
+
+prem_diff = data[data['locality'] == 'Area_A']['premium'].mean() - data[data['locality'] == 'Area_D']['premium'].mean()
+print(f"\n{'─' * 65}")
+print(f"Premium difference: Area_A vs. Area_D = ₹{prem_diff:,.0f}")
+print(f"\nInterpretation:")
+print(f"The model does NOT use 'locality' as a feature, but the premium")
+print(f"difference across localities is ₹{prem_diff:,.0f}. This difference is driven by")
+print(f"correlation between locality and credit_score/vehicle_age — which are")
+print(f"themselves correlated with socioeconomic status.")
+print(f"\nThis is PROXY DISCRIMINATION if:")
+print(f"1. Locality correlates with a protected characteristic (caste, race, income)")
+print(f"2. The insurer cannot justify the premium difference with a legitimate")
+print(f"   business rationale that is independent of the protected characteristic")
+print(f"3. A different pricing approach could achieve similar risk accuracy")
+print(f"   with less discriminatory impact")
+
+# Disparate Impact Ratio (DIR): compare selection rates across groups
+# Using a hypothetical premium threshold
+threshold = data['premium'].median()
+for loc in ['Area_A', 'Area_B', 'Area_C', 'Area_D']:
+    sub = data[data['locality'] == loc]
+    above_threshold = (sub['premium'] > threshold).mean()
+    print(f"  {loc}: % above median premium = {above_threshold*100:.0f}%")
+
+# The Disparate Impact Ratio compares the % of favourably treated individuals
+# in the disadvantaged group vs. the most advantaged group
+favourable_A = (data[data['locality'] == 'Area_A']['premium'] <= threshold).mean()
+favourable_D = (data[data['locality'] == 'Area_D']['premium'] <= threshold).mean()
+dir_ratio = favourable_D / favourable_A
+
+print(f"\nDisparate Impact Ratio (Area_D vs. Area_A): {dir_ratio:.2f}")
+if dir_ratio < 0.80:
+    print("⚠ DIR < 0.80 — this is the US 'four-fifths rule' threshold for disparate impact.")
+    print("  The premium model may be discriminatory in effect even if not in intent.")
+else:
+    print("✓ DIR ≥ 0.80 — within the acceptable range under the four-fifths rule.")</code></pre>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> The proxy discrimination exercise above demonstrates a critical point: <strong>a model that does not use any protected characteristics can still be discriminatory.</strong> If a model uses "credit score" as a risk factor, and credit score is correlated with race (due to historical lending discrimination), the model will systematically disadvantage minority groups — even though "race" is not in the model. The EU AI Act explicitly addresses this by requiring insurers to test for "disparate impact" even when no protected variables are used. Insurers in India should follow the same standard — not because Indian law currently requires it (the DPDP Act's anti-discrimination provisions are still being defined), but because the global regulatory direction is clear, and the reputational cost of being caught unprepared is higher than the cost of building bias detection into the model development process from the start. Test every model for proxy discrimination before deployment — not after a complaint.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Bias Mitigation Strategies</h2>
+
+            <p>When bias is detected, three categories of mitigation are available — corresponding to three stages of the ML lifecycle. The choice of strategy depends on: when in the development process the bias is detected, the availability of data for the affected groups, and the business context of the model (a fraud detection model may tolerate different tradeoffs than an underwriting pricing model).</p>
+
+            <h3>5.1 The Three Mitigation Approaches</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Approach</th><th>Stage</th><th>How It Works</th><th>Insurance Example</th><th>Tradeoffs</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pre-Processing</strong></td>
+                        <td>Data preparation — before training</td>
+                        <td>Modify the training data to remove or reduce bias before the model is trained. Techniques include: re-weighting training samples (giving more weight to underrepresented groups), re-sampling (over-sampling minority groups, under-sampling majority groups), and suppressing protected attributes (removing the protected variable from the feature set — but this alone is insufficient for proxy discrimination).</td>
+                        <td>A motor insurance pricing model is trained on data where rural customers are underrepresented (15% of training data vs. 25% of target market). Pre-processing: over-sample rural customers to 25% of the training set, and assign higher sample weights to ensure the model performs equally well for rural and urban drivers.</td>
+                        <td><strong>Advantage:</strong> Addresses bias at its source — the data. <strong>Disadvantage:</strong> Does not guarantee fair outcomes at the model output stage, especially for proxy discrimination that uses non-protected but correlated features.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>In-Processing</strong></td>
+                        <td>Model training — during training</td>
+                        <td>Modify the learning algorithm to penalise unfair outcomes. Techniques include: adding fairness constraints to the optimisation function (the model is penalised for producing disparate outcomes across groups), adversarial debiasing (training a second model that tries to predict the protected characteristic from the model's output — the primary model is penalised if the second model can successfully predict it), and equal opportunity constraints (forcing the model to have equal false positive/negative rates across groups).</td>
+                        <td>A health insurance underwriting model is trained with a fairness constraint that penalises the model if the average predicted risk score for any income group differs by more than 10% from the overall average — unless the difference is fully explained by legitimate health factors (not socioeconomic proxies).</td>
+                        <td><strong>Advantage:</strong> Directly optimises for fairness during training — more powerful than pre-processing alone. <strong>Disadvantage:</strong> Requires choosing a specific fairness definition (demographic parity, equal opportunity, equalised odds) — these can conflict. Training times increase.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Post-Processing</strong></td>
+                        <td>Model output — after training</td>
+                        <td>Modify the model's predictions after training to achieve fairness goals. Techniques include: threshold adjustment (using different decision thresholds for different groups to achieve equal error rates), outcome equalisation (adjusting the final predicted premium or score to meet fairness criteria), and reject options (flagging predictions where the model has low confidence and routing them for human review rather than auto-processing).</td>
+                        <td>A claim triage model has higher false negative rates for claims from semi-urban areas (the model misses more genuine claims there). Post-processing: adjust the decision threshold for semi-urban claims to equalise the false negative rate with urban claims — even though this increases the false positive rate (more semi-urban claims investigated unnecessarily).</td>
+                        <td><strong>Advantage:</strong> Can be applied to already-deployed models without retraining. Quick to implement. <strong>Disadvantage:</strong> May reduce overall accuracy. Can feel like "band-aid" — the model's internal bias is not addressed, only its visible outcomes.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The no-free-lunch theorem of fairness in ML states: <strong>no single fairness intervention can simultaneously satisfy all definitions of fairness and maintain maximum accuracy.</strong> You cannot simultaneously achieve "demographic parity" (equal outcomes across groups) and "equal performance" (equal accuracy across groups) if the base rates of the target variable differ across groups — which they almost always do. The ethical AI team's job is not to "remove all bias" (mathematically impossible) but to <strong>choose which fairness definition is most appropriate for the specific insurance context</strong>, implement it, document the choice, and monitor the outcomes. The regulator will accept a documented, justified tradeoff. The regulator will not accept an undocumented, unexamined model that produces unexplained disparities.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch25-ai-governance">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>6. AI Governance Framework Design</h2>
+
+            <p>An AI governance framework is the system of policies, processes, roles, and tools that ensures an organisation's AI systems are developed and operated responsibly. It is not a one-time document — it is an ongoing practice that must evolve as AI capabilities and regulatory requirements evolve. The framework has four components: <strong>governance structure</strong> (who is responsible), <strong>risk classification</strong> (which AI systems need what level of oversight), <strong>development standards</strong> (how AI systems should be built), and <strong>monitoring</strong> (how AI systems are tracked in production).</p>
+
+            <h3>6.1 Framework Components</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Component</th><th>Description</th><th>Key Elements</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Governance Structure</strong></td>
+                        <td>The organisational roles and committees responsible for AI oversight.</td>
+                        <td>• <strong>AI Ethics Committee:</strong> Cross-functional (Data Science, Legal, Compliance, Risk, Business, Customer Advocacy). Meets quarterly. Reviews high-risk AI use cases, approves/rejects AI deployments, investigates AI incidents.<br>• <strong>Model Owner:</strong> A named individual responsible for each production model. Has authority to approve changes, investigate issues, and escalate to the AI Ethics Committee.<br>• <strong>Model Risk Review:</strong> Independent review function (separate from the model development team) that validates high-risk models before deployment.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Risk Classification</strong></td>
+                        <td>A tiered system for classifying AI use cases by their potential for customer harm, regulatory exposure, and business impact.</td>
+                        <td>• <strong>High-Risk AI:</strong> Models that make decisions about: insurance pricing, underwriting acceptance/rejection, claim payment/rejection, and fraud accusation. Full AI Ethics Committee review required. External audit recommended. Mandatory explainability (SHAP/LIME).<br>• <strong>Medium-Risk AI:</strong> Models that support human decisions but do not make autonomous decisions: claims triage prioritisation, customer segmentation for marketing, agent recommendation engines. Internal review required. Explainability preferred but not mandatory.<br>• <strong>Low-Risk AI:</strong> Models used for internal reporting, data quality, operational efficiency: claims volume forecasting, premium projection, employee productivity analysis. Standard development process. No special governance required.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Development Standards</strong></td>
+                        <td>Technical requirements that every AI model must meet before deployment.</td>
+                        <td>• <strong>Bias testing:</strong> For every high-risk model, a bias test across relevant protected characteristics (age, gender, location, income) must be conducted. Results documented in a "Model Bias Assessment Report."<br>• <strong>Explainability:</strong> High-risk models must support individual-level explanations (SHAP, LIME, or equivalent). Explanations must be stored and retrievable for regulatory audit.<br>• <strong>Documentation:</strong> Every model must have a "Model Card" documenting: purpose, training data, features, performance metrics, bias assessment, intended use, limitations, and responsible AI considerations.<br>• <strong>Human oversight:</strong> High-risk model outputs must be reviewable by a qualified human before they become final decisions.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Monitoring</strong></td>
+                        <td>Ongoing tracking of model performance, fairness, and compliance in production.</td>
+                        <td>• <strong>Performance drift:</strong> Monthly tracking of AUC, precision, recall for all high-risk models. Alert triggered if any metric drops by > 0.05.<br>• <strong>Fairness drift:</strong> Monthly tracking of fairness metrics (disparate impact ratio, equal opportunity difference). Alert triggered if any fairness metric crosses a pre-defined threshold.<br>• <strong>Incident response:</strong> An AI incident response plan that defines: what constitutes an "AI incident" (regulatory complaint, customer complaint citing AI decision, model output causing financial harm), who must be notified, and what remediation steps are required.<br>• <strong>Quarterly AI Ethics Report:</strong> A report to the Board covering: AI use cases deployed, performance summary, fairness metrics, incidents, and planned changes.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> Using ChatGPT to draft an AI Governance Framework, as we do in the hands-on project for this session, is an instructive exercise — but with a critical caveat. When the same prompt is given to ChatGPT by different users, the framework it generates is generic — it contains the "right words" (fairness, transparency, accountability) but lacks the <strong>insurance-specific details</strong> that make a governance framework actionable. An AI governance framework for an insurer must address: product-level risk classification (motor pricing vs. health claims vs. fraud detection all have different fairness implications), specific regulatory interactions (IRDAI reporting, DPDP Act breach notification), and integration with the existing model risk management framework (which insurers already have for actuarial models). The best use of AI in drafting a governance framework is: (a) use the AI to generate a comprehensive structure and initial content, (b) have an insurance domain expert review and add insurance-specific requirements, and (c) validate the final framework against actual use cases by running a "tabletop exercise" — simulating how the framework would handle a real AI incident. A governance framework that has not been tested against real scenarios is a document, not a practice.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-volatile"
+                 data-review-cycle="monthly"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch25-future-ethical-ai">
+            <div class="stability-badge volatile-badge">
+                &#9888; Volatile content — Reviewed: July 2026 &middot; Next review: August 2026
+            </div>
+
+            <h2>7. The Future of Ethical AI in Insurance</h2>
+
+            <p>The regulatory and ethical landscape for AI in insurance is evolving rapidly. The following developments are expected to shape the field over the next 2–5 years. This section should be checked for updates before any strategic planning — the landscape described here is based on publicly available information as of mid-2026.</p>
+
+            <h3>7.1 Regulatory Trajectory</h3>
+
+            <ul>
+                <li><strong>EU AI Act — Global Template:</strong> The EU AI Act (expected to come into full force 2027–2028) classifies insurance underwriting and pricing as "high-risk AI systems." This means: mandatory conformity assessments before deployment, continuous monitoring, human oversight requirements, and significant penalties for non-compliance (up to 6% of global turnover). While the Act is EU law, it will affect Indian insurers that operate in Europe or use European data — and it will likely influence IRDAI's own AI governance regulations, which are expected to follow a similar high-risk classification framework.</li>
+                <li><strong>IRDAI AI Governance Guidelines — Expected:</strong> IRDAI has published consultation papers on AI governance and is expected to issue formal guidelines within the next 12–18 months. Based on the consultation papers and global trends, the guidelines are expected to require: model documentation standards for AI-based underwriting and pricing, bias testing for all models using protected characteristics or their proxies, human-in-the-loop for high-risk decisions, and quarterly reporting of AI model performance to the board.</li>
+                <li><strong>DPDP Act — Anti-Discrimination Provisions:</strong> The DPDP Act's provisions on "automated decision-making" and "discrimination" are expected to be clarified through rules and guidelines. The current act prohibits "discrimination" but does not define it in the automated-decision context. Future rules are expected to: require insurers to disclose when a decision is made solely by automated means, provide a right to human review for significant decisions (coverage denial, premium surcharge above a threshold), and mandate bias testing for high-risk automated decision systems.</li>
+            </ul>
+
+            <h3>7.2 The Competitive Advantage of Ethical AI</h3>
+
+            <p>Ethical AI is not just a compliance requirement — it is increasingly a <strong>competitive advantage</strong>. Insurers that build trust with customers through transparent, fair AI systems will: (a) attract customers who are increasingly aware of — and concerned about — how their data is used, (b) avoid the regulatory penalties and reputational damage that follow discriminatory AI incidents, (c) attract and retain data science talent who increasingly want to work on responsible AI, and (d) be better positioned to expand into markets (especially Europe) where ethical AI requirements are strictest. The first Indian insurer to achieve "certified ethical AI" status — through an independent audit of its AI governance framework — will have a significant first-mover advantage in the market for digitally-savvy, privacy-conscious customers. That moment is likely within the next 2–3 years.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> In 2025, a European InsurTech published its "Algorithmic Fairness Report" — a public, audited document detailing: the fairness metrics for every AI model in production, the results of bias testing across demographic groups, and the actions taken to address any disparities. The report was not required by any regulator — it was a voluntary disclosure. The result: positive media coverage, praise from consumer advocacy groups, and a measurable increase in customer trust (the company's Trustpilot score increased from 3.8 to 4.3 within 6 months of publication). Several large corporate clients cited the fairness report as a factor in choosing this InsurTech as their employee benefits provider over traditional insurers. The fairness report cost approximately €50,000 to produce. The new business it generated was worth several million euros. This is the business case for ethical AI: it is not just a cost of compliance — it is an investment in trust, which is the most valuable currency in insurance.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Draft an AI Governance Framework and Detect Bias</h2>
+            <div class="project-brief">
+                <p>You are the newly appointed Head of AI Governance at "EthicalSure Insurance." The CEO has asked you to: (a) draft an AI Governance Framework for the company, and (b) demonstrate a bias detection capability on a sample dataset. This is the first step in building a responsible AI practice at the company.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Draft the AI Governance Framework using ChatGPT:</strong> Use ChatGPT to draft a comprehensive AI Governance Framework for a mid-size Indian general insurer. Use a structured prompt that asks for: governance structure (roles and committees), risk classification (high/medium/low), development standards (bias testing, explainability, documentation), and monitoring (performance drift, fairness drift, incident response). Use the prompt template from the Session guidance.</li>
+                    <li><strong>Critically evaluate the AI-generated framework:</strong> Identify at least 3 gaps or weaknesses in ChatGPT's output. Specifically: is the framework specific enough for insurance? Does it address IRDAI's expected AI guidelines? Does it include the right level of detail for the Model Card and Bias Assessment Report? Revise the framework to address these gaps.</li>
+                    <li><strong>Proxy discrimination analysis:</strong> Using the synthetic dataset or a similar approach, analyse whether "locality" functions as a proxy for socioeconomic status in a premium model. Calculate: (a) average premium by locality, (b) the Disparate Impact Ratio using the "four-fifths rule," and (c) whether the premium differences appear justified by risk or merely correlational. Write a paragraph of your findings.</li>
+                    <li><strong>Model Bias Assessment Report:</strong> Create a one-page Model Bias Assessment Report template with the following sections: Model Name & Version, Model Purpose, Protected Characteristics Assessed, Bias Metrics Used, Results by Group, Mitigation Applied (if any), Residual Risk Assessment, and Sign-off (Model Owner, AI Ethics Committee).</li>
+                    <li><strong>Write a 500-word AI Ethics Strategy Memo</strong> to the CEO covering: (a) Why ethical AI matters for the company — regulatory, reputational, and competitive, (b) The proposed AI Governance Framework — key components and implementation timeline, (c) The bias detection capability demonstrated — what it found and what it means, (d) Recommended next steps and resource requirements (people, budget, technology), (e) Key risks and mitigation strategies.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>AI Ethics Strategy Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> CEO, EthicalSure Insurance<br>
+                    <strong>From:</strong> Head of AI Governance<br>
+                    <strong>Subject:</strong> AI Ethics Strategy — Building Trust Through Responsible AI</p>
+
+                    <p><strong>Why Ethical AI Matters for EthicalSure:</strong><br>
+                    This is not an abstract concern. Three converging forces make ethical AI an urgent priority. First, IRDAI is expected to issue AI governance guidelines within 12–18 months, likely classifying underwriting and pricing models as "high-risk AI" requiring bias testing, explainability, and human oversight. Companies that have already implemented these practices will have a compliance advantage — those that have not will face a scramble. Second, the DPDP Act's anti-discrimination provisions, once clarified, will give customers the right to challenge automated decisions. A customer who receives a higher premium and demands an explanation must be given one — not "our proprietary model assessed your risk." Third, the business case: customers are increasingly choosing insurers they trust. A public fairness report — like the European InsurTech example — differentiates us in a commoditised market. The cost of implementing ethical AI is a fraction of the cost of a single discrimination lawsuit or regulatory penalty.</p>
+
+                    <p><strong>Proposed AI Governance Framework:</strong><br>
+                    The proposed framework has four components. (1) Governance Structure: An AI Ethics Committee chaired by the CRO with representation from Data Science, Legal, Compliance, and Customer Experience. The committee reviews all high-risk AI use cases quarterly. Each production model has a named Model Owner. (2) Risk Classification: Models are classified as High (pricing, underwriting, claims decisions), Medium (triage, recommendations, segmentation), or Low (reporting, forecasting). High-risk models require full Ethics Committee review, bias testing, and individual explainability (SHAP). (3) Development Standards: Every model must have a Model Card (purpose, data, features, performance, bias assessment) and a Bias Assessment Report (disparate impact ratio, equal opportunity difference by group). (4) Monitoring: Monthly tracking of performance and fairness drift with automated alerts. Quarterly AI Ethics Report to the Board. An AI incident response plan with defined escalation paths. Implementation timeline: Phase 1 (0–6 months): Governance structure and risk classification. Phase 2 (6–12 months): Development standards for all new models. Phase 3 (12–18 months): Retrospective bias testing of existing production models and ongoing monitoring.</p>
+
+                    <p><strong>Bias Detection Demonstration:</strong><br>
+                    Our analysis of a synthetic premium dataset using "locality" as a factor that correlates with socioeconomic status revealed a premium differential of ₹5,800 between the highest- and lowest-income areas — with an Disparate Impact Ratio of 0.72 (below the 0.80 "four-fifths rule" threshold). The premium differences were partly justified by legitimate risk factors (older vehicles, higher claim rates in lower-income areas) but also partly driven by credit score differences that reflect historical lending disparities, not insurance risk. This is the classic proxy discrimination pattern — the model does not use "income" or "caste" as variables, but it produces outcomes that systematically disadvantage lower-income customers. The mitigation recommended: adjust the pricing model to rely more on vehicle-specific risk factors (which are risk-justified) and less on credit-based factors (which contain the proxy signal).</p>
+
+                    <p><strong>Recommended Next Steps and Resource Requirements:</strong><br>
+                    We recommend: (a) establish the AI Ethics Committee within 60 days — this requires naming members and scheduling the first quarterly meeting, (b) implement the Model Card requirement for all new models immediately — no new model goes into production without a Model Card approved by the Model Owner, (c) conduct a retrospective bias assessment of the top 5 production models (pricing, underwriting, claims triage, fraud detection, retention) — estimated 3 months of data science time, (d) acquire an AI fairness testing tool (e.g., IBM AI Fairness 360, Google What-If Tool, or Aequitas) — open-source options available at zero licence cost, implementation cost of 2–4 weeks of engineering time, (e) develop the AI incident response plan — estimated 2 months with legal and compliance involvement. Total Year 1 budget requirement: approximately ₹30–40 lakh (primarily people and training costs). This is less than the potential cost of a single regulatory penalty or discrimination lawsuit. The investment in ethical AI is an investment in trust — and trust is the foundation of the insurance business.</p>
+
+                    <p><strong>Key Risks and Mitigation:</strong><br>
+                    The primary risk is that bias testing reveals inconvenient truths — existing models that systematically disadvantage certain groups. Mitigation: we must be prepared for this outcome. Ethical AI is not about "being perfect" — it is about being transparent, accountable, and committed to improvement. If bias is found, we will: document it, assess the customer impact, develop a remediation plan, and communicate transparently with affected customers. A company that voluntarily discloses and remediates bias will be treated far more favourably by regulators than one that waits for a complaint. The second risk is that the AI governance framework slows down model deployment. Mitigation: the framework is designed with proportionality — low-risk models do not require Ethics Committee review — and the review process for high-risk models has a 2-week turnaround target.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Ethical AI in insurance is a regulatory, reputational, and business imperative. The EU AI Act classifies insurance underwriting as "high-risk AI." IRDAI is expected to issue AI governance guidelines. A discriminatory AI model can destroy customer trust faster than any other failure.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Seven ethical AI principles — Fairness, Transparency, Explainability, Accountability, Privacy, Robustness, Human Oversight — translate into specific requirements for insurance AI systems. The "three-audience test" (regulator, customer, journalist) catches problems that checklists miss.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Five types of bias affect insurance ML: Historical, Representation, Measurement, Aggregation, and Evaluation bias. Each occurs at a different point in the ML lifecycle and requires a different mitigation strategy. Proxy discrimination — where facially neutral variables correlate with protected characteristics — is the most dangerous because it is invisible.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>Bias mitigation strategies exist across three stages: Pre-processing (re-weighting, re-sampling), In-processing (fairness constraints, adversarial debiasing), and Post-processing (threshold adjustment, outcome equalisation). There is no single "correct" fairness definition — the choice must be explicitly documented and justified for each model's context.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>An AI Governance Framework has four components: Governance Structure (AI Ethics Committee, Model Owners), Risk Classification (High/Medium/Low), Development Standards (Model Cards, Bias Assessment, Explainability), and Monitoring (performance and fairness drift, incident response). The framework must be tested against real scenarios — not just written as a document.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s25-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. An insurance pricing model uses "credit score" as a rating factor. Analysis shows that credit score is correlated with neighbourhood income level, and neighbourhood income is correlated with race. The model does not use "race" as a variable. This is an example of:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) A fair model — it does not contain any protected characteristics</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Proxy discrimination — a facially neutral variable (credit score) is correlated with a protected characteristic (race via income via neighbourhood). The model may produce discriminatory outcomes even though no protected variable is used. The insurer must test for disparate impact</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Representation bias — credit scores are not representative of certain population groups</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Measurement bias — credit scores are inaccurate for certain groups</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. A fraud detection model reports AUC of 0.91 overall but AUC of 0.67 for claims from semi-urban areas. The most likely explanation is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) The model is working correctly — AUC always varies across segments</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Evaluation bias — the model's overall performance metric (AUC = 0.91) masks a significant performance gap for semi-urban claims. This combination of representation bias (fewer semi-urban claims in training data) and aggregation bias (fraud patterns differ between urban and semi-urban) means the model cannot detect fraud effectively in semi-urban areas</label>
+                        <label class="quiz-option"><option type="radio" name="q2" value="c"> c) The semi-urban claims data is mislabelled</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) AUC is the wrong metric — the model should be evaluated on accuracy instead</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. The "no-free-lunch theorem" of fairness in ML states that:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) Fairness is free — it costs nothing to add fairness constraints to a model</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) No single fairness intervention can simultaneously satisfy all definitions of fairness and maintain maximum accuracy. Tradeoffs between fairness definitions are inevitable — the team must choose, document, and justify the chosen fairness definition for each model</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Fairness constraints always reduce model accuracy by at least 10%</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) Only one fairness definition is mathematically valid — all others are subjective</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. The "Model Card" for an insurance AI system should document:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Only the model's technical specifications (algorithm, features, performance metrics)</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Purpose, training data description, features and their rationale, performance metrics overall and by group, bias assessment results, intended use cases, limitations, and responsible AI considerations — making the model's capabilities and limitations transparent to all stakeholders</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) The model's code repository location and deployment instructions</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) The names of the data scientists who developed the model</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. A company uses ChatGPT to draft its AI Governance Framework. After reviewing the output, the Head of AI Governance notes that the framework contains no specific references to insurance regulations (IRDAI, DPDP Act) or insurance-specific AI use cases (underwriting, pricing, claims). The correct action is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Accept the AI-generated framework as-is — it is comprehensive and well-structured</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Revise the framework to add insurance-specific content: IRDAI's expected AI guidelines, DPDP Act compliance requirements, product-level risk classification for motor/health/property AI models, and integration with the existing actuarial model risk management framework. The AI-generated structure is useful as a starting point, but the content must be tailored by insurance domain experts</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Reject the AI-generated framework entirely and hire a consultant to write one from scratch</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) Ask ChatGPT to regenerate with a more detailed prompt — this will fix all gaps</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s25-quiz', ['b','b','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s25-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-24.html" class="nav-link">&larr; Previous: Insurance Regulations &amp; Digital Governance</a>
+            <a href="session-26.html" class="nav-link next">Next: Capstone Project Presentations &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

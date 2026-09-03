@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 23: Looker Studio for Executive Reporting — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-22.html" class="nav-link">&larr; Previous: Customer Retention &amp; Churn Analytics</a>
+            <a href="session-24.html" class="nav-link next">Next: Insurance Regulations &amp; Digital Governance &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 7 &middot; Session 23 &middot; 90 min &middot; Looker Studio Lab</div>
+            <h1>Session 23: Looker Studio for Executive Reporting</h1>
+            <div class="chapter-meta">
+                CILO-2 &middot; Analytics Tools &middot; Lab-based, Hands-on (Looker Studio) &middot; Google account required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Distinguish between executive dashboards (strategic, KPI-driven, exception-focused) and operational dashboards (detailed, action-oriented, transaction-level) — and design each for its specific audience</li>
+                <li>Connect Looker Studio to insurance data from Google Sheets, configure data freshness, and build scorecards for the seven essential executive KPIs</li>
+                <li>Build a 2-page executive insurance dashboard covering Performance Overview and Portfolio &amp; Market View</li>
+                <li>Apply data storytelling principles — the "one page, one question" rule, strategic annotations, and the executive summary KPI hierarchy</li>
+                <li>Design a management review cadence around the dashboard — linking insights to decisions to actions</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Executive Reporting vs. Operational Dashboards</h2>
+
+            <p>The most common mistake in insurance dashboard design is building an <strong>operational dashboard</strong> and calling it an <strong>executive dashboard</strong>. The two serve fundamentally different purposes, audiences, and decision contexts. An executive dashboard that shows the "claims processed per adjuster" chart is not an executive dashboard — it is an operational dashboard that an executive will ignore. Understanding the difference is the first step in building a dashboard that actually gets used by senior leadership.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Operational Dashboard</th><th>Executive Dashboard</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Primary audience</strong></td><td>Operations managers, team leads, claims processors</td><td>CEO, CFO, COO, Board, Functional Heads</td></tr>
+                    <tr><td><strong>Purpose</strong></td><td>Monitor daily operations, identify bottlenecks, manage workflow</td><td>Monitor strategic health, identify trends, drive decisions</td></tr>
+                    <tr><td><strong>Time horizon</strong></td><td>Daily, weekly — real-time or near-real-time</td><td>Monthly, quarterly — historical trends with forward-looking indicators</td></tr>
+                    <tr><td><strong>Granularity</strong></td><td>Transaction-level — individual claims, individual policies</td><td>Aggregate — portfolio-level KPIs, trends, exceptions</td></tr>
+                    <tr><td><strong>Key question</strong></td><td>"What needs my attention right now?"</td><td>"Are we on track to meet our strategic objectives?"</td></tr>
+                    <tr><td><strong>Visual density</strong></td><td>High — many charts, tables, detail on one page</td><td>Low — minimal, focused, each page answers ONE question</td></tr>
+                    <tr><td><strong>Interactivity</strong></td><td>Drill-down to individual transaction is essential</td><td>Drill-down to next level of aggregation, rarely to transaction level</td></tr>
+                    <tr><td><strong>Update frequency</strong></td><td>Daily or intra-day</td><td>Monthly — reflects the reporting calendar</td></tr>
+                    <tr><td><strong>Threshold logic</strong></td><td>Yellow/red alerts when metrics exceed operational thresholds</td><td>Trend direction, rate of change, comparison to plan/prior year</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A private Indian insurer spent ₹40 lakh building a management dashboard that was supposed to "give the CEO real-time visibility into all operations." The dashboard had 47 charts on 3 pages — claims pending by adjuster, policy issuance time by branch, call centre hold times by hour, and 44 other metrics. The CEO looked at it once, found it overwhelming, and never opened it again. The dashboards that actually drove decisions at the insurer were the ones built later: a 1-page Executive Dashboard with exactly 7 KPIs (premium growth, combined ratio, claim settlement ratio, persistency, expense ratio, solvency ratio, customer NPS) and a 1-page Board Dashboard with the same 7 KPIs plus a 5-year trend line. The operational managers got their detailed dashboards. The executives got their strategic overview. The key skill was knowing the difference — and having the confidence to say "no" to the 40 charts that executives should not see.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Looker Studio Interface &amp; Setup</h2>
+
+            <p>Looker Studio (formerly Google Data Studio) is a free, browser-based data visualisation tool that integrates with the Google ecosystem — Sheets, BigQuery, Analytics, and 800+ other data sources through connectors. For Indian insurers, Looker Studio is particularly useful for: (a) building lightweight executive dashboards that can be shared easily, (b) incorporating Google Sheets data that the finance team already maintains, (c) embedding in Google Sites for intranet access, and (d) creating scheduled email PDF snapshots for board reporting.</p>
+
+            <h3>2.1 Setting Up the Data Source</h3>
+
+            <p><strong>Step 1 — Prepare the data in Google Sheets:</strong> The executive dashboard data should be aggregated to the monthly level before importing to Looker Studio. Create a Google Sheet with the following structure (one sheet per data category):</p>
+
+            <pre><code class="language-text">Sheet 1: 'kpi_monthly'
+Columns: month_date, kpi_name, kpi_value, target_value, prior_year_value
+Data:
+  Jan 2024, GWP Growth (%), 12.5, 15.0, 10.2
+  Jan 2024, Combined Ratio (%), 101.2, 98.0, 103.5
+  ... (one row per KPI per month)
+
+Sheet 2: 'product_performance'
+Columns: month_date, product_line, gwp_cr, loss_ratio, expense_ratio, combined_ratio, growth_yoy
+Data:
+  Jan 2024, Motor, 45.2, 72.5, 28.0, 100.5, 8.5
+  Jan 2024, Health, 28.6, 68.2, 22.5, 90.7, 22.3
+  ... (one row per product per month)
+
+Sheet 3: 'channel_performance'
+Columns: month_date, channel, new_premium_cr, retention_rate, cac, ltv_cac
+Data:
+  Jan 2024, Agent, 18.5, 0.82, 3200, 4.2
+  ... (one row per channel per month)
+
+Sheet 4: 'market_share'
+Columns: quarter, product_line, our_gwp_cr, total_market_gwp_cr
+Data:
+  Q1 2024, Motor, 145.2, 5200
+  ... (one row per product per quarter)</code></pre>
+
+            <p><strong>Step 2 — Connect Looker Studio to Google Sheets:</strong> In Looker Studio, click "Create" → "Data Source" → Select "Google Sheets" → Choose the spreadsheet and worksheet. Set the data refresh to "On" with a frequency of "Daily" (executive dashboards need daily data freshness, not real-time).</p>
+
+            <p><strong>Step 3 — Configure fields:</strong> For each data source, verify that: date fields are recognised as "Date" type, numeric fields as "Number" or "Currency" as appropriate, and percentage fields as "Number" with a "%" format. Create calculated fields for derived metrics:</p>
+
+            <pre><code class="language-text">Calculated Field Examples (Looker Studio formula syntax):
+
+-- Variance vs. Target (absolute)
+Variance vs Target = kpi_value − target_value
+
+-- Variance vs. Target (%)  :
+Var % vs Target = (kpi_value − target_value) / ABS(target_value) * 100
+
+-- Status Indicator:
+Status = CASE
+           WHEN kpi_value >= target_value THEN "On Track"
+           WHEN kpi_value >= target_value * 0.90 THEN "At Risk"
+           ELSE "Off Track"
+         END
+
+-- Year-to-Date (aggregate):
+YTD Value = RUNNING_SUM(kpi_value)
+
+-- Year-over-Year Growth (%)  :
+YoY Growth % = (kpi_value − prior_year_value) / ABS(prior_year_value) * 100</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> For executive dashboards, the data source should be ALREADY aggregated before it reaches Looker Studio. Executives do not need row-level data. Prepare the monthly aggregations in your data warehouse or in Google Sheets (using Python scripts or manual finance team updates) and serve the aggregates to Looker Studio. This has three advantages: (a) Looker Studio performs faster (aggregated tables are much smaller than raw data), (b) the finance team can validate the numbers before they reach the executive dashboard, and (c) the data pipeline is simpler and cheaper to maintain. Raw-data-to-executive-dashboard pipelines are fragile, slow, and unnecessary.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Executive KPIs for Insurance</h2>
+
+            <p>Not every metric is an executive KPI. An executive dashboard should contain exactly the metrics that the CEO and board use to assess the strategic health of the business. In insurance, seven KPIs cover the essential dimensions of business performance. An executive dashboard that has more than 7 KPIs is not an executive dashboard — it is a list of metrics without strategic focus.</p>
+
+            <h3>3.1 The Seven Essential Insurance Executive KPIs</h3>
+
+            <table>
+                <thead>
+                    <tr><th>KPI</th><th>Formula</th><th>What It Tells the CEO</th><th>Target</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>1. GWP Growth</strong></td><td>Current period Gross Written Premium / Prior period − 1</td><td>Is the business growing? Are we gaining or losing market share? Growth must be evaluated alongside loss ratio.</td><td>> 15% for growing markets, > inflation for mature markets</td></tr>
+                    <tr><td><strong>2. Combined Ratio</strong></td><td>Loss Ratio + Expense Ratio</td><td>Is the core insurance business profitable? Below 100 = underwriting profit. Above 100 = loss that must be covered by investment income.</td><td>< 100 (underwriting profit) for most lines. < 95 for market-leading performance.</td></tr>
+                    <tr><td><strong>3. Claim Settlement Ratio</strong></td><td>Claims Paid / (Claims Paid + Claims Denied)</td><td>Are we treating customers fairly? Regulatory focus area. Low ratio = high customer complaints. Very high ratio = possible fraud control weakness.</td><td>> 95% (IRDAI focus). Monitor: if ratio drops below 90%, investigate.</td></tr>
+                    <tr><td><strong>4. Persistency / Retention</strong></td><td>Policies Renewed / Policies Up for Renewal</td><td>Are we keeping our customers? Improving retention by 5% can increase enterprise value by 25%+. Most important leading indicator of future profitability.</td><td>> 80% for general insurance. > 85% for life insurance (13th month).</td></tr>
+                    <tr><td><strong>5. Expense Ratio</strong></td><td>Operating Expenses / Gross Written Premium</td><td>Are we spending efficiently? High ratio = cost structure problem. Low ratio alone is not good if the loss ratio is high (under-investing in claims = future problems).</td><td>< 30% for traditional insurers. < 20% for digital carriers. Trends matter more than absolute levels.</td></tr>
+                    <tr><td><strong>6. Solvency Ratio</strong></td><td>Available Solvency Margin / Required Solvency Margin</td><td>Can we survive a severe loss event? Regulator-mandated metric. Below 1.5 = regulatory intervention. Above 2.0 = strong capital position.</td><td>> 1.5 (IRDAI minimum). > 2.0 for financial strength rating. > 2.5 for comfortable headroom.</td></tr>
+                    <tr><td><strong>7. Customer NPS</strong></td><td>% Promoters − % Detractors (0–10 scale)</td><td>Are our customers happy? Leading indicator of future churn. Lagging indicator of claims service quality.</td><td>> 50 for good. > 70 for excellent. Industry average for Indian insurance: 25–60.</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The seven KPIs above are the <strong>strategic</strong> metrics for the CEO and board. Each functional head (Head of Claims, Head of Underwriting, Head of Marketing) should have their own operational dashboard with 10–20 metrics relevant to their function. The executive dashboard should NOT include: claims processed per adjuster, policy issuance time, call centre average handle time, or any other operational metric. If a metric does not answer the question "are we on track to meet our strategic objectives?", it does not belong on the executive dashboard — regardless of how interesting or well-analysed it is.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Page 1 — Performance Overview</h2>
+
+            <p>Page 1 answers the question: <strong>"Are we on track to achieve our strategic objectives this year?"</strong> It is the page the CEO looks at first — and most of the time, it is the only page they look at. Every element on this page must serve this single question.</p>
+
+            <h3>4.1 Page Layout</h3>
+
+            <pre><code class="language-text">LOOKER STUDIO EXECUTIVE DASHBOARD — PAGE 1: PERFORMANCE OVERVIEW
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ PERFORMANCE OVERVIEW  FY 2026            [Date Range: ▼] [Compare: ▼]
+├───────────┬───────────┬───────────┬───────────┬───────────┬──────────┤
+│ GWP Growth│ Combined  │ Claim     │ Persist-  │ Expense   │ Solvency │
+│ ▲ 14.2%   │ Ratio     │ Settlement│ ency      │ Ratio     │ Ratio    │
+│ vs plan:  │ 98.6      │ Ratio     │ 78%       │ 26.5%     │ 2.3      │
+│ +1.2%     │ vs plan:  │ 94.5%     │ vs plan:  │ vs plan:  │ vs plan: │
+│ ▲ vs PY:  │ ▲ -2.1pts │ vs plan:  │ +2%       │ -0.5pts   │ -0.1     │
+│ +3.5%     │ (improv)  │ -0.5%     │ (improve)  │ (improv)  │ (stable) │
+│ GREEN      │ AMBER     │ GREEN     │ GREEN      │ GREEN      │ GREEN    │
+├───────────┴───────────┴───────────┴───────────┴───────────┴──────────┤
+│ I N S T I T U T I O N A L   D E T A I L                              │
+│ (Optional expanded view when CEO clicks "show details")             │
+│                                                                     │
+│ Combined Ratio Trend (Last 24 Months)                               │
+│ ┌─────────────────────────────────────────────────────────────────┐ │
+│ │   ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌────┐              │ │
+│ │   │    │▄▄▄▄│    │    │    │▄▄▄▄│    │▄▄▄▄│    │              │ │
+│ │▄▄▄│    │    │▄▄▄▄│▄▄▄▄│    │    │▄▄▄▄│    │    │▄▄▄▄│▄▄▄▄│▄▄▄▄│ │
+│ │   J F M A M J J A S O N D J F M A M J J A S O N D              │ │
+│ └─────────────────────────────────────────────────────────────────┘ │
+│ ▲ Loss Ratio: 72.5%     Expense Ratio: 26.1%     Target: 98.0%    │
+│                                                                     │
+│ Key Insight: Combined ratio improved 2.1 pts vs. prior year,        │
+│ driven by expense reduction. Loss ratio stable. Monitor motor TP    │
+│ adequacy — pricing pool update expected in Q3.                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+BOTTOM ROW (expandable/collapsible):
+
+┌──────────────┬─────────────────────┬──────────────────────┐
+│ KPI Trend    │ Top 5 Products      │ Exception Flags       │
+│ Indicators   │ by GWP + Combined   │ (Red = needs action)  │
+│ (Mini-spark  │ Ratio — bar/line)   │ ─────────────────     │
+│ lines for    │                     │ • Motor TP CR=108 ⚠  │
+│ all 7 KPIs)  │ Motor  45%  CR=100  │ • Health persistency  │
+│              │ Health 29%  CR=91   │   dropped 4% in 2 mo  │
+│              │ Property 12% CR=95  │ ─────────────────     │
+│              │ Crop 8% CR=110      │ • IT expenses +15%    │
+│              │ Travel 6% CR=72     │   vs plan (cloud cost)│
+└──────────────┴─────────────────────┴──────────────────────┘</code></pre>
+
+            <h3>4.2 Building Page 1 in Looker Studio — Step by Step</h3>
+
+            <ol>
+                <li><strong>Scorecards (top row):</strong> Add 6 scorecard charts, one for each KPI. Configure: "Metric" = kpi_value, "Comparison" = target_value (shows variance). Enable "Show comparison" and "Compact numbers." Set conditional formatting: green if kpi_value ≥ target_value, amber if ≥ 90% of target, red if below. Add a trend arrow (up/down/flat) as a sparkline at the bottom of each scorecard using a separate time series chart overlaid on the scorecard.</li>
+                <li><strong>Key insight text box:</strong> Below the scorecards, add a text box that dynamically shows the "Key Insight" — the most important KPI movement this month. This should be updated monthly by the analyst. In Looker Studio, you can use a "Text" element with a calculated field that picks the KPI with the largest month-over-month change. For example: "Combined ratio improved 2.1 pts — best performance in 18 months. Driven by expense ratio reduction." This single text box makes the dashboard an "executive summary" rather than a data display.</li>
+                <li><strong>Combined Ratio trend chart:</strong> Add a time series chart. Dimension: month_date. Metric: combined_ratio. Add reference lines at target (98) and threshold (100). Add a second metric: loss_ratio, plotted on the same Y-axis but with a different style (dashed line). The two lines together tell the story: combined_ratio = loss_ratio + expense_ratio. The gap between them is the expense ratio — executives can see at a glance whether CR movements are driven by claims or expenses.</li>
+                <li><strong>KPI sparklines row:</strong> Add 7 mini time series charts (one per KPI) showing the 24-month trend. These are critical for executive decision-making — a KPI that is "green" this month but has been trending downward for 6 months is more concerning than a "red" KPI that is improving. Configure: height = 80px, hide axes, hide legend. Add a trend line (linear) for each sparkline.</li>
+                <li><strong>Top 5 products table:</strong> Add a table with: product_line, gwp_cr (formatted as currency), growth_yoy (with conditional green/red), combined_ratio (with conditional formatting: green if < 95, amber if 95–105, red if > 105). Sort by gwp_cr descending. Limit to 5 rows. This table tells the CEO: "which products are generating our premium, and are they profitable?"</li>
+                <li><strong>Exception flags:</strong> Add a table filtered to show only metrics where kpi_value is outside the acceptable range. This is the "red flags" section — the CEO's attention should be drawn here first. If the table is empty (all KPIs within range), display a green "All KPIs on track" message. This table is where the executive should START their review, not the scorecards.</li>
+            </ol>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A CFO of a mid-size Indian general insurer told the analytics team: "I want a dashboard that tells me, in 10 seconds, what I need to worry about." The team built a single-page dashboard that was literally nothing but: (a) a green/amber/red status for each of the 7 strategic KPIs, (b) a key insight text box, and (c) an exception flag table. The CEO and CFO reviewed this dashboard every Monday morning for 15 minutes. If any KPI was red, the relevant functional head joined the meeting to explain the plan. The KPI that was most often red was the Combined Ratio for motor third-party — a structural industry problem that could not be solved by the insurer alone but needed constant management attention. The dashboard did not solve the problem — but it made sure the problem was visible to the people who could act on it, every single week. That visibility was worth more than a hundred "beautiful" charts that no one looked at.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch23-portfolio-market">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>5. Page 2 — Portfolio &amp; Market View</h2>
+
+            <p>Page 2 answers the question: <strong>"Where is the growth coming from and what is our competitive position?"</strong> This page is reviewed monthly by the CEO with the Heads of Products, Distribution, and Marketing. It focuses on the composition and competitive dynamics of the portfolio — which products, channels, and regions are performing and which need attention.</p>
+
+            <h3>5.1 Page Layout</h3>
+
+            <pre><code class="language-text">LOOKER STUDIO EXECUTIVE DASHBOARD — PAGE 2: PORTFOLIO & MARKET VIEW
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ PORTFOLIO & MARKET VIEW     [Product: ▼] [Channel: ▼] [Region: ▼]
+├────────────────────────────┬────────────────────────────────────────┤
+│                            │                                        │
+│  Product Mix (Treemap)     │  Market Share Trend (Line Chart)       │
+│                            │                                        │
+│ ┌──────┬──────┬─────┬────┐ │  ┌─────────┬──┬──┬──┬──┬──┬──┬──┐    │
+│ │Motor │Health│Property   │ │  │   ── Our GWP  ── Industry │    │
+│ │45%   │29%   │12%    8%  │ │  │ ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄  │    │
+│ │CR:100│CR:91 │CR:95  │  │ │  │▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄│    │
+│ │      │      │Crop  │  │ │  └────────────────────────────┘    │
+│ └──────┴──────┴─────┴────┘ │  Market share: 2.8% (+0.3% YoY)   │
+│                            │                                        │
+├────────────────────────────┼────────────────────────────────────────┤
+│ Channel Mix (100% Bar)     │ Geographic Distribution (Geo Map)      │
+│                            │                                        │
+│ ┌──────┬──────┬────┬──┬──┐ │  ┌────────────────────────────────┐   │
+│ │Agent │Digital│Aggregator │ │  │  [India map with states       │   │
+│ │45%   │25%    │18%   Banca│ │  │   shaded by GWP share]        │   │
+│ │      │       │12%      │ │  │                                │   │
+│ └──────┴──────┴────┴──┴──┘ │  │  Top 3 states: Maharashtra     │   │
+│ Digital channel growing at  │  │  22%, Karnataka 14%, Gujarat 12%│
+│ 35% YoY (vs. overall 15%)   │  └────────────────────────────────┘   │
+├────────────────────────────┴────────────────────────────────────────┤
+│ Product Profitability Matrix (Scatter Chart)                        │
+│ X-axis: Growth Rate (YoY %), Y-axis: Combined Ratio,               │
+│ Size: GWP, Color: Product Line                                     │
+│ • Top-left: High growth, Low CR = "Stars" (Invest)                 │
+│ • Top-right: High growth, High CR = "Question marks" (Fix or stop) │
+│ • Bottom-left: Low growth, Low CR = "Cash cows" (Optimise)         │
+│ • Bottom-right: Low growth, High CR = "Dogs" (Exit)                │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>5.2 Building Page 2</h3>
+
+            <ol>
+                <li><strong>Product Mix (Treemap):</strong> Add a treemap chart. Hierarchy: product_line. Size metric: gwp_cr. Colour metric: combined_ratio (green → amber → red colour scale). The treemap shows the CEO which products dominate the portfolio (size) AND which are profitable (colour) — in one chart.</li>
+                <li><strong>Market Share Trend:</strong> Add a time series chart with two metrics: (a) our_gwp_cr (our company's gross written premium by quarter, bar), (b) total_market_gwp_cr (total industry premium, line). Add a calculated field: market_share = our_gwp_cr / total_market_gwp_cr. Display this as a trend line (secondary axis) or a scorecard below the chart. Market share trend is one of the most important competitive indicators — it captures whether the insurer is winning or losing relative to the market, independent of overall market growth.</li>
+                <li><strong>Channel Mix (100% Stacked Bar):</strong> Add a 100% stacked bar chart. Dimension: month_date. Breakdown: channel. Metric: new_premium_cr. This chart shows how the distribution mix is evolving over time. The key trend to watch: is the digital share growing? Is the agent share declining? The executive needs to see whether the channel strategy is working.</li>
+                <li><strong>Geographic Distribution:</strong> If state-level data is available, add a Google Maps chart (filled map of India). Colour metric: gwp_cr. Hover tooltip: state name, premium, growth rate, loss ratio. If precise location data is unavailable, use a horizontal bar chart of top 10 states sorted by premium.</li>
+                <li><strong>Product Profitability Matrix:</strong> Add a scatter chart. X-axis: growth_yoy. Y-axis: combined_ratio. Size: gwp_cr. Colour: product_line. Add constant lines at X=0 (zero growth) and Y=100 (break-even combined ratio). The four quadrants reveal the strategic position of each product. Products in the "Star" quadrant (high growth, low combined ratio) are the most valuable — the CEO should know their names and protect them.</li>
+            </ol>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The Product Profitability Matrix (Quadrant Chart) is the single most strategic visual on the executive dashboard. It is the insurance equivalent of the BCG Growth-Share Matrix. Present it with clear quadrant labels and a one-sentence takeaway for each product in the "needs attention" quadrants. For example: "Motor is our star — our largest product AND our most profitable. Crop is in the 'fix or exit' quadrant: negative growth AND combined ratio above 105. We need a decision on crop by next quarter." When an executive sees this chart, they immediately know which products to invest in, which to fix, and which to exit. No other chart on the dashboard conveys this strategic information. Make it the most prominent visual on Page 2.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Dashboard Storytelling</h2>
+
+            <p>A dashboard that displays data without telling a story is a report, not a decision-support tool. Dashboard storytelling is the practice of structuring the visual elements, annotations, and layout to guide the viewer through a logical narrative: <strong>Here is the context → Here is what changed → Here is why it matters → Here is what we should do.</strong></p>
+
+            <h3>6.1 The Executive Dashboard Story Framework</h3>
+
+            <p>Every executive dashboard should tell a four-part story. The layout should follow this narrative structure — not the structure of the data source:</p>
+
+            <ol>
+                <li><strong>The Headline (Top row — scorecards):</strong> The 7 KPI scorecards with green/amber/red status. An executive should be able to glance at this row and answer: "Is the business healthy or not?" If all 7 are green, the story is "we are on track." If any are red, the exception flags section takes over.</li>
+                <li><strong>The Evidence (Middle — trend charts):</strong> The trend charts that support the headline. If the Combined Ratio is amber, the Combined Ratio trend chart should be the first chart the executive sees — showing whether the amber is a temporary blip (you can ignore it) or part of a deteriorating trend (you must address it).</li>
+                <li><strong>The Context (Lower — composition and comparison):</strong> The portfolio composition and market context that explains WHY the headline and evidence look the way they do. The Product Profitability Matrix and Market Share chart provide this context.</li>
+                <li><strong>The Call to Action (Bottom — exception flags, recommendations):</strong> The actionable output of the dashboard — what needs to be done. The exception flag table lists the specific issues requiring management attention. Each exception should have a recommended action and an owner.</li>
+            </ul>
+
+            <h3>6.2 Strategic Annotation — The "Why" Layer</h3>
+
+            <p>The most valuable addition to an executive dashboard is not a chart — it is an <strong>annotation</strong> that explains WHY a KPI moved. A chart showing "Combined ratio improved from 100.5 to 98.6" is useful. A chart with the annotation "Combined ratio improved 1.9 pts — expense ratio down 1.2 pts (IT modernisation savings beginning to flow) + loss ratio stable" is transformative. The annotation turns data into insight.</p>
+
+            <p>In Looker Studio, annotations can be added as:</p>
+            <ul>
+                <li><strong>Text boxes (recommended for monthly executive dashboards):</strong> The analyst writes a paragraph summarising the month's key movements. This is placed at the top of the dashboard, directly below the scorecards. It should take 30 seconds to read and cover: what happened, why, and what action is recommended.</li>
+                <li><strong>Chart-specific annotations (for recurring trends):</strong> Use a separate data source with annotation events (date, label, colour) and add it as a line chart layer on top of the main time series. This is more technically complex but produces a cleaner result for recurring annotations (e.g., marking monsoon season on claims charts, or marking regulatory change implementation dates).</li>
+                <li><strong>Drill-through comments (for deep dive):</strong> Use the "Report comments" feature in Looker Studio to allow executives to comment on specific charts. The CEO can ask: "What is driving the motor TP combined ratio increase?" The analytics team can respond: "Reserve strengthening of ₹12 Cr due to pool deficit — temporary, not structural." This creates a dialogue layer on top of the data.</li>
+            </ul>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A large Indian life insurer replaced its static quarterly board pack (68 PowerPoint slides, taking 2 weeks to prepare) with a 2-page Looker Studio dashboard. The change was not about technology — it was about storytelling. The 68 slides had presented every possible metric but told no coherent story. The 2-page dashboard presented exactly 7 KPIs with a "key insight" text box and an "exception flags" table at the bottom. The board discussion changed: instead of spending 75% of meeting time understanding the numbers and 25% debating strategy, the ratio flipped to 25% understanding and 75% debating. The chairman told the analytics team: "This is the best report we have ever received. Not because the numbers are different — they are the same numbers — but because now I understand what I need to act on." That is the goal of dashboard storytelling: not to present data, but to enable decisions.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch23-dashboard-to-decision">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. From Dashboard to Decision</h2>
+
+            <p>The most sophisticated executive dashboard in the world is worth nothing if it does not lead to decisions and actions. The gap between "seeing the data" and "doing something about it" is where most dashboard investments fail. Closing this gap requires a management process that integrates the dashboard into the decision-making rhythm of the organisation.</p>
+
+            <h3>7.1 The Dashboard-Powered Decision Cadence</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Cadence</th><th>Who Participates</th><th>What They Review</th><th>Decision Output</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Weekly — 15 min</strong></td><td>CEO, CFO, COO, Head of Risk</td><td>Executive Dashboard — Exception Flags only (Page 1 red flags at the bottom)</td><td>Decisions on red-flag items: approve escalation, assign owner, set deadline</td></tr>
+                    <tr><td><strong>Monthly — 60 min</strong></td><td>CEO + all functional heads</td><td>Executive Dashboard — Pages 1 and 2, full review</td><td>Strategic decisions: pricing changes, product launches, channel reallocation, expense initiatives</td></tr>
+                    <tr><td><strong>Quarterly — 120 min</strong></td><td>Board + management team</td><td>Executive Dashboard + detailed functional deep-dives</td><td>Strategic direction: market entry/exit, capital allocation, M&A, major partnership decisions</td></tr>
+                    <tr><td><strong>Annually — Strategic Review</strong></td><td>Board + full management</td><td>5-year trend of all 7 KPIs + detailed competitor benchmarking</td><td>Annual business plan, capital plan, strategic priorities for the next fiscal year</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 The Action-Tracking Log</h3>
+
+            <p>Every decision that comes out of a dashboard review must be tracked. Without an action-tracking system, the same red flag will appear month after month — and the dashboard becomes just another report that everyone ignores. The action log should be a simple table — in Google Sheets, embedded in Looker Studio, or integrated with the project management tool:</p>
+
+            <pre><code class="language-text">ACTION LOG — EXECUTIVE DASHBOARD REVIEW (July 2026)
+
+| Action ID | Date Raised | KPI | Issue | Owner | Action | Deadline | Status |
+|-----------|------------|-----|-------|-------|--------|----------|--------|
+| A‑0025    | 15 Jul 2026| CR  | Motor TP | VP UW | Submit | 30 Sep | In Prog |
+|           |            |     | CR=108  |        | rate   | 2026   |         |
+|           |            |     | (target:|        | revision|        |         |
+|           |            |     | 100)   |        | proposal|        |         |
+| A‑0026    | 15 Jul 2026| NPS | NPS    | VP CX | Launch | 31 Jul | Open   |
+|           |            |     | dropped |        | digital | 2026   |         |
+|           |            |     | from 52 |        | claims  |        |         |
+|           |            |     | to 44   |        | tracking|        |         |
+| A‑0027    | 15 Jul 2026| PERS| Health | VP Mk | Launch | 15 Aug | Open   |
+|           |            |     | persistency |        | auto-  | 2026   |         |
+|           |            |     | 74% → 70%|       | renewal |        |         |
+|           |            |     | in 2 mo |        | feature |        |         |</code></pre>
+
+            <h3>7.3 The Most Important Rule — "No Decisions Without Data"</h3>
+
+            <p>The ultimate goal of the executive dashboard is not to be "interesting" or "beautiful" — it is to create a culture where <strong>no strategic decision is made without reference to the relevant KPI.</strong> When a product head proposes a premium change, the CEO should ask: "Show me the combined ratio trend for that product. Show me the elasticity estimate. How does this impact our persistency target?" When a marketing head proposes a channel expansion, the CEO should ask: "What is the CAC for that channel? What is the LTV/CAC ratio? How does it compare to our existing channels?"</p>
+
+            <p>An executive dashboard that has achieved this culture shift has succeeded — regardless of which tool it was built in, how many charts it has, or whether it uses the latest visualisation techniques. An executive dashboard that has not achieved this culture shift has failed — regardless of how impressive the technology is.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The best way to measure whether your executive dashboard is succeeding is to track the <strong>number of data-informed decisions</strong> in each management meeting. Count them. In the first meeting after the dashboard launches, there may be 2–3 data-informed decisions out of 10 decisions total. Six months later, there should be 7–8. If the number has not increased, the dashboard is not being used for decision-making — it is just a report. The fix is usually not a better dashboard. The fix is a management process that requires dashboard reference before decisions. The CEO must model this behaviour: "Before we discuss this, let's look at the dashboard. What does the data say?" When the CEO does this consistently, everyone else will follow.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a 2-Page Executive Dashboard in Looker Studio</h2>
+            <div class="project-brief">
+                <p>You are the business intelligence lead at "ExecutiveView Insurance." The CEO has requested a 2-page executive dashboard that provides a strategic overview of the business. The current monthly reporting process involves 50+ PowerPoint slides prepared over 2 weeks by the finance team. The CEO wants a dashboard that is: (a) always up to date, (b) takes 30 seconds to get the key message, and (c) clearly flags what needs attention.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Prepare the data in Google Sheets:</strong> Create 4 sheets (kpi_monthly, product_performance, channel_performance, market_share) with at least 24 months of data. Use the synthetic dataset's aggregates or create realistic mock data. The data must include at least: months from Jan 2024 to Dec 2025, 5 product lines, 4 channels, and 7 executive KPIs with targets and prior year values.</li>
+                    <li><strong>Build Page 1 — Performance Overview:</strong> Include: 6 scorecards with conditional formatting (one for each of the first 6 executive KPIs), a key insight text box, the Combined Ratio trend chart with reference lines, 7 KPI sparklines, a top-5 products table, and an exception flags table. All elements must be connected to the Google Sheets data source.</li>
+                    <li><strong>Build Page 2 — Portfolio &amp; Market View:</strong> Include: a treemap of product mix, a market share trend chart, a channel mix 100% stacked bar, a geographic distribution chart (bar chart of top 10 states if geo data is unavailable), and the Product Profitability Matrix scatter chart with quadrant lines at X=0, Y=100.</li>
+                    <li><strong>Interactivity:</strong> Add a date range control on Page 1. Add a product line filter that controls all charts on both pages. Add a "drill-down" from product treemap to product detail (you can simulate this with a filter action).</li>
+                    <li><strong>Storytelling and annotations:</strong> Add a text box annotation explaining the most significant KPI movement for the current month. Ensure the page layout follows the four-part story framework (Headline → Evidence → Context → Call to Action).</li>
+                    <li><strong>Share the dashboard:</strong> Share the dashboard with "view" permission (generate a shareable link). Set up a scheduled email delivery of a PDF snapshot to yourself once. Write a 300-word dashboard user guide for the CEO explaining: what each page shows, how to use the filters, what to look at first, and how the dashboard should be used in management decision-making.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Dashboard User Guide (Sample)</h4>
+
+                    <p><strong>To:</strong> CEO, ExecutiveView Insurance<br>
+                    <strong>From:</strong> Business Intelligence — Executive Dashboard<br>
+                    <strong>Subject:</strong> Executive Dashboard — User Guide</p>
+
+                    <p><strong>Welcome to your Executive Dashboard.</strong></p>
+
+                    <p><strong>What this dashboard does:</strong><br>
+                    This dashboard replaces the monthly 50-slide PowerPoint pack. It is updated every morning with the previous day's data (with a 2-day lag for claims data, which takes longer to settle). It shows the strategic health of the business — not operational detail. It is designed to be reviewed in 15 minutes, not 2 hours. The dashboard contains 2 pages. Page 1 — "Performance Overview" answers: Are we on track to hit our annual targets? Page 2 — "Portfolio &amp; Market View" answers: Where is the growth coming from and are we winning or losing in the market?</p>
+
+                    <p><strong>How to use it — start here every time:</strong><br>
+                    Open Page 1. Look at the "Exception Flags" table at the bottom-right FIRST — not the scorecards. The exception flags show you what is wrong and needs your attention. If the exception table is empty, all KPIs are within acceptable range — you can review the scorecards at a relaxed pace. If the exception table has items, those are your priorities for this review. The "Key Insight" text box below the scorecards gives you the one sentence you need to know about this month's performance — read it before you dive into the charts.</p>
+
+                    <p><strong>The scorecard colours:</strong><br>
+                    <strong>Green:</strong> On track — KPI is at or above target. No action needed. <strong>Amber:</strong> At risk — KPI is between 90% and 100% of target. Monitor. <strong>Red:</strong> Off track — KPI is below 90% of target. Action required. A red KPI should have a corresponding entry in the Exception Flags table with an owner and a deadline. If any KPI has been red for more than 2 consecutive months, that KPI becomes a standing agenda item in the weekly management meeting until it is resolved.</p>
+
+                    <p><strong>The Product Profitability Matrix (Page 2):</strong><br>
+                    This is the most strategic chart in the dashboard. Products in the top-left quadrant (high growth, low combined ratio) are our "Stars" — protect them. Products in the bottom-right (low growth, high combined ratio) are our "Dogs" — we should stop investing and consider exiting. Products in the top-right (high growth, high combined ratio) are "Question Marks" — we need to decide whether to invest more to fix them or cut them loose. Products in the bottom-left (low growth, low combined ratio) are "Cash Cows" — keep them running efficiently but don't invest heavily in growth. This chart should drive every product strategy conversation.</p>
+
+                    <p><strong>Filters:</strong><br>
+                    Use the Date Range filter on Page 1 to adjust the time window (default: last 12 months). The product filter on Page 2 controls all charts on that page — select a specific product to see its channel mix, geographic distribution, and profitability in detail. To reset, click "Clear."</p>
+
+                    <p><strong>How to use this in meetings:</strong><br>
+                    Start every weekly management meeting with: "Let's look at the dashboard. What are the red flags?" Spend the first 10 minutes on exception flags only. Then move to the strategic topic for the week. The dashboard is not a presentation that someone delivers TO you — it is a tool that the team uses TOGETHER. The most powerful thing you can do as CEO is to say, in every strategic discussion: "What does the dashboard say?" and "Show me the KPI." When you do this consistently, the organisation learns to lead with data.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Executive dashboards and operational dashboards serve different purposes. An executive dashboard answers ONE question per page, uses aggregate KPIs with green/amber/red status, and highlights exceptions. An operational dashboard supports workflow management with granular data and real-time updates.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Seven KPIs cover the essential dimensions of insurance business performance: GWP Growth, Combined Ratio, Claim Settlement Ratio, Persistency, Expense Ratio, Solvency Ratio, and Customer NPS. An executive dashboard with more than 7 KPIs has lost its strategic focus.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Page 1 — Performance Overview — should use the four-part story framework: Headline (scorecards) → Evidence (trend charts) → Context (composition) → Call to Action (exception flags). The exception flags table is the most important element — it tells the executive what needs to be done.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>The Product Profitability Matrix (Growth Rate × Combined Ratio scatter chart) is the single most strategic visual — it reveals the "Stars," "Cash Cows," "Question Marks," and "Dogs" of the portfolio. Present it with clear quadrant labels and product-level actions.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>A dashboard that does not lead to decisions has failed — regardless of its technical quality. The measure of success is the number of data-informed decisions in management meetings. This requires a management process — weekly reviews, action tracking, and a CEO who models "what does the dashboard say?" behaviour.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s23-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. The primary question that Page 1 (Performance Overview) of an executive dashboard should answer is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Which claims adjuster has the highest pending caseload?</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Are we on track to achieve our strategic objectives this year?</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) What is the average premium per policy by district?</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) How many calls did the contact centre handle yesterday?</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. An executive dashboard shows the combined ratio is 102 (target: 98) — coded RED. The trend chart shows that 5 months ago it was 106, 4 months ago 104, 3 months ago 103, 2 months ago 102, and this month 102 again (flat). The correct strategic interpretation is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) The combined ratio is red — immediate board-level action required</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) The combined ratio has been improving steadily from 106 to 102 over 5 months but has plateaued — the improvement trend is positive but the improvement has stalled, suggesting the "easy fixes" are done and structural changes are now needed to reach 98</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) The combined ratio is flat this month — no trend, no concern</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) The target should be adjusted upward to 102 since the trend has stabilised</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. In the Product Profitability Matrix (Growth Rate × Combined Ratio scatter chart), a product with 25% YoY growth and Combined Ratio of 88 is classified as:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) "Dog" — low growth, high combined ratio — should be exited</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) "Cash Cow" — low growth, low combined ratio — optimise for cash generation</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) "Star" — high growth AND low combined ratio — the most valuable product in the portfolio. Invest to protect and grow it further</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) "Question Mark" — high growth but unknown profitability — needs investigation</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. An executive dashboard has been in use for 6 months. The CEO and management team have stopped looking at it. The MOST likely reason is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) The dashboard does not have enough visualisation types — needs more variety</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) The dashboard is not integrated into the decision-making process — there is no action tracking system, no regular review cadence, and no expectation that decisions reference the dashboard. The dashboard is interesting but not actionable</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) The data is not refreshed frequently enough — needs hourly updates</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) The dashboard is too slow to load</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. The "Key Insight" text box on the executive dashboard should contain:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) A generic greeting: "Welcome to the monthly dashboard"</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) A summary of ALL 7 KPI movements — every KPI, every change</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) The SINGLE most important KPI movement this month, WHY it happened, and WHAT action is recommended. This text box is an "executive summary" — it tells the CEO the one thing they need to know before they dive into the details</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The data source and refresh timestamp</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s23-quiz', ['b','b','c','b','c'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s23-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-22.html" class="nav-link">&larr; Previous: Customer Retention &amp; Churn Analytics</a>
+            <a href="session-24.html" class="nav-link next">Next: Insurance Regulations &amp; Digital Governance &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

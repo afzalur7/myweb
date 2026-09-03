@@ -1,0 +1,95 @@
+{
+  "sections": [
+    {
+      "id": "ch1-insurtech-landscape",
+      "chapter": 1,
+      "title": "Indian Insurance Ecosystem Overview",
+      "dataSource": null,
+      "reviewCycle": "biannual",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2027-01-01",
+      "reviewer": "auto"
+    },
+    {
+      "id": "ch4-digital-transformation",
+      "chapter": 4,
+      "title": "Digital Transformation Trends in Insurance",
+      "dataSource": "platforms.json",
+      "reviewCycle": "quarterly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-10-01",
+      "reviewer": "auto"
+    },
+    {
+      "id": "ch8-insurtech-startups",
+      "chapter": 8,
+      "title": "Indian InsurTech Startup Landscape",
+      "dataSource": "platforms.json",
+      "reviewCycle": "quarterly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-10-01",
+      "reviewer": "auto"
+    },
+    {
+      "id": "ch10-embedded-ubi",
+      "chapter": 10,
+      "title": "Embedded & Usage-Based Insurance Models",
+      "dataSource": "platforms.json",
+      "reviewCycle": "quarterly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-10-01",
+      "reviewer": "auto"
+    },
+    {
+      "id": "ch14-genai-insurance",
+      "chapter": 14,
+      "title": "Generative AI Tools and Use Cases",
+      "dataSource": null,
+      "reviewCycle": "monthly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-08-01",
+      "reviewer": "manual"
+    },
+    {
+      "id": "ch17-cyber-risk",
+      "chapter": 17,
+      "title": "Cyber Threat Landscape and Insurance Products",
+      "dataSource": null,
+      "reviewCycle": "quarterly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-10-01",
+      "reviewer": "auto"
+    },
+    {
+      "id": "ch18-climate-risk",
+      "chapter": 18,
+      "title": "Climate Risk Data and Insurance Portfolio Exposure",
+      "dataSource": null,
+      "reviewCycle": "quarterly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-10-01",
+      "reviewer": "auto"
+    },
+    {
+      "id": "ch24-regulations",
+      "chapter": 24,
+      "title": "IRDAI Regulations and DPDP Act Compliance",
+      "dataSource": "chains.json",
+      "reviewCycle": "quarterly",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2026-10-01",
+      "reviewer": "manual"
+    },
+    {
+      "id": "ch25-ethical-ai",
+      "chapter": 25,
+      "title": "Ethical AI Governance Frameworks",
+      "dataSource": null,
+      "reviewCycle": "biannual",
+      "lastReviewed": "2026-07-01",
+      "nextReview": "2027-01-01",
+      "reviewer": "auto"
+    }
+  ],
+  "lastManifestUpdate": "2026-07-01"
+}

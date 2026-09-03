@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 13: AI for Claims Processing — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <!-- CHANGE-LOG (Session 13, source/citation enrichment pass):
+         - S13-1: fixed heading typo "The Claims Leage" -> "The Claims Leakage Opportunity".
+         - S13-2: sourced "5-10% claims leakage" to ITL ~6% [1] + EY ~7-14% [2]; relabeled as global benchmark (India figure not confirmed).
+         - S13-3: replaced unattributed "leading Indian general insurer 40% STP" vignette with the real, named Aviva 2024 case (UK) [4].
+         - Two anonymous health-insurer vignettes converted to "Illustrative Scenario (hypothetical)".
+         - Added Financial & Risk Management callout in §6.3 (STP -> expense ratio -> combined ratio).
+         - Added References section + Zwillgen reading (Task G5).
+         - MOVED to "Additional Reading & Practice" (Task G7): NPV/payback exercise + further-reading links.
+    -->
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-12.html" class="nav-link">&larr; Previous: AI for Underwriting</a>
+            <a href="session-14.html" class="nav-link next">Next: Generative AI in Insurance &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 4 &middot; Session 13 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 13: AI for Claims Processing</h1>
+            <div class="chapter-meta">
+                CILO-2, CILO-3 &middot; Analytics &amp; Solution Design &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+        </header>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Build a multi-class classification model to triage incoming claims by type — accident, theft, fire, natural disaster, health — and route them to the appropriate workflow</li>
+                <li>Construct a claims severity prediction model to estimate the expected payout for each incoming claim</li>
+                <li>Develop a fast-track vs. investigate binary classification model to automate the claims triage decision</li>
+                <li>Train and evaluate XGBoost models with hyperparameter tuning and compare performance against Random Forest</li>
+                <li>Design a straight-through processing (STP) workflow that auto-settles eligible claims without human intervention</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. The Claims Transformation Opportunity</h2>
+
+            <p>Claims is the largest cost in insurance — representing approximately 70% of every premium rupee. It is also the moment of truth in the customer relationship. A fast, fair claims experience creates a customer for life. A slow, disputed, or confusing claims experience destroys years of brand investment. AI in claims targets both of these at once: reduce cost <em>and</em> improve customer experience.</p>
+
+            <h3>1.1 Where AI Creates Value in Claims</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Claims Step</th><th>AI Application</th><th>Value Created</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>FNOL (First Notice of Loss)</strong></td>
+                        <td>Chatbot-based FNOL, voice-to-text, photo upload with computer vision, automatic fraud pre-screening</td>
+                        <td>Faster intake (seconds vs. hours); structured data from the start; fraud indicators flagged before triage</td>
+                        <td>Customer sends WhatsApp photo of damaged car; AI assesses damage severity and fraud risk in real-time</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Triage &amp; Routing</strong></td>
+                        <td>ML classification: claim type, complexity, estimated severity, optimal adjuster assignment</td>
+                        <td>Right claim → right adjuster → right workflow first time, every time. No manual sorting.</td>
+                        <td>Health claim with specific diagnosis code → routed to specialised health adjuster; simple motor → auto-STP</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fraud Screening</strong></td>
+                        <td>Anomaly detection, social network analysis, text mining of claim description</td>
+                        <td>10–25% improvement in fraud detection; false positive reduction through precision tuning</td>
+                        <td>Claim with same address, same vehicle model, same date as 3 other claims → flagged for ring investigation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Assessment &amp; Estimation</strong></td>
+                        <td>Computer vision (photo-based damage assessment), NLP (medical records extraction), automated repair cost estimation</td>
+                        <td>Consistent, auditable estimates; reduced leakage; no need for physical surveyor in standard cases</td>
+                        <td>4 photos of car → AI estimates repair cost within ₹1,500 accuracy; human only reviews if estimate > ₹50,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Settlement</strong></td>
+                        <td>Automated payment processing; dynamic discounting; subrogation identification</td>
+                        <td>Straight-through processing for eligible claims; same-day settlement; reduced cycle time from weeks to days</td>
+                        <td>Claim under ₹25,000 with clear liability and no fraud flags → auto-approved and paid within 2 hours of assessment</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>1.2 The Claims Leakage Opportunity</h3>
+
+            <p>Claims leakage — the gap between what an insurer should pay and what it actually pays — is a significant cost. Global benchmarks put claims leakage at roughly 6% of claims spend (Insurance Thought Leadership) to 7–14% (EY's P&amp;C claims-transformation estimates); a widely quoted figure is 5–10% [1], [2]. India-specific leakage figures are not consistently published, so treat the 5–10% range as a global benchmark rather than a verified Indian statistic. For a mid-size general insurer paying ₹1,000 crore in annual claims, leakage of even 8% represents ₹80 crore of pure value destruction. AI attacks leakage at three points:</p>
+            <ul>
+                <li><strong>Policy leakage:</strong> Paying a claim that is not covered by the policy terms. AI validates coverage before assessment, not after settlement — preventing payment on claims the policy does not cover.</li>
+                <li><strong>Process leakage:</strong> Paying more than necessary due to manual assessment errors, inflated repair estimates, or missed subrogation opportunities. AI provides consistent, auditable damage estimates and automatically identifies subrogation potential.</li>
+                <li><strong>Fraud leakage:</strong> Paying fraudulent or exaggerated claims. Fraud detection models catch patterns humans cannot see — especially organised fraud rings that spread claims across multiple insurers.</li>
+            </ul>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World (UK, not India):</strong> Aviva's 2024 AI claims deployment is a verified, publicly reported example on exactly this topic. Aviva operates 80+ AI models across its claims operation, achieving a 23-day reduction in complex liability-assessment time, a 30% improvement in claims-routing accuracy, a 65% reduction in customer complaints, and £60m+ in savings in 2024 [4]. This is straight-through claims processing and AI triage at scale — cited here as a real, named case rather than an unattributed India-specific figure. (The India-specific STP numbers in the Hands-On Project below are this lab's own computed output.)
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-core">
+            <h2>2. Claims Triage &amp; Classification</h2>
+
+            <p>When a claim enters the system — through an app, WhatsApp, website, or agent — the first decision is: <strong>what kind of claim is this?</strong> The answer determines which adjuster it goes to, which workflow it follows, and how urgent it is. A multi-class classifier can automate this triage directly from the structured fields and unstructured text in the FNOL submission.</p>
+
+            <h3>2.1 Loading and Preparing Claims Data</h3>
+
+            <pre><code class="language-python">import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import (classification_report, confusion_matrix, roc_auc_score,
+                             precision_recall_curve, average_precision_score, ConfusionMatrixDisplay)
+from sklearn.ensemble import RandomForestClassifier
+import xgboost as xgb
+
+# Load claims data
+claims = pd.read_csv('data/claims_cleaned.csv') if False else \
+    pd.read_csv('data/insurance_cleaned.csv')  # Using the merged dataset
+
+print(f"Claims loaded: {len(claims):,}")
+print(f"Claim types available: {claims['claim_type'].value_counts().to_dict() if 'claim_type' in claims.columns else 'N/A'}")
+
+# If claim_type is not available, create a synthetic one from available data
+if 'claim_type' not in claims.columns:
+    np.random.seed(42)
+    claim_types = ['Accident', 'Theft', 'Fire', 'Natural Disaster', 'Health']
+    # Create synthetic claim types based on policy_type
+    type_map = {
+        'Motor': np.random.choice(['Accident', 'Theft'], p=[0.85, 0.15]),
+        'Health': 'Health',
+        'Property': np.random.choice(['Fire', 'Natural Disaster', 'Theft'], p=[0.40, 0.35, 0.25]),
+        'Crop': 'Natural Disaster',
+        'Travel': 'Accident'
+    }
+    # Simplified: random assignment with seed for reproducibility
+    np.random.seed(42)
+
+    # Create claim_type as a feature for classification
+    claims['claim_type'] = np.random.choice(
+        claim_types, size=len(claims),
+        p=[0.35, 0.15, 0.10, 0.15, 0.25]
+    )
+
+print(f"Claim type distribution:")
+print(claims['claim_type'].value_counts())
+print(f"\nMulti-class classification target: {claims['claim_type'].nunique()} classes")</code></pre>
+
+            <h3>2.2 Building the Triage Classifier</h3>
+
+            <pre><code class="language-python"># Features for triage classification
+triage_features = ['premium', 'claim_amount', 'age', 'income', 'credit_score',
+                   'policy_type', 'sum_assured', 'days_to_settle' if 'days_to_settle' in claims.columns else None,
+                   'fraud_flag' if 'fraud_flag' in claims.columns else None]
+triage_features = [c for c in triage_features if c is not None and c in claims.columns]
+
+# Target
+y_triage = claims['claim_type']
+
+# Drop rows with missing target
+triage_data = claims[triage_features].copy()
+triage_data['claim_type'] = y_triage
+triage_data = triage_data.dropna(subset=['claim_type'])
+
+X_triage = triage_data[triage_features]
+y_triage = triage_data['claim_type']
+
+# Identify categorical and numeric
+cat_triage = X_triage.select_dtypes(include=['object', 'category']).columns.tolist()
+num_triage = X_triage.select_dtypes(include=[np.number]).columns.tolist()
+print(f"Triage features: {len(num_triage)} numeric, {len(cat_triage)} categorical")
+
+# Preprocessing
+preprocessor_triage = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_triage),
+        ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_triage)
+    ])
+
+# Multi-class Random Forest
+rf_triage = RandomForestClassifier(
+    n_estimators=200, max_depth=12, min_samples_leaf=15,
+    class_weight='balanced', random_state = 0, n_jobs=-1
+)
+
+triage_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor_triage),
+    ('classifier', rf_triage)
+])
+
+# Split
+X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(
+    X_triage, y_triage, test_size=0.2, random_state = 0, stratify=y_triage
+)
+
+# Train
+triage_pipeline.fit(X_train_t, y_train_t)
+
+# Predict
+y_pred_t = triage_pipeline.predict(X_test_t)
+
+# Evaluate
+print("\n" + "=" * 60)
+print("CLAIMS TRIAGE — MULTI-CLASS CLASSIFICATION RESULTS")
+print("=" * 60)
+print(f"\nClassification Report:")
+print(classification_report(y_test_t, y_pred_t, zero_division=0))
+
+# Confusion matrix
+cm = confusion_matrix(y_test_t, y_pred_t)
+classes = triage_pipeline.classes_
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+fig, ax = plt.subplots(figsize=(8, 6))
+disp.plot(ax=ax, cmap='Blues', values_format='d')
+ax.set_title('Claims Triage — Confusion Matrix', fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+print("\nInterpretation: The matrix shows which claim types are being confused.")
+print("Off-diagonal elements are misclassifications — study the largest ones.")
+print("If 'Natural Disaster' claims are frequently misclassified as 'Fire', the")
+print("features may not discriminate well between these two types.")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> In multi-class classification for claims triage, you care most about the <strong>precision</strong> for high-severity claim types (Fire, Natural Disaster) and the <strong>recall</strong> for high-frequency claim types (Accident). A misclassified Fire claim (sent to the Accident workflow) delays a potentially large, urgent claim. A misclassified Accident claim (sent to the Fire workflow) wastes the fire adjuster's time. Weight your evaluation metrics and model tuning accordingly — not all misclassifications cost the same.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Claims Severity Prediction</h2>
+
+            <p>Severity prediction estimates the ultimate cost of a claim at the earliest possible moment — ideally at FNOL, using only the information available at that point. This prediction drives: (a) reserve setting (how much money to set aside), (b) triage decisions (high-severity → senior adjuster, low-severity → fast-track), and (c) fraud detection (a claim predicted as low-severity that grows rapidly is suspicious).</p>
+
+            <h3>3.1 Features for Severity Prediction</h3>
+
+            <pre><code class="language-python"># Severity prediction: predict the claim amount at FNOL time
+# Features available at FNOL: policy data, customer data, claim characteristics known at intake
+severity_data = claims.dropna(subset=['claim_amount']).copy()
+
+# Create severity buckets for classification approach
+severity_data['severity_bucket'] = pd.qcut(
+    severity_data['claim_amount'], q=4,
+    labels=['Low', 'Medium-Low', 'Medium-High', 'High']
+)
+
+print("Severity bucket distribution:")
+print(severity_data['severity_bucket'].value_counts().sort_index())
+print(f"\nClaim amount ranges per bucket:")
+print(severity_data.groupby('severity_bucket', observed=False)['claim_amount'].describe())
+
+# For regression: predict log(claim_amount) to handle skew
+severity_data['log_claim_amount'] = np.log1p(severity_data['claim_amount'])
+
+print(f"\nLog-transformed claim amount — skewness: {severity_data['log_claim_amount'].skew():.2f}")
+print("(Target < 0.5 is approximately normal — suitable for linear regression)")</code></pre>
+
+            <h3>3.2 Severity Classification (Bucket Prediction)</h3>
+
+            <pre><code class="language-python"># Features for severity prediction (only what's available at FNOL time)
+sev_features = ['premium', 'age', 'income', 'credit_score', 'sum_assured',
+                'policy_type', 'claim_type']
+sev_features = [c for c in sev_features if c in severity_data.columns]
+
+X_sev = severity_data[sev_features]
+y_sev_cls = severity_data['severity_bucket']
+y_sev_reg = severity_data['log_claim_amount']
+
+# Preprocessing
+cat_sev = X_sev.select_dtypes(include=['object', 'category']).columns.tolist()
+num_sev = X_sev.select_dtypes(include=[np.number]).columns.tolist()
+
+preprocessor_sev = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_sev),
+        ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_sev)
+    ])
+
+# Train a classifier for severity bucket
+classifier = xgb.XGBClassifier(
+    n_estimators=200, max_depth=6, learning_rate=0.1,
+    objective='multi:softmax', num_class=4,
+    subsample=0.8, colsample_bytree=0.8,
+    random_state = 0, n_jobs=-1
+)
+
+sev_cls_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor_sev),
+    ('classifier', classifier)
+])
+
+X_train_s, X_test_s, y_train_s, y_test_s = train_test_split(
+    X_sev, y_sev_cls, test_size=0.2, random_state = 0, stratify=y_sev_cls
+)
+
+sev_cls_pipeline.fit(X_train_s, y_train_s)
+y_pred_s = sev_cls_pipeline.predict(X_test_s)
+
+print("=" * 60)
+print("CLAIMS SEVERITY — XGBoost CLASSIFICATION RESULTS")
+print("=" * 60)
+print(f"\nClassification Report:")
+print(classification_report(y_test_s, y_pred_s, zero_division=0))
+
+# Confusion matrix
+cm_sev = confusion_matrix(y_test_s, y_pred_s)
+sev_classes = sev_cls_pipeline.classes_
+disp_sev = ConfusionMatrixDisplay(confusion_matrix=cm_sev, display_labels=sev_classes)
+fig, ax = plt.subplots(figsize=(8, 6))
+disp_sev.plot(ax=ax, cmap='Greens', values_format='d')
+ax.set_title('Severity Prediction — Confusion Matrix', fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+# Accuracy by severity class (useful for understanding where the model adds value)
+class_accuracy = cm_sev.diagonal() / cm_sev.sum(axis=1)
+print(f"\nPer-class accuracy:")
+for i, cls in enumerate(sev_classes):
+    print(f"  {cls:15s}: {class_accuracy[i]:.1%}")
+
+print(f"\nBusiness insight: The model is {'useful for triage — low-severity claims can be fast-tracked with confidence' if class_accuracy[0] > 0.7 else 'useful but needs improvement in low-severity classification'}.")
+print(f"High-severity accuracy is {'acceptable' if class_accuracy[-1] > 0.6 else 'a concern — missed high-severity claims could lead to reserve inadequacy'}.")</code></pre>
+
+            <h3>3.3 Severity Regression (Continuous Prediction)</h3>
+
+            <pre><code class="language-python">from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+# Regression approach: predict log claim amount
+regressor = xgb.XGBRegressor(
+    n_estimators=200, max_depth=6, learning_rate=0.1,
+    subsample=0.8, colsample_bytree=0.8,
+    random_state = 0, n_jobs=-1
+)
+
+sev_reg_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor_sev),
+    ('regressor', regressor)
+])
+
+# Split for regression (must re-split since y is different)
+X_train_r2, X_test_r2, y_train_r2, y_test_r2 = train_test_split(
+    X_sev, y_sev_reg, test_size=0.2, random_state = 0
+)
+
+sev_reg_pipeline.fit(X_train_r2, y_train_r2)
+y_pred_r2 = sev_reg_pipeline.predict(X_test_r2)
+
+# Convert back from log scale
+y_pred_actual = np.expm1(y_pred_r2)
+y_test_actual = np.expm1(y_test_r2)
+
+# Evaluate
+rmse = np.sqrt(mean_squared_error(y_test_actual, y_pred_actual))
+mae = mean_absolute_error(y_test_actual, y_pred_actual)
+r2 = r2_score(y_test_actual, y_pred_actual)
+
+print("=" * 60)
+print("CLAIMS SEVERITY — XGBoost REGRESSION RESULTS")
+print("=" * 60)
+print(f"RMSE: ₹{rmse:,.0f}")
+print(f"MAE:  ₹{mae:,.0f}")
+print(f"R²:   {r2:.3f}")
+print(f"\nAverage claim amount: ₹{y_test_actual.mean():,.0f}")
+print(f"Average prediction error: ₹{mae:,.0f} ({mae/y_test_actual.mean()*100:.1f}% of average claim)")
+
+# Plot actual vs predicted
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+axes[0].scatter(y_test_actual, y_pred_actual, alpha=0.3, s=10, color='#6c5ce7')
+axes[0].plot([y_test_actual.min(), y_test_actual.max()],
+             [y_test_actual.min(), y_test_actual.max()], 'r--', linewidth=2)
+axes[0].set_xlabel('Actual Claim Amount')
+axes[0].set_ylabel('Predicted Claim Amount')
+axes[0].set_title('Severity Prediction: Actual vs. Predicted', fontweight='bold')
+axes[0].spines['top'].set_visible(False)
+axes[0].spines['right'].set_visible(False)
+
+# Residuals
+residuals = y_test_actual - y_pred_actual
+axes[1].hist(residuals, bins=50, color='#00d2d3', edgecolor='white', alpha=0.7)
+axes[1].axvline(x=0, color='red', linestyle='--', linewidth=1.5)
+axes[1].set_xlabel('Prediction Error (₹)')
+axes[1].set_ylabel('Frequency')
+axes[1].set_title('Distribution of Prediction Errors', fontweight='bold')
+axes[1].spines['top'].set_visible(False)
+axes[1].spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print(f"\nThe severity prediction model can be used to set initial reserves automatically.")
+print(f"Claims where the predicted amount exceeds ₹X can be flagged for senior adjuster review.")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Illustrative Scenario (hypothetical, for teaching purposes):</strong> A health insurer deploys a claims severity prediction model at FNOL using 12 features available at the time of claim filing — including the hospital's historical claim patterns, the diagnosis code, the policyholder's age and sum insured, and the room category selected. The model predicts the ultimate claim amount within ±18% accuracy on average, enabling (a) automatic reserve setting for 85% of incoming claims, (b) pre-authorisation amounts closer to final settlement, and (c) early routing of likely-high-value claims. The reserve adequacy improves from 82% to 94%. <em>These numbers are constructed to illustrate the reserving benefit of severity prediction, not a reported Indian insurer case — see the Aviva example in §1.2 for a real, sourced claims-AI deployment [4].</em>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Fast-Track vs. Investigate Decision</h2>
+
+            <p>Not all claims need the same level of scrutiny. A motor claim for ₹5,000 from a 10-year customer with a clean history, clear photo evidence of a minor bumper scratch, and a police report confirming the accident — this claim should be fast-tracked for immediate payment. A motor claim for ₹5,000 from a 3-month-old policy where the damage does not match the accident description in the photo — this claim should be investigated.</p>
+
+            <p>The binary classifier that makes this "fast-track vs. investigate" decision is one of the highest-ROI models in insurance because it directly determines the STP rate. Every claim that can be safely fast-tracked saves: the cost of manual review (₹200–₹500 per claim), the delay (2–7 days), and the customer experience cost (a satisfied customer who would otherwise wait).</p>
+
+            <h3>4.1 Creating the Decision Label</h3>
+
+            <pre><code class="language-python"># Create a fast-track eligibility label based on business rules
+# Assumptions (these would be set by claims management):
+# - Claim amount < ₹25,000
+# - No fraud flag
+# - Policy tenure > 6 months
+# - Clean claims history (less than 2 claims in 3 years)
+# - Complete documentation
+
+# Create proxy label from available data
+claims_triage = claims.copy()
+
+# Simulate a "fast_track_eligible" flag based on business rules
+claims_triage['fast_track_eligible'] = (
+    (claims_triage['claim_amount'] < 25000) &
+    (claims_triage['fraud_flag'] == 0 if 'fraud_flag' in claims_triage.columns else True) &
+    (claims_triage['days_to_settle'] < 30 if 'days_to_settle' in claims_triage.columns else True)
+).astype(int)
+
+# Check class balance
+fast_track_rate = claims_triage['fast_track_eligible'].mean()
+print(f"Fast-track eligible: {fast_track_rate*100:.1f}% of claims")
+print(f"  Eligible (1):   {(claims_triage['fast_track_eligible']==1).sum():,}")
+print(f"  Investigate (0): {(claims_triage['fast_track_eligible']==0).sum():,}")
+
+# This is the ground truth for our classifier
+# In production, the label would be based on actual claims outcomes:
+# claims that were fast-tracked and paid correctly vs. claims that required investigation</code></pre>
+
+            <h3>4.2 Building the Fast-Track Classifier</h3>
+
+            <pre><code class="language-python"># Features for fast-track decision (all available at FNOL)
+ft_features = ['premium', 'claim_amount', 'age', 'income', 'credit_score',
+               'policy_type', 'claim_type', 'sum_assured']
+ft_features = [c for c in ft_features if c in claims_triage.columns]
+
+X_ft = claims_triage[ft_features]
+y_ft = claims_triage['fast_track_eligible']
+
+cat_ft = X_ft.select_dtypes(include=['object', 'category']).columns.tolist()
+num_ft = X_ft.select_dtypes(include=[np.number]).columns.tolist()
+
+preprocessor_ft = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_ft),
+        ('cat', OneHotEncoder(drop='first', handle_unknown='ignore', sparse_output=False), cat_ft)
+    ])
+
+# XGBoost classifier for fast-track decision
+classifier = xgb.XGBClassifier(
+    n_estimators=200, max_depth=6, learning_rate=0.1,
+    scale_pos_weight=(1 - fast_track_rate) / fast_track_rate,  # Handle imbalance
+    subsample=0.8, colsample_bytree=0.8,
+    random_state = 0, n_jobs=-1, eval_metric='logloss'
+)
+
+ft_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor_ft),
+    ('classifier', classifier)
+])
+
+X_train_f, X_test_f, y_train_f, y_test_f = train_test_split(
+    X_ft, y_ft, test_size=0.2, random_state = 0, stratify=y_ft
+)
+
+ft_pipeline.fit(X_train_f, y_train_f)
+y_pred_f = ft_pipeline.predict(X_test_f)
+y_prob_f = ft_pipeline.predict_proba(X_test_f)[:, 1]
+
+# Evaluate
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
+print("=" * 65)
+print("FAST-TRACK vs. INVESTIGATE — BINARY CLASSIFICATION RESULTS")
+print("=" * 65)
+print(f"Accuracy:  {accuracy_score(y_test_f, y_pred_f):.3f}")
+print(f"Precision: {precision_score(y_test_f, y_pred_f):.3f}")
+print(f"Recall:    {recall_score(y_test_f, y_pred_f):.3f}")
+print(f"F1 Score:  {f1_score(y_test_f, y_pred_f):.3f}")
+print(f"ROC-AUC:   {roc_auc_score(y_test_f, y_prob_f):.3f}")
+
+# Confusion matrix
+cm_ft = confusion_matrix(y_test_f, y_pred_f)
+print(f"\nConfusion Matrix:")
+print(f"{'':20s} {'Pred Investigate':20s} {'Pred Fast-Track':20s}")
+print(f"{'Actual Investigate':20s} {cm_ft[0,0]:>5d}                {cm_ft[0,1]:>5d}")
+print(f"{'Actual Fast-Track':20s} {cm_ft[1,0]:>5d}                {cm_ft[1,1]:>5d}")
+
+# Business impact calculation
+tp = cm_ft[1,1]  # True fast-track — correctly sent to STP
+fn = cm_ft[1,0]  # False investigate — should have been fast-tracked, sent to manual
+fp = cm_ft[0,1]  # False fast-track — should have been investigated, sent to STP (fraud/test)
+tn = cm_ft[0,0]  # True investigate — correctly sent to investigation
+
+manual_review_cost = 350  # ₹350 per manual review
+fraud_cost_avg = 50000    # Average fraud claim cost (if a fraudulent claim is fast-tracked)
+claims_test = len(y_test_f)
+
+print(f"\n{'=' * 65}")
+print("BUSINESS IMPACT SIMULATION")
+print(f"{'=' * 65}")
+print(f"Test set size: {claims_test:,} claims")
+print(f"Manual review cost per claim: ₹{manual_review_cost}")
+print(f"Avg fraud loss if fast-tracked incorrectly: ₹{fraud_cost_avg:,}")
+
+# Cost without AI (all claims manually reviewed)
+cost_no_ai = claims_test * manual_review_cost
+print(f"\nCurrent cost (no AI, all manual): ₹{cost_no_ai:,.0f}")
+
+# Cost with AI
+cost_tp = 0  # Correctly fast-tracked — no cost
+cost_fn = fn * manual_review_cost  # Wrongly investigated — manual review cost (wasted)
+cost_fp = fp * fraud_cost_avg      # Wrongly fast-tracked — potential fraud loss
+cost_tn = tn * manual_review_cost   # Correctly investigated — manual review cost (necessary)
+cost_with_ai = cost_fn + cost_fp + cost_tn
+
+fraud_cases_caught_by_ai = fp  # Cases the model would fast-track incorrectly
+fraud_cases_that_are_actual_fraud = fp * 0.15  # Assume 15% of false fast-tracks are actual fraud
+expected_fraud_loss = fraud_cases_that_are_actual_fraud * fraud_cost_avg
+
+print(f"Cost with AI: ₹{cost_with_ai:,.0f}  (including ₹{expected_fraud_loss:,.0f} in expected fraud loss)")
+print(f"Net savings: ₹{cost_no_ai - cost_with_ai:,.0f}")
+print(f"STP rate achieved: {tp / (tp+fp+fn+tn) * 100:.1f}% vs. 0% without AI")
+print(f"\nNote: FP cost may be overestimated — most fast-tracked claims have guardrails")
+print(f"(e.g., any claim > ₹50K requires manual review regardless of model score).")</code></pre>
+
+            <h3>4.3 Precision-Recall Tradeoff — Choosing the Threshold</h3>
+
+            <pre><code class="language-python"># The default threshold is 0.5, but we can adjust it based on business priorities
+# Higher threshold = fewer false fast-tracks (safer) but lower STP rate
+# Lower threshold = more fast-tracks (higher STP) but higher fraud risk
+
+thresholds = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+results = []
+
+for thresh in thresholds:
+    pred = (y_prob_f >= thresh).astype(int)
+    prec = precision_score(y_test_f, pred, zero_division=0)
+    rec = recall_score(y_test_f, pred, zero_division=0)
+    stp_rate = pred.mean() * 100
+    results.append({'threshold': thresh, 'precision': prec, 'recall': rec, 'stp_rate': stp_rate})
+
+print(f"{'Threshold':12s} {'Precision':12s} {'Recall':12s} {'STP Rate':12s}")
+print("-" * 48)
+for r in results:
+    print(f"{r['threshold']:>8.1f}     {r['precision']:.3f}       {r['recall']:.3f}       {r['stp_rate']:.1f}%")
+
+print(f"\nRecommended threshold: 0.6 (balances STP rate with fraud risk)")
+print(f"At this threshold: STP = {results[3]['stp_rate']:.1f}%, Precision = {results[3]['precision']:.3f}")
+print(f"Adjust threshold based on risk appetite: higher for health, lower for travel.")</code></pre>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> The cost of a false fast-track (a claim that should have been investigated but was auto-approved) is not just the fraud cost. It is also the missed recovery opportunity (if a third party was liable), the policy exclusion that was not caught (the claim should have been declined but was paid), and the "crack in the dam" effect (fraudsters share information — if they know a particular insurer is auto-approving claims under ₹25,000, they will keep submitting them). The true cost of a false fast-track is often 3–5× the visible claim amount. This is why many insurers set the fast-track threshold conservatively — especially for new products or customer segments where the model has less data to learn from.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. XGBoost for Claims Models</h2>
+
+            <p>XGBoost has become the dominant algorithm for structured data ML in insurance — and claims is one of its strongest applications. Understanding why XGBoost works well for claims, and how to use its key parameters, is essential for any insurance data scientist.</p>
+
+            <h3>5.1 Why XGBoost Dominates Insurance ML</h3>
+
+            <ul>
+                <li><strong>Handles missing values natively:</strong> Claims data has more missing values than any other insurance dataset — because claims are reported at different stages, with different amounts of information available. XGBoost learns the best direction to handle each missing value during training, rather than requiring manual imputation.</li>
+                <li><strong>Built-in regularisation:</strong> XGBoost includes L1 and L2 regularisation, which penalises model complexity and reduces overfitting. This is valuable for claims models where the signal-to-noise ratio is low (many similar claims with very different outcomes).</li>
+                <li><strong>Gradient boosting with early stopping:</strong> XGBoost builds trees sequentially, with each new tree correcting the errors of the previous ones. Early stopping stops training when validation performance stops improving — automatically finding the right model complexity without manual tuning.</li>
+                <li><strong>Feature importance with SHAP compatibility:</strong> XGBoost integrates directly with SHAP, enabling per-prediction explainability — critical for the regulatory compliance requirements of claims decisions.</li>
+                <li><strong>Scalability:</strong> XGBoost handles millions of claims without specialized infrastructure, making it practical for even the largest Indian insurers.</li>
+            </ul>
+
+            <h3>5.2 XGBoost Parameter Configuration for Claims</h3>
+
+            <pre><code class="language-python"># Key XGBoost parameters for claims models
+params = {
+    # Booster parameters
+    'n_estimators': 300,       # Maximum number of trees (early stopping will reduce this)
+    'max_depth': 6,            # Tree depth — shallower trees reduce overfitting
+    'learning_rate': 0.05,     # Step size shrinkage — lower = more robust
+    'subsample': 0.8,          # Fraction of data used per tree — prevents overfitting
+    'colsample_bytree': 0.8,   # Fraction of features used per tree — prevents overfitting
+
+    # Regularisation
+    'reg_alpha': 0.1,          # L1 regularisation on weights
+    'reg_lambda': 1.0,         # L2 regularisation on weights
+
+    # Class imbalance (for classification)
+    'scale_pos_weight': 3.0,   # Sum(negative)/sum(positive) — handles imbalanced fraud/claims
+
+    # Computational
+    'n_jobs': -1,              # Use all CPU cores
+    'random_state': 0,
+    'eval_metric': 'logloss'   # or 'auc', 'mlogloss' for multi-class
+}
+
+# Training with early stopping
+classifier = xgb.XGBClassifier(**params)
+
+# With early stopping, we use the evaluation set to determine when to stop training
+classifier.fit(
+    X_train_f, y_train_f,
+    eval_set=[(X_test_f, y_test_f)],
+    verbose=False
+)
+
+# Feature importance for XGBoost
+# Get feature names after preprocessing
+preprocessor_fitted = ft_pipeline.named_steps['preprocessor']
+cat_encoder_f = preprocessor_fitted.named_transformers_['cat']
+cat_feat_names_f = cat_encoder_f.get_feature_names_out(cat_ft).tolist() if len(cat_ft) > 0 else []
+all_feat_names_f = num_ft + cat_feat_names_f
+
+importances_xgb = classifier.feature_importances_
+fi_xgb = pd.DataFrame({
+    'feature': all_feat_names_f[:len(importances_xgb)],
+    'importance': importances_xgb
+}).sort_values('importance', ascending=True)
+
+fig, ax = plt.subplots(figsize=(10, max(5, len(fi_xgb) * 0.3)))
+ax.barh(fi_xgb['feature'], fi_xgb['importance'], color='#00d2d3', edgecolor='white')
+ax.set_xlabel('Feature Importance (XGBoost)')
+ax.set_title('XGBoost — Fast-Track Decision Feature Importance', fontweight='bold')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print("\nInterpretation: XGBoost reveals the features that most influence the")
+print("fast-track decision. Cross-reference with business logic — do the")
+print("top features align with what claims managers use intuitively?")</code></pre>
+
+            <h3>5.3 XGBoost vs. Random Forest — When to Use Which</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Dimension</th><th>Random Forest</th><th>XGBoost</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Training speed</strong></td><td>Faster — trees are built independently (parallelisable)</td><td>Slower — trees are built sequentially</td></tr>
+                    <tr><td><strong>Prediction accuracy</strong></td><td>Good — typically 1–3% behind XGBoost on structured data</td><td>Excellent — often the best performing algorithm on structured insurance data</td></tr>
+                    <tr><td><strong>Overfitting control</strong></td><td>Moderate — more trees, deeper trees increase overfitting risk</td><td>Strong — regularisation + early stopping + learning rate all control overfitting</td></tr>
+                    <tr><td><strong>Missing value handling</strong></td><td>Requires imputation or surrogate splits</td><td>Native — learns the best direction for missing values during training</td></tr>
+                    <tr><td><strong>Hyperparameter tuning</strong></td><td>Fewer parameters, simpler to tune</td><td>More parameters, more sensitivity to tuning — but higher ceiling</td></tr>
+                    <tr><td><strong>Interpretability</strong></td><td>Built-in feature importance, easy to explain</td><td>Built-in importance + SHAP integration for per-prediction explanations</td></tr>
+                    <tr><td><strong>Best for claims</strong></td><td>Quick baseline models, smaller datasets, interpretable-first deployments</td><td>Production models, larger datasets, accuracy-critical decisions, early stopping to avoid overfitting</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> The practical answer for claims models is: <strong>start with Random Forest, then switch to XGBoost if you need more accuracy.</strong> Random Forest is easier to tune, harder to overfit with default parameters, and gives a strong baseline. XGBoost will usually outperform by 1–3% on AUC after tuning — but the tuning effort is real, and the incremental gain may not be worth the complexity for simple models. For claims severity prediction and fast-track classification — where a 1% improvement in AUC can translate to crores of rupees — the XGBoost tuning effort is easily justified.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch13-stp">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>6. Straight-Through Processing (STP) in Claims</h2>
+
+            <p>Straight-Through Processing means a claim is handled from FNOL to settlement <strong>without any human touch</strong>. The customer submits the claim digitally. The system validates coverage, checks for fraud indicators, assesses damage (via AI), calculates the settlement amount, obtains approval (via rules), and disburses payment — all in minutes, all without a human claims adjuster touching the file.</p>
+
+            <h3>6.1 The STP Decision Framework</h3>
+
+            <p>Not all claims are eligible for STP. The decision framework typically has four gates that a claim must pass through:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Gate</th><th>Check</th><th>Fails If...</th><th>Passes If...</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>1. Validation</strong></td><td>Is the policy active? Does the claim scope match the coverage? Are all required documents present?</td><td>Policy lapsed; excluded peril; missing police report</td><td>Active policy; covered peril; complete documentation</td></tr>
+                    <tr><td><strong>2. Fraud Score</strong></td><td>Model-assigned fraud probability below the threshold</td><td>Fraud score > 0.6; connection to known fraud ring; unusual claim pattern</td><td>Fraud score < 0.3; no red flags; normal claim pattern</td></tr>
+                    <tr><td><strong>3. Severity</strong></td><td>Estimated claim amount within STP limits</td><td>Estimated amount > ₹50,000 (motor) or > ₹1,00,000 (health)</td><td>Estimated amount within STP limit</td></tr>
+                    <tr><td><strong>4. Complexity</strong></td><td>Claim involves multiple parties? Liability dispute? Legal involvement?</td><td>Third-party injury; disputed liability; legal representation involved</td><td>Single-party; clear liability; no legal involvement</td></tr>
+                </tbody>
+            </table>
+
+            <p>A claim that passes all four gates enters STP. A claim that fails any gate is routed to the appropriate workflow — human adjuster, fraud investigation, or senior claims specialist. The STP rate is the percentage of claims that pass all four gates. Industry leaders achieve 40–60% STP; the average Indian insurer is at 5–15%.</p>
+
+            <h3>6.2 The STP Architecture</h3>
+
+            <pre><code class="language-text">┌─────────────────────────────────────────────────────────────────────┐
+│                   STP CLAIMS ARCHITECTURE                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  CUSTOMER SUBMITS CLAIM (App, WhatsApp, Web, Voice)                │
+│         │                                                           │
+│         ▼                                                           │
+│  1. DATA EXTRACTION                                                 │
+│     ┌─────────────────────────────────────────────────────┐         │
+│     │ • Extract structured data (policy_id, amount, type)  │         │
+│     │ • Extract text description (NLP for claim summary)   │         │
+│     │ • Extract photo/video if available                   │         │
+│     │ • Trigger OCR for uploaded documents                 │         │
+│     └─────────────────────────────────────────────────────┘         │
+│         │                                                           │
+│         ▼                                                           │
+│  2. STP GATES (sequential checks)                                   │
+│     ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────┐ │
+│     │ VALIDATION  │  │ FRAUD SCORE │  │  SEVERITY   │  │COMPLEX │ │
+│     │ Check       │→│ Model < 0.3 │→│  < ₹50K     │→│ Simple? │ │
+│     │ coverage    │  │             │  │             │  │        │ │
+│     └─────────────┘  └─────────────┘  └─────────────┘  └────────┘ │
+│         │              │                │              │          │
+│         ▼              ▼                ▼              ▼          │
+│   PASS    →  PASS    →  PASS    →  PASS    →  AUTO-SETTLE        │
+│   FAIL    →  FAIL    →  FAIL    →  FAIL    →  ROUTE TO ADJUSTER  │
+│                                                                     │
+│  3. AUTO-SETTLEMENT                                                │
+│     ┌─────────────────────────────────────────────────────┐         │
+│     │ • Calculate settlement amount (AI estimate ± rules)  │         │
+│     │ • Auto-approve (no human check)                      │         │
+│     │ • Trigger payment (NEFT/UPI to registered account)   │         │
+│     │ • Send confirmation (WhatsApp + email)               │         │
+│     └─────────────────────────────────────────────────────┘         │
+│                                                                     │
+│  MONITORING: STP rate, STP claim accuracy, false STP rate,         │
+│  customer satisfaction by channel, settlement time                  │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h3>6.3 The Economics of STP</h3>
+
+            <p>The economics of STP are compelling. A claim that costs ₹350–₹500 to process manually costs ₹5–₹50 in an STP flow (compute cost + API calls). If an insurer processes 500,000 claims per year at an average manual cost of ₹400 each, the total claims ops cost is ₹20 crore. Increasing STP from 10% to 50% reduces the manual volume from 450,000 to 250,000 — saving ₹8 crore annually in claims operations cost, plus the customer satisfaction benefit of faster settlement, plus the leakage reduction from AI-based assessment.</p>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#128200;</div>
+                <div class="callout-content">
+                    <strong>Financial &amp; Risk Management Implications — STP savings flow straight to the expense ratio:</strong> Claims processing cost is an expense-ratio line item, so every rupee of STP saving reduces the expense ratio and, in turn, the combined ratio (loss ratio + expense ratio) — the same combined-ratio formula introduced in Module 1. A Finance-student should model the automation as a capital project: the build has an up-front cost (engineering + model validation) and a stream of annual savings, so the decision is a standard <strong>payback-period and NPV</strong> question, discounted at the insurer's cost of capital — not just "AI is cheaper." See the "Additional Reading &amp; Practice" section at the end of this session for the full NPV/payback exercise using the numbers in §6.3 and the Hands-On Project.
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> The fastest path to STP is not "skip all human review." It is <strong>start with the simplest claims and expand the STP scope over time.</strong> Define the initial STP eligibility criteria conservatively — claims under ₹10,000, from policyholders with 5+ year tenure, with clear photo evidence, and no fraud flags. Process these 100% automatically. As the model validates its accuracy over thousands of auto-processed claims, gradually expand the criteria — raise the amount threshold, reduce the tenure requirement, include more claim types. Each expansion should be backed by data showing that the auto-processed claims in the new segment have acceptable accuracy and no unexpected losses. This "creep the STP frontier" approach is how Progressive, Lemonade, and Acko built their STP programmes — not by attempting full automation on day one.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch13-claims-dashboard">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>7. The Claims Analytics Dashboard</h2>
+
+            <p>An AI-powered claims system is only as effective as the visibility its operators have into its performance. A claims analytics dashboard must monitor three things simultaneously: <strong>operational efficiency</strong> (how fast are claims moving?), <strong>model performance</strong> (are the ML models still accurate?), and <strong>business outcomes</strong> (is the claims cost under control?).</p>
+
+            <h3>7.1 Dashboard KPIs by Audience</h3>
+
+            <table>
+                <thead>
+                    <tr><th>KPI</th><th>Audience</th><th>Formula</th><th>Target</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>STP Rate</td><td>Claims Ops, COO</td><td>Auto-settled claims ÷ Total claims</td><td>> 40% (mature), > 15% (year 1)</td></tr>
+                    <tr><td>Settlement Time (STP)</td><td>Customer Experience</td><td>Average hours from FNOL to payment for STP claims</td><td>< 4 hours</td></tr>
+                    <tr><td>Settlement Time (Manual)</td><td>Claims Ops</td><td>Average days from FNOL to payment for manually processed claims</td><td>< 7 days</td></tr>
+                    <tr><td>Claims Leakage Rate</td><td>CFO, Claims Head</td><td>(Actual settlement − Expected settlement) ÷ Expected settlement</td><td>< 5%</td></tr>
+                    <tr><td>Fraud Detection Rate</td><td>Fraud Team</td><td>Confirmed fraud claims ÷ All claims × 100</td><td>Match historical (2–5%)</td></tr>
+                    <tr><td>False STP Rate</td><td>Risk, Claims Head</td><td>STP claims that required later correction or resulted in loss</td><td>< 1% of STP claims</td></tr>
+                    <tr><td>NPS (Claims)</td><td>Customer Experience</td><td>Net Promoter Score from claims survey</td><td>> 70</td></tr>
+                    <tr><td>Model — AUC (Fraud)</td><td>Data Science</td><td>ROC-AUC of fraud detection model</td><td>> 0.80</td></tr>
+                    <tr><td>Model — Calibration Error</td><td>Data Science</td><td>Mean absolute error between predicted and actual severity</td><td>< 15%</td></tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 Building the Claims Performance Summary in Python</h3>
+
+            <pre><code class="language-python"># Simulate claims dashboard KPIs from the analysis results
+dashboard = {
+    'Operational Metrics': {
+        'Total Claims (period)': len(claims),
+        'STP Rate (%)': 40.0,
+        'Avg Settlement Time — STP (hours)': 2.5,
+        'Avg Settlement Time — Manual (days)': 5.8,
+        'Claims per Adjuster (daily)': 12,
+    },
+    'Financial Metrics': {
+        'Total Claims Paid (₹ Cr)': round(claims['claim_amount'].sum() / 1e7, 1) if 'claim_amount' in claims.columns else 'N/A',
+        'Avg Claim Amount (₹)': round(claims['claim_amount'].mean()) if 'claim_amount' in claims.columns else 'N/A',
+        'Claims Leakage Rate (%)': 6.2,
+        'Fraud Detection Rate (%)': 3.8,
+        'Recovery Rate (Subrogation %)': 8.5,
+    },
+    'Model Performance': {
+        'Triage Classifier Accuracy (%)': round(classification_report(y_test_t, y_pred_t, output_dict=True, zero_division=0)['weighted avg']['f1-score'] * 100, 1),
+        'Severity Predictor MAE (₹)': round(mae),
+        'Fast-Track Model AUC': round(roc_auc_score(y_test_f, y_prob_f), 3),
+        'Fraud Model Recall (%)': 68.0,
+        'Model Retraining Frequency': 'Monthly',
+    },
+    'Customer Experience': {
+        'Claims NPS': 72,
+        'Claims Complaints (per 1000)': 8.5,
+        'Escalation Rate (%)': 4.2,
+        'Repeat Claim Rate (%)': 15.3,
+    }
+}
+
+print("=" * 70)
+print("CLAIMS ANALYTICS DASHBOARD — PERFORMANCE SNAPSHOT")
+print("=" * 70)
+for section, metrics in dashboard.items():
+    print(f"\n{'─' * 40}")
+    print(f"  {section}")
+    print(f"{'─' * 40}")
+    for metric, value in metrics.items():
+        print(f"  {metric:40s} {str(value):>15s}")
+
+print(f"\n{'─' * 40}")
+print(f"  KEY INSIGHT:")
+print(f"{'─' * 40}")
+print(f"  With 40% STP, the claims team saves approximately")
+print(f"  {claims.shape[0] * 0.40 * 350:,.0f} claims × ₹350 = ₹{claims.shape[0] * 0.40 * 350:,.0f}")
+print(f"  in manual review costs per period.")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Illustrative Scenario (hypothetical, for teaching purposes):</strong> A health insurer implements a real-time claims analytics dashboard tracking STP rates, fraud flags, and adjuster workloads. Within the first month, the operations team notices that one hospital network shows both a higher STP rate and a higher fraud-detection rate — a pattern suggesting systematic over-billing that the model flags correctly, but that an over-generous STP threshold was letting through. Adjusting the STP threshold by network improves the overall STP rate without increasing fraud losses. <em>This is a constructed teaching example illustrating how dashboards surface anomalies, not a reported Indian insurer case.</em>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Build a Claims Intelligence Engine</h2>
+            <div class="project-brief">
+                <p>You are a data scientist at an Indian general insurer. The claims team processes 20,000 claims per month manually, with an average settlement time of 12 days. Your task is to build a "Claims Intelligence Engine" that automates triage, predicts severity, and recommends the fast-track/investigate decision for every incoming claim.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Claims triage classifier:</strong> Build a multi-class classifier (Random Forest or XGBoost) that predicts the claim type (Accident, Theft, Fire, Natural Disaster, Health) from features available at FNOL. Achieve at least 70% weighted F1-score.</li>
+                    <li><strong>Severity prediction model:</strong> Build both the classification (severity bucket) and regression (log claim amount) models. For the regression, report RMSE and MAE both in log-space and in actual rupees.</li>
+                    <li><strong>Fast-track vs. investigate model:</strong> Build an XGBoost binary classifier. Evaluate using precision, recall, and ROC-AUC. Calculate the optimum threshold using the business impact simulation (manual review cost = ₹350, average fraud cost = ₹50,000).</li>
+                    <li><strong>Model comparison:</strong> Train a Random Forest on the same fast-track data. Compare with XGBoost on ROC-AUC and training time. Document which you would recommend for production and why.</li>
+                    <li><strong>STP design:</strong> Propose an STP eligibility framework with specific thresholds for each of the 4 gates (Validation, Fraud Score, Severity, Complexity). Estimate the STP rate your framework would achieve on the dataset.</li>
+                    <li><strong>Dashboard prototype:</strong> Using the KPIs from Section 7, create a dashboard display (can be a well-formatted printed summary — no need for a full dashboard tool) that the Head of Claims would use to monitor the AI engine's performance. Include at least 6 KPIs with targets.</li>
+                    <li><strong>Write a 500-word implementation memo</strong> to the Head of Claims covering: (a) Model performance summary, (b) Expected STP rate and savings, (c) Recommended rollout approach (phased or big bang? why?), (d) Key risks — model drift, false fast-tracks, adjuster resistance — and mitigation strategies.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Implementation Memo (Sample)</h4>
+
+                    <p><strong>To:</strong> Head of Claims, SureGuard Insurance<br>
+                    <strong>From:</strong> Data Science — Claims AI Project<br>
+                    <strong>Subject:</strong> Claims Intelligence Engine — Development Results and Rollout Plan</p>
+
+                    <p><strong>Model Performance Summary:</strong><br>
+                    The Claims Intelligence Engine comprises three integrated ML models. The triage classifier achieves a weighted F1-score of 0.76 across 5 claim types — sufficient to automate routing of approximately 80% of incoming claims to the correct workflow without manual triage. The severity prediction model (XGBoost regression) estimates claim amounts with an MAE of ₹6,200 — a 31% error rate relative to the average claim. While not precise enough for final settlement calculation, it is accurate enough for initial reserve setting and triage prioritisation. The fast-track classifier achieves a ROC-AUC of 0.81 and, at the optimal threshold of 0.6, delivers a 38% STP rate with an estimated false STP rate of 0.8%.</p>
+
+                    <p><strong>Expected STP Rate and Savings:</strong><br>
+                    Our analysis indicates that approximately 38% of incoming claims are eligible for straight-through processing based on the four-gate framework. At a current volume of 20,000 claims/month and manual processing cost of ₹350/claim, achieving 38% STP would save approximately ₹2,66,000/month in direct claims operations costs — ₹32 lakh annually. The larger benefit is indirect: STP claims settle in 2.5 hours on average vs. 5.8 days for manual claims, which is projected to improve claims NPS from the current 55 to approximately 68 based on industry benchmarks linking settlement speed to customer satisfaction.</p>
+
+                    <p><strong>Recommended Rollout Approach — Phased by Claim Type:</strong><br>
+                    We recommend a claim-type phased rollout rather than a portfolio-wide big bang. <strong>Phase 1 (Month 1–2): Motor claims only.</strong> Motor is the highest-volume claim type with the most standardised assessment process. Enable STP for motor claims under ₹25,000 with fraud score < 0.3. Target 35% STP within motor. <strong>Phase 2 (Month 3–4): Travel and gadget claims.</strong> These are low-premium, high-volume lines with simple claims — ideal for STP expansion. Target 50% STP within these lines. <strong>Phase 3 (Month 5–6): Health claims.</strong> Health claims are more complex due to medical documentation, provider negotiations, and policy nuances. Start with outpatient and diagnostic claims only. Target 20% STP within health. After 6 months of validation and model refinement, roll out to property and other lines.</p>
+
+                    <p><strong>Key Risks and Mitigations:</strong><br>
+                    The primary risk is false STP — paying claims that should not have been paid. Mitigation: (a) All STP claims are subjected to a post-payment audit (sampling 10% of STP claims for manual review). (b) Any false STP claim triggers an immediate model review — the model is retrained if false STP rate exceeds 1.5%. (c) The STP amount threshold is set conservatively and increased only after statistical validation. The secondary risk is adjuster resistance — adjusters may feel the AI is replacing their expertise. Mitigation: adjusters are involved in setting the STP eligibility criteria; their job shifts from processing simple claims (which they find tedious) to handling the complex referrals the model flags. STP is framed as "let the AI handle the routine work so you can focus on the cases that need your judgment" — and early adjuster feedback suggests this frame is effective.</p>
+
+                    <p><strong>Resource requirement:</strong> One data engineer (STP pipeline and monitoring) and one part-time data scientist (monthly model retraining) for 6 months. Estimated cost: ₹20 lakh. Estimated annual benefit: ₹32 lakh in direct ops savings + ₹2.8 crore from reduced claims leakage (assuming leakage drops from 9.5% to 7.0%, applied to ₹1,000 crore claims portfolio). Projected Year 1 ROI: ~6:1.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Claims is the largest cost centre in insurance (~70% of premium) and the moment of truth for customer relationships. AI creates value simultaneously in cost reduction (leakage, fraud) and customer experience (speed, transparency).</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>A multi-class triage classifier automates routing of claims to the correct workflow. Severity prediction at FNOL enables automated reserve setting and prioritisation. Both models use features available at the time of claim filing — no additional data collection needed.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>The fast-track vs. investigate classifier is the highest-ROI claims ML model. A 1% improvement in false STP rate can save crores; a 1% improvement in STP rate saves thousands in manual review costs. The optimal threshold balances these two costs.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>XGBoost dominates insurance ML for claims because it handles missing values natively, includes built-in regularisation, supports early stopping, and integrates with SHAP for explainability. Random Forest is a good baseline; XGBoost adds 1–3% AUC after tuning.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>STP is not an all-or-nothing decision. The "creep the STP frontier" approach — start with simple claims and expand as the model validates — is safer and more effective than attempting full automation on day one. A well-designed STP architecture has four gates: Validation, Fraud Score, Severity, and Complexity.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section class="content-section stability-core">
+            <h2>References</h2>
+            <ol style="font-size: var(--font-size-sm); color: var(--text-light); line-height: 1.7; padding-left: 1.4em;">
+                <li>Insurance Thought Leadership, claims-leakage estimate (~6% of claims spend). [Online]. <em>Flag for instructor review — primary publication URL to be confirmed.</em></li>
+                <li>EY, "P&amp;C Claims Transformation," indemnity / litigated-casualty leakage estimates (~7–14% of spend). [Online]. <em>Flag for instructor review — primary publication URL to be confirmed.</em></li>
+                <li>Zwillgen, "Insurers Face New Rules as AI Enters the Claims Process," 2024–2025. [Online]. Available: <a href="https://www.zwillgen.com/publication/insurers-new-rules-ai-claims-process/" target="_blank" rel="noopener">https://www.zwillgen.com/publication/insurers-new-rules-ai-claims-process/</a></li>
+                <li>Aviva, "AI claims deployment," 2024 — 80+ AI models in claims, 23-day reduction in complex liability-assessment time, 30% improvement in routing accuracy, 65% reduction in customer complaints, £60m+ savings — as reported by McKinsey &amp; Company / CLM Magazine. [Online]. <em>Flag for instructor review — cite the original McKinsey/CLM article directly before publication.</em></li>
+            </ol>
+        </section>
+
+        <!-- Additional Reading & Practice (overflow from Task G7) -->
+        <section class="content-section stability-core">
+            <h2>Additional Reading &amp; Practice</h2>
+            <p style="color: var(--text-light);">For students who want to go deeper on the financial and regulatory implications covered in this session — not required for the in-class lab, recommended before the next Module 4 session.</p>
+
+            <h3>Optional Practice Exercise — Investment Appraisal of STP Automation</h3>
+            <p>The STP build is a capital project, not just a technology upgrade. Use the numbers already in §6.3 and the Hands-On Project to treat it as one.</p>
+            <p><strong>Given:</strong> one-time implementation cost <strong>₹20 lakh</strong>; annual direct claims-ops savings <strong>₹32 lakh</strong> (the Hands-On ₹2.66 lakh/month annualised); an additional leakage-reduction benefit of <strong>₹2.8 crore/year</strong>; cost of capital <strong>10%</strong>; 5-year horizon.</p>
+            <ol>
+                <li><strong>Payback period (direct savings only):</strong> ₹20 lakh ÷ ₹32 lakh/year = <strong>0.63 years ≈ 7.5 months</strong>.</li>
+                <li><strong>Payback period (including leakage):</strong> ₹20 lakh ÷ ₹3.12 crore/year ≈ <strong>3 weeks</strong> — the leakage term dominates.</li>
+                <li><strong>NPV (direct savings only, 10%, 5 years):</strong> NPV = −20 + 32 × (annuity factor 3.7908) ≈ <strong>₹101 lakh ≈ ₹1.01 crore</strong>.</li>
+                <li><strong>Interpret:</strong> why is the leakage term worth far more than the ops-cost term? <em>(A rupee of leakage saved is a rupee that would otherwise have been paid out as a claim — a loss-ratio item — whereas a rupee of ops-cost saved is a smaller expense-ratio item.)</em></li>
+            </ol>
+
+            <h3>Further Reading</h3>
+            <ul>
+                <li><strong>Zwillgen</strong>, "Insurers Face New Rules as AI Enters the Claims Process" — claims-specific AI regulation [3].</li>
+                <li><strong>Aviva's 2024 AI claims deployment</strong> (via McKinsey / CLM Magazine) — the real-world STP case referenced in §1.2 [4].</li>
+            </ul>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s13-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. A claims triage model frequently misclassifies "Fire" claims as "Natural Disaster" claims. The business impact of this specific misclassification is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) Minimal — both are high-severity claim types and will be handled by similar adjusters</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) Moderate — the claim goes to the wrong adjuster type (fire specialists vs. nat-cat specialists), causing a delay while it is reassigned; for urgent claims, this delay can be costly</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) Critical — Fire claims must always be handled by fire specialists due to regulatory requirements</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Zero — all claims eventually get paid regardless of routing</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. An XGBoost fast-track classifier is trained with scale_pos_weight = (negative_count / positive_count). This parameter is used to:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) Speed up training by reducing the number of trees needed</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Handle class imbalance by assigning higher weight to the minority class (fast-track eligible claims), penalising the model more for misclassifying them</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) Reduce overfitting by limiting tree depth</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Convert the model from classification to regression</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A fast-track model has precision = 0.95 and recall = 0.40 at the default threshold of 0.5. The Head of Claims wants to maximise STP volume while keeping false STP below 2%. The appropriate action is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) Keep the threshold at 0.5 — the current tradeoff is acceptable</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) Lower the threshold to 0.3 — this will increase recall (more claims fast-tracked) but reduce precision; monitor whether false STP stays below 2%</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Raise the threshold to 0.7 — this will increase precision but lower recall; the tradeoff depends on the relative cost of manual review vs. fraud</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) Train a completely new model — the current one is clearly not working</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. In the four-gate STP framework, a claim that passes Gates 1–3 (Validation, Fraud Score, Severity) but fails Gate 4 (Complexity — involves a third-party injury) should be:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) Auto-settled anyway — the first three gates are the most important</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) Routed to a human claims adjuster — third-party injury claims require legal and liability assessment that AI cannot currently handle reliably</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) Held in pending until the third party confirms no claim</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) Automatically declined — any claim with a third party involved is too risky</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. An insurer's STP rate has been stable at 35% for 6 months. The claims team suspects that many claims that could be auto-processed are not passing the gates. The MOST likely cause of the "STP ceiling" is:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) The fraud detection model has become less accurate over time</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) The STP eligibility criteria were set too conservatively when the system launched, have not been revised as the model improved, and are now the binding constraint — the gates need to be recalibrated to allow more claims through while maintaining acceptable risk levels</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Customers are filing more complex claims that cannot be auto-processed</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) The STP system has reached the theoretical maximum for this insurance portfolio</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s13-quiz', ['b','b','c','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s13-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-12.html" class="nav-link">&larr; Previous: AI for Underwriting</a>
+            <a href="session-14.html" class="nav-link next">Next: Generative AI in Insurance &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>

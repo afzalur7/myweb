@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 05: Insurance Data Sources &amp; Cleaning — Insurtech &amp; Digital Risk Solutions</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* Editable answer fields — students can type directly in the page.
+           Input is NOT saved anywhere; it only lives in the browser session
+           so students can try their answer before revealing the solution. */
+        .write-in {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+            box-sizing: border-box;
+        }
+        .write-in:focus {
+            border-color: var(--primary);
+            border-style: solid;
+            background: var(--surface-hover);
+        }
+        .write-in::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .write-in-tall { min-height: 72px; }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="chapter-container">
+        <nav class="chapter-nav-top">
+            <a href="session-04.html" class="nav-link">&larr; Previous: Digital Transformation in Insurance</a>
+            <a href="session-06.html" class="nav-link next">Next: Data Visualization for Insurance &rarr;</a>
+        </nav>
+
+        <header class="chapter-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a4a 100%); color: #fff;">
+            <div class="chapter-badge">Module 2 &middot; Session 05 &middot; 90 min &middot; Python Lab</div>
+            <h1>Session 05: Insurance Data Sources &amp; Cleaning</h1>
+            <div class="chapter-meta">
+                CILO-2 &middot; Analytics Tools &middot; Lab-based, Hands-on (Python) &middot; Jupyter Notebook required
+            </div>
+        </section>
+
+        <section class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Identify the types and sources of data in the insurance industry — customer, policy, claims, external, and unstructured data</li>
+                <li>Navigate the 6-table integrated synthetic insurance dataset and understand its schema, relationships, and business context</li>
+                <li>Load CSV files into Pandas DataFrames and perform initial exploration using .head(), .info(), .describe(), and .shape</li>
+                <li>Apply appropriate strategies for handling missing values — deletion, mean/median imputation, mode imputation, and forward-fill</li>
+                <li>Merge Customer, Policy, and Claims tables into a single analysis-ready DataFrame and generate a comprehensive data quality report</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 1 -->
+        <section class="content-section stability-core">
+            <h2>1. Insurance Data Landscape</h2>
+
+            <p>Insurance is an information business. An insurer's ability to accurately price risk, efficiently process claims, detect fraud, and retain customers depends entirely on the quality and breadth of its data. Understanding the types of data available — and their limitations — is the foundation of insurance analytics.</p>
+
+            <h3>1.1 The Five Categories of Insurance Data</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Category</th><th>Description</th><th>Examples</th><th>Typical Sources</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Customer Data</strong></td>
+                        <td>Demographic and contact information about policyholders</td>
+                        <td>Name, age, gender, location, occupation, income, credit score, KYC status, marital status</td>
+                        <td>Application forms, KYC documents, third-party data providers (credit bureaus), Account Aggregator</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Policy Data</strong></td>
+                        <td>Details about the insurance contracts issued</td>
+                        <td>Policy type, premium amount, sum assured, tenure, start/end dates, product name, distribution channel, add-on covers, status (active/lapsed/cancelled)</td>
+                        <td>Policy administration system (core insurance platform)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Claims Data</strong></td>
+                        <td>Records of all claims filed by policyholders</td>
+                        <td>Claim ID, policy ID, claim date, claim type, claim amount, settlement amount, status, settlement date, days-to-settle, fraud flag, adjuster ID, cause of loss</td>
+                        <td>Claims management system</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. External Data</strong></td>
+                        <td>Data from outside the insurer used to augment internal data for risk assessment</td>
+                        <td>Credit scores, vehicle registration data (VAHAN), weather data, economic indicators, crime statistics, hospital pricing data</td>
+                        <td>Credit bureaus (CIBIL, Experian), government databases, third-party APIs, public datasets</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Unstructured Data</strong></td>
+                        <td>Non-tabular data that requires text analysis, computer vision, or natural language processing to extract value</td>
+                        <td>Claim description text, policy documents (PDF), medical reports, surveyor photos, customer call transcripts, email correspondence</td>
+                        <td>FNOL forms, medical records, surveyor reports, call centre recordings, scanned documents</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>1.2 The Data Challenge in Insurance</h3>
+            <p>Insurance data is notoriously messy for several structural reasons. First, data comes from multiple sources that were never designed to talk to each other — an insurer might have separate systems for policy administration, claims, billing, CRM, and document management, each with its own data formats, identifiers, and quality standards. Second, insurance data is long-tailed — a life insurance policy can span 30+ years, and the data quality from 1995 is unlikely to match the data quality from 2025. Third, claims data suffers from "reporting delay" — a claim may occur in one accounting period but not be reported until a later period (IBNR), and the final settlement may take years (long-tail liability claims).</p>
+
+            <p>These structural challenges are why data cleaning is not an optional preparatory step in insurance analytics — it is often 60–80% of the work. An analyst who cannot clean data effectively cannot produce reliable insurance insights, regardless of how sophisticated their modeling skills are.</p>
+
+            <div class="callout callout-realworld">
+                <div class="callout-icon">&#127758;</div>
+                <div class="callout-content">
+                    <strong>Real World:</strong> A leading Indian health insurer discovered during a data quality audit that 8% of its claims records had mismatched customer IDs between the claims system and the policy system. This meant that when the claims analytics team tried to join claims to policies to calculate loss ratios by product, 8% of claims dropped out of the join — producing subtly wrong loss ratios for every product. The error was invisible to management because the numbers "looked reasonable" — they were just wrong by 8%. Fixing the data quality issue required tracing and reconciling 40,000+ records manually over 3 months. The lesson: data quality problems compound silently.
+                </div>
+            </div>
+
+            <!-- Exercise 1.1 — Classify the Data Source -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128269; Exercise 1.1 — Classify the Data Source</h4>
+                    <p>For each data item below, choose the correct category from the five in Section 1.1: <strong>Customer / Policy / Claims / External / Unstructured</strong>.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Data Item</th><th style="width: 180px;">Category</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Policyholder's age, income, and credit score.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>2</td><td>Policy start/end dates and the premium amount.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>3</td><td>The claim settlement amount and days-to-settle.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>4</td><td>A surveyor's photo of a damaged car.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>5</td><td>The latest IMD rainfall data for a coastal district.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>6</td><td>The customer's occupation and KYC status.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>7</td><td>The claim description text written by the policyholder.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                        <tr><td>8</td><td>The distribution channel and product name.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Customer</option><option>Policy</option><option>Claims</option><option>External</option><option>Unstructured</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Reflection:</strong> Which category is hardest to clean, and why? Write your answer.</p>
+                <textarea class="write-in write-in-tall" placeholder="Your reflection..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Classification</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Customer</strong> — demographics and financial profile of the policyholder.</li>
+                            <li><strong>Policy</strong> — contract details of the insurance cover.</li>
+                            <li><strong>Claims</strong> — records of losses and their settlement.</li>
+                            <li><strong>Unstructured</strong> — photos require computer vision, not tabular cleaning.</li>
+                            <li><strong>External</strong> — weather data comes from outside the insurer (IMD).</li>
+                            <li><strong>Customer</strong> — occupation and KYC are part of the customer profile.</li>
+                            <li><strong>Unstructured</strong> — free text requires NLP to extract structured meaning.</li>
+                            <li><strong>Policy</strong> — channel and product describe how/where the policy was sold.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Reflection note:</strong> Unstructured data (photos, free text, documents) is the hardest to clean because it cannot be fixed with `fillna` or type conversion — it needs NLP/computer vision to extract value, and the extraction itself can introduce errors. This is why insurance analysts spend the most time on it.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section class="content-section stability-stable"
+                 data-review-cycle="biannual"
+                 data-last-reviewed="2026-07-01"
+                 data-review-id="ch5-dataset">
+            <div class="stability-badge stable-badge">
+                &#128203; Stable content — Reviewed: July 2026
+            </div>
+
+            <h2>2. The Integrated Synthetic Dataset</h2>
+
+            <p>Throughout this course, we will use a single integrated synthetic insurance dataset. All 6 tables were designed together with consistent keys, realistic distributions, and embedded patterns for fraud detection, claims analysis, and risk modeling. Every session from Session 05 onward references this dataset — so understanding its structure now will pay dividends for the rest of the course.</p>
+
+            <h3>2.1 The Six Tables</h3>
+
+            <p>The integrated dataset comprises six related tables — three core tables linked by primary/foreign keys, plus three supporting tables used for specific exercises:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Table</th><th>Records</th><th>What It Contains</th><th>Primary Key</th><th>Foreign Key</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Customer</strong></td>
+                        <td>5,000</td>
+                        <td>Demographics, location, occupation, income, credit score, KYC status</td>
+                        <td>customer_id</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Policy</strong></td>
+                        <td>10,000</td>
+                        <td>Policy type, premium, sum assured, tenure, start/end dates, channel, product name</td>
+                        <td>policy_id</td>
+                        <td>customer_id</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Claims</strong></td>
+                        <td>20,000</td>
+                        <td>Claim amount, type, status, settlement date, days-to-settle, fraud flag</td>
+                        <td>claim_id</td>
+                        <td>policy_id, customer_id</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fraud Indicators</strong></td>
+                        <td>5,000</td>
+                        <td>Suspicious patterns, historical flags, audit trail, risk score</td>
+                        <td>indicator_id</td>
+                        <td>claim_id</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cyber Incident</strong></td>
+                        <td>2,000</td>
+                        <td>Breach type, severity, records exposed, loss amount (₹ Cr), ransomware flag, industry</td>
+                        <td>incident_id</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Weather / Climate</strong></td>
+                        <td>3,000</td>
+                        <td>Daily rainfall, max/min temperature, cyclone events, wind speed, flood index by region</td>
+                        <td>(date, region)</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Where do these files come from?</strong> The six CSVs are <strong>generated</strong> by a single Python script — <code>generate_dataset.py</code> (shown in Section 2.2 below) — that creates realistic synthetic data with consistent keys, distributions, and embedded fraud patterns. All files are published in the course's public GitHub repository:
+                    <div style="margin-top: var(--space-sm);">
+                        <a href="https://github.com/afzalur7/insurtech-course-dataset" target="_blank" rel="noopener" style="display: inline-block; padding: 8px 18px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border-radius: var(--radius-md); font-weight: 700; font-size: var(--font-size-sm); text-decoration: none;">&#128279; GitHub Repository — Download All Files</a>
+                    </div>
+                    <p style="margin-top: var(--space-sm); margin-bottom: var(--space-xs);"><strong>To get started:</strong></p>
+                    <ul style="margin-top: 0;">
+                        <li>Download the repository (green "Code" button → "Download ZIP") or clone it: <code>git clone https://github.com/afzalur7/insurtech-course-dataset.git</code></li>
+                        <li>Put the six CSV files in a folder named <code>data/</code> next to your Jupyter notebook</li>
+                        <li>Or download individual files directly: <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/customers.csv" target="_blank" rel="noopener">customers.csv</a> &middot; <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/policies.csv" target="_blank" rel="noopener">policies.csv</a> &middot; <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/claims.csv" target="_blank" rel="noopener">claims.csv</a> &middot; <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/fraud_indicators.csv" target="_blank" rel="noopener">fraud_indicators.csv</a> &middot; <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/cyber_incidents.csv" target="_blank" rel="noopener">cyber_incidents.csv</a> &middot; <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data/weather_data.csv" target="_blank" rel="noopener">weather_data.csv</a></li>
+                        <li>To regenerate the CSVs yourself: <code>python generate_dataset.py</code> (seed = 42, so output is identical)</li>
+                    </ul>
+                    The rest of the course uses the exact same files.
+                </div>
+            </div>
+
+            <h3>2.2 Generating the Six Tables (Python Code)</h3>
+
+            <p>This is the exact script saved as <code>generate_dataset.py</code> in the <a href="https://github.com/afzalur7/insurtech-course-dataset" target="_blank" rel="noopener">course GitHub repository</a>. It creates all six CSVs with reproducible results (<code>np.random.seed(42)</code>) so every student generates the <strong>identical</strong> dataset. <strong>Two ways to get the data:</strong> (1) Download the six ready-made CSVs from the repository (fastest — no code needed), or (2) run this script yourself to generate them from scratch. Both produce exactly the same files.</p>
+
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                <h4 style="margin-top: 0; color: var(--accent); margin-bottom: var(--space-sm);">What the generator does (you don't need to write this — it's on GitHub)</h4>
+                <ul style="margin-bottom: var(--space-sm);">
+                    <li><strong>1. Customer table</strong> — 5,000 customers: demographics, income (lognormal, ~₹1.3L median), credit score (~N(710, 85)), KYC status. 5% income missing by design (the MAR pattern used in the cleaning exercises).</li>
+                    <li><strong>2. Policy table</strong> — 10,000 policies linked to customers by <code>customer_id</code>: type (Motor 40%, Health 30%, Property 12%, Crop 10%, Travel 8%), premium, sum assured, tenure, dates, channel.</li>
+                    <li><strong>3. Claims table</strong> — 20,000 claims linked to policies by <code>policy_id</code>: type, amount (right-skewed), settlement, status, fraud flag (~5%), days-to-settle.</li>
+                    <li><strong>4. Fraud indicators</strong> — 5,000 records linked to claims by <code>claim_id</code>, with a risk score and review status.</li>
+                    <li><strong>5. Cyber incidents</strong> — 2,000 records: industry, breach type, records exposed, loss (₹ Cr), ransomware flag.</li>
+                    <li><strong>6. Weather data</strong> — 3,000 daily records by region: rainfall, temperature, cyclone events (~2%), wind speed, flood index.</li>
+                </ul>
+                <p style="margin-bottom: 0;">
+                    <strong>Run it:</strong> <code>python generate_dataset.py</code> &nbsp;&middot;&nbsp;
+                    <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/generate_dataset.py" target="_blank" rel="noopener">View the full script on GitHub</a> &nbsp;&middot;&nbsp;
+                    <a href="https://github.com/afzalur7/insurtech-course-dataset" target="_blank" rel="noopener">Browse the repository</a>
+                </p>
+            </div>
+<strong>Important:</strong> This generator is the <em>single source of truth</em> for the dataset. Run it <strong>once</strong> before the lab — do not regenerate mid-course or the keys will not match earlier exercises. Because the seed is fixed at 42, every student who runs it produces byte-identical files, so results can be compared across the class.
+                </div>
+            </div>
+
+            <h3>2.3 Entity-Relationship Diagram</h3>
+
+            <pre><code class="language-text">┌─────────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│   Customer      │       │     Policy       │       │     Claims       │
+│                 │       │                  │       │                  │
+│ customer_id (PK)│──────→│ policy_id (PK)   │──────→│ claim_id (PK)    │
+│ age             │       │ customer_id (FK) │       │ policy_id (FK)   │
+│ gender          │       │ policy_type      │       │ customer_id (FK) │
+│ location        │       │ premium          │       │ claim_date       │
+│ occupation      │       │ sum_assured      │       │ claim_type       │
+│ income          │       │ tenure_months    │       │ claim_amount     │
+│ credit_score    │       │ start_date       │       │ settlement_amount│
+│ kyc_status      │       │ end_date         │       │ status           │
+└─────────────────┘       │ channel          │       │ fraud_flag       │
+                          │ product_name     │       │ days_to_settle   │
+                          └──────────────────┘       └──────────────────┘
+                                   │                        │
+                                   │                        │
+                          ┌────────▼────────┐      ┌────────▼────────┐
+                          │ Fraud Indicators│      │  Cyber Incident │
+                          │                 │      │                 │
+                          │ indicator_id    │      │ incident_id     │
+                          │ claim_id (FK)   │      │ industry        │
+                          │ indicator_type  │      │ breach_type     │
+                          │ indicator_value │      │ records_exposed │
+                          │ score           │      │ loss_amount_cr  │
+                          │ review_status   │      │ ransomware_flag │
+                          └─────────────────┘      └─────────────────┘
+
+                                   ┌──────────────────┐
+                                   │  Weather/Climate  │
+                                   │                   │
+                                   │ date              │
+                                   │ region            │
+                                   │ rainfall_mm       │
+                                   │ max_temp          │
+                                   │ cyclone_event     │
+                                   │ wind_speed_kmph   │
+                                   │ flood_index       │
+                                   └───────────────────┘</code></pre>
+
+            <p>The key relationships to note: Customer has a one-to-many relationship with Policy (a customer can hold multiple policies). Policy has a one-to-many relationship with Claims (a single policy can generate multiple claims over its lifetime). Fraud Indicators and the Weather table are standalone tables used for specific exercises in later sessions.</p>
+
+            <!-- Exercise 2.1 — Read the Relationships -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128209; Exercise 2.1 — Read the Relationships</h4>
+                    <p>Using the entity-relationship diagram above, answer the questions below. Write your answers in the boxes.</p>
+                </div>
+                <div class="project-steps">
+                    <ol>
+                        <li>Can one customer hold more than one policy? How do you know from the diagram?<br>
+                            <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                        <li>Can one policy generate more than one claim? How do you know?<br>
+                            <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                        <li>Which column would you use to join Claims to Policy?<br>
+                            <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                        <li>Which table has NO direct relationship to the others? What is it used for?<br>
+                            <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                        <li>If a claim's <code>policy_id</code> does not exist in the Policy table, what does that indicate about data quality?<br>
+                            <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea></li>
+                    </ol>
+                </div>
+                <details class="solution-toggle">
+                    <summary>Check Your Answers</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>Yes.</strong> The Customer→Policy relationship is one-to-many (a customer can hold multiple policies) — shown by the foreign key <code>customer_id (FK)</code> in the Policy table and the "1 → ∞" arrow direction.</li>
+                            <li><strong>Yes.</strong> Policy→Claims is also one-to-many — a single policy can produce multiple claims over its lifetime (e.g., two accidents on the same motor policy).</li>
+                            <li><strong><code>policy_id</code></strong> — it appears as a primary key in Policy and as a foreign key in Claims. Join Claims.policy_id = Policy.policy_id. (You would also join on customer_id when you want customer details.)</li>
+                            <li><strong>The Weather/Climate table</strong> — it has no foreign key linking it to Customer, Policy, or Claims. It is used for climate-risk exercises (correlating weather events with claims) and parametric insurance design, where it is joined by date and region rather than by key.</li>
+                            <li>It is a <strong>data quality problem</strong> — an orphaned claim. The claim references a policy that does not exist, which will cause it to drop out of a merge. This must be investigated (wrong policy_id? policy deleted?) before analysis — never silently ignore orphans.</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section class="content-section stability-core">
+            <h2>3. Setting Up Python for Data Work</h2>
+
+            <p>Before we can clean insurance data, we need to set up our Python environment. This session assumes you are using Jupyter Notebook (or JupyterLab) with the Pandas and NumPy libraries installed.</p>
+
+            <h3>3.1 Required Imports</h3>
+
+            <p>Every data analysis session in this course starts with these imports:</p>
+
+            <pre><code class="language-python"># Core data manipulation libraries
+import pandas as pd
+import numpy as np
+
+# Optional: display all columns and rows in Jupyter
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', 200)
+
+# For reproducibility
+np.random.seed(42)
+
+print("Pandas version:", pd.__version__)
+print("NumPy version:", np.__version__)</code></pre>
+
+            <h3>3.2 Loading the Data</h3>
+
+            <p>The six CSV files should be placed in a `data/` folder relative to your notebook. Load them as follows:</p>
+
+            <pre><code class="language-python"># Specify the data path
+DATA_PATH = 'data/'
+
+# Load each table
+customers   = pd.read_csv(DATA_PATH + 'customers.csv')
+policies    = pd.read_csv(DATA_PATH + 'policies.csv')
+claims      = pd.read_csv(DATA_PATH + 'claims.csv')
+fraud_indicators = pd.read_csv(DATA_PATH + 'fraud_indicators.csv')
+cyber       = pd.read_csv(DATA_PATH + 'cyber_incidents.csv')
+weather     = pd.read_csv(DATA_PATH + 'weather_data.csv')
+
+# Confirm all tables loaded
+print("Tables loaded successfully:")
+print(f"  Customers:       {customers.shape[0]:,} rows")
+print(f"  Policies:        {policies.shape[0]:,} rows")
+print(f"  Claims:          {claims.shape[0]:,} rows")
+print(f"  Fraud Indicators:{fraud_indicators.shape[0]:,} rows")
+print(f"  Cyber Incidents: {cyber.shape[0]:,} rows")
+print(f"  Weather:         {weather.shape[0]:,} rows")</code></pre>
+
+            <h3>3.3 Initial Exploration</h3>
+
+            <p>Before any cleaning, explore each table to understand its structure:</p>
+
+            <pre><code class="language-python"># Examine the customers table
+print("=== CUSTOMERS TABLE ===")
+print(f"Shape: {customers.shape}")
+print(f"\nColumn names and types:\n{customers.dtypes}")
+print(f"\nFirst 5 rows:\n{customers.head()}")
+print(f"\nSummary statistics (numeric):\n{customers.describe()}")
+print(f"\nSummary statistics (categorical):\n{customers.describe(include='object')}")</code></pre>
+
+            <pre><code class="language-python"># Check for missing values in each column
+print("=== MISSING VALUES ===")
+print(customers.isnull().sum())
+print(f"\nPercentage missing:\n{customers.isnull().mean() * 100}")
+
+# Unique values in categorical columns
+print(f"\nUnique values in 'occupation': {customers['occupation'].nunique()}")
+print(f"Unique values in 'location': {customers['location'].nunique()}")
+print(f"Value counts for 'gender':\n{customers['gender'].value_counts()}")</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> If you encounter a FileNotFoundError when loading the CSVs, check that the files are in the correct folder and that your Jupyter Notebook's working directory is set to the project root. Use `import os; print(os.getcwd())` to verify your current directory.
+                </div>
+            </div>
+
+            <!-- Exercise 3.1 — Predict the Output -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128064; Exercise 3.1 — Predict the Output</h4>
+                    <p><strong>Before you run any code</strong>, predict what each Pandas command returns. This "predict → run → check" habit is the fastest way to learn Pandas — it forces your brain to build a mental model of the API.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th style="width: 34%;">Command</th><th style="width: 40%;">What do you expect it to return?</th><th style="width: 26%;">Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>customers.shape</code></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Prediction..."></textarea></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Count of rows &amp; columns</option><option>First few rows</option><option>Data types + non-null counts</option><option>Missing values per column</option><option>Unique values per column</option></select></td></tr>
+                        <tr><td><code>customers.head(3)</code></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Prediction..."></textarea></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Count of rows &amp; columns</option><option>First few rows</option><option>Data types + non-null counts</option><option>Missing values per column</option><option>Unique values per column</option></select></td></tr>
+                        <tr><td><code>customers.info()</code></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Prediction..."></textarea></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Count of rows &amp; columns</option><option>First few rows</option><option>Data types + non-null counts</option><option>Missing values per column</option><option>Unique values per column</option></select></td></tr>
+                        <tr><td><code>customers.isnull().sum()</code></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Prediction..."></textarea></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Count of rows &amp; columns</option><option>First few rows</option><option>Data types + non-null counts</option><option>Missing values per column</option><option>Unique values per column</option></select></td></tr>
+                        <tr><td><code>customers['gender'].value_counts()</code></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Prediction..."></textarea></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Count of rows &amp; columns</option><option>First few rows</option><option>Data types + non-null counts</option><option>Missing values per column</option><option>Unique values per column</option></select></td></tr>
+                    </tbody>
+                </table>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Predictions</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>Command</th><th>Returns</th><th>Purpose</th></tr>
+                            <tr><td><code>customers.shape</code></td><td>A tuple like <code>(5000, 12)</code> — (rows, columns)</td><td><strong>Count of rows &amp; columns</strong></td></tr>
+                            <tr><td><code>customers.head(3)</code></td><td>The first 3 rows of the DataFrame as a table</td><td><strong>First few rows</strong></td></tr>
+                            <tr><td><code>customers.info()</code></td><td>A summary listing each column, its data type, and how many non-null (non-missing) values it has</td><td><strong>Data types + non-null counts</strong></td></tr>
+                            <tr><td><code>customers.isnull().sum()</code></td><td>A Series with one row per column showing the total count of missing (NaN) values</td><td><strong>Missing values per column</strong></td></tr>
+                            <tr><td><code>customers['gender'].value_counts()</code></td><td>A Series showing each unique gender value and how many customers have it</td><td><strong>Unique values per column</strong></td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Key takeaway:</strong> <code>.shape</code>, <code>.head()</code>, and <code>.info()</code> are your "first look" trio — run them on every table before touching anything else. Two minutes of exploration saves two hours of debugging.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section class="content-section stability-core">
+            <h2>4. Handling Missing Values</h2>
+
+            <p>Missing data is the most common data quality problem in insurance datasets. The question is never "will we have missing data?" but "how should we handle it?" The right strategy depends on the type of missingness, the column's role in analysis, and the proportion of missing values.</p>
+
+            <h3>4.1 Types of Missingness</h3>
+            <p>Statisticians distinguish three types of missing data, and the appropriate handling strategy depends on which type you have:</p>
+            <ul>
+                <li><strong>MCAR — Missing Completely at Random:</strong> The missingness has no relationship to any data — it is purely random. A data entry error that randomly skips a field. This is rare in practice. When it occurs, you can safely delete missing rows or impute without introducing bias.</li>
+                <li><strong>MAR — Missing at Random:</strong> The missingness is related to observed data but not to the missing value itself. For example, older policyholders may be less likely to report their income. If age is observed, we can model income missingness using age. This is the most common type in insurance data.</li>
+                <li><strong>MNAR — Missing Not at Random:</strong> The missingness is related to the missing value itself. For example, policyholders with very low credit scores may refuse to share their credit score. If the missingness is caused by the low score itself, techniques like deletion or imputation will introduce bias. This requires more advanced handling (Heckman correction, sensitivity analysis).</li>
+            </ul>
+
+            <h3>4.2 Practical Strategies in Pandas</h3>
+
+            <p><strong>Strategy 1 — Deletion (Drop Missing Rows):</strong> Use only when a small proportion of rows is affected and missingness is MCAR.</p>
+
+            <pre><code class="language-python"># Drop rows where ANY value is missing (use with extreme caution)
+df_clean = customers.dropna()
+
+# Drop rows where a SPECIFIC column is missing (safer)
+df_clean = customers.dropna(subset=['customer_id', 'age'])
+
+# Drop columns with more than 50% missing values
+threshold = len(customers) * 0.5
+customers = customers.dropna(axis=1, thresh=threshold)</code></pre>
+
+            <p><strong>Strategy 2 — Mean/Median Imputation:</strong> Replace missing numeric values with the column mean or median. Median is preferred when the distribution is skewed (as claim amounts and incomes typically are).</p>
+
+            <pre><code class="language-python"># Mean imputation for normally distributed data
+customers['age'].fillna(customers['age'].mean(), inplace=True)
+
+# Median imputation for skewed data (preferred for income, claim amounts)
+customers['income'].fillna(customers['income'].median(), inplace=True)
+
+# Grouped median: impute based on similar customers
+customers['income'] = customers.groupby('occupation')['income']\
+    .transform(lambda x: x.fillna(x.median()))</code></pre>
+
+            <p><strong>Strategy 3 — Mode Imputation:</strong> Replace missing categorical values with the most frequent category. Use for categorical variables where the missingness is small (&lt;5%).</p>
+
+            <pre><code class="language-python"># Mode imputation for categorical columns
+customers['gender'].fillna(customers['gender'].mode()[0], inplace=True)
+customers['kyc_status'].fillna(customers['kyc_status'].mode()[0], inplace=True)</code></pre>
+
+            <p><strong>Strategy 4 — Forward Fill:</strong> Use for time-series data where a missing value likely equals the previous value (e.g., monthly claims where one month is missing).</p>
+
+            <pre><code class="language-python"># Forward fill for time-series data
+monthly_claims['claim_count'].fillna(method='ffill', inplace=True)
+
+# Backward fill as alternative
+monthly_claims['claim_count'].fillna(method='bfill', inplace=True)</code></pre>
+
+            <div class="callout callout-warning">
+                <div class="callout-icon">&#9888;</div>
+                <div class="callout-content">
+                    <strong>Warning:</strong> Never drop rows with missing <code>claim_amount</code> or <code>fraud_flag</code> without deliberate consideration. These are the target variables for many models — dropping them means you are removing the very data you want to predict. In claims analysis, missing <code>claim_amount</code> should be flagged, investigated, and only then either imputed or excluded with clear documentation. Dropping rows with missing target data is one of the most common and most dangerous data cleaning mistakes in insurance analytics.
+                </div>
+            </div>
+
+            <!-- Exercise 4.1 — Choose the Strategy -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#129300; Exercise 4.1 — Choose the Missing-Value Strategy</h4>
+                    <p>For each scenario, choose the type of missingness (<strong>MCAR / MAR / MNAR</strong>) and the best handling strategy (<strong>drop / mean / median / mode / forward-fill / flag &amp; investigate</strong>).</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Scenario</th><th style="width: 130px;">Missingness Type</th><th style="width: 160px;">Best Strategy</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Random data-entry gaps in the <code>age</code> column — no pattern at all.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>MCAR</option><option>MAR</option><option>MNAR</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Drop rows</option><option>Mean imputation</option><option>Median imputation</option><option>Mode imputation</option><option>Forward-fill</option><option>Flag &amp; investigate</option></select></td></tr>
+                        <tr><td>2</td><td>Older policyholders are less likely to report income; missingness depends on age.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>MCAR</option><option>MAR</option><option>MNAR</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Drop rows</option><option>Mean imputation</option><option>Median imputation</option><option>Mode imputation</option><option>Forward-fill</option><option>Flag &amp; investigate</option></select></td></tr>
+                        <tr><td>3</td><td>Policyholders with very low credit scores refuse to share them — missingness is caused by the score itself.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>MCAR</option><option>MAR</option><option>MNAR</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Drop rows</option><option>Mean imputation</option><option>Median imputation</option><option>Mode imputation</option><option>Forward-fill</option><option>Flag &amp; investigate</option></select></td></tr>
+                        <tr><td>4</td><td><code>claim_amount</code> is missing on claims still awaiting settlement.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>MCAR</option><option>MAR</option><option>MNAR</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Drop rows</option><option>Mean imputation</option><option>Median imputation</option><option>Mode imputation</option><option>Forward-fill</option><option>Flag &amp; investigate</option></select></td></tr>
+                        <tr><td>5</td><td>One month of a monthly claims time series is missing.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>MCAR</option><option>MAR</option><option>MNAR</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Drop rows</option><option>Mean imputation</option><option>Median imputation</option><option>Mode imputation</option><option>Forward-fill</option><option>Flag &amp; investigate</option></select></td></tr>
+                        <tr><td>6</td><td><code>gender</code> is missing on only 2% of records.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>MCAR</option><option>MAR</option><option>MNAR</option></select></td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>Drop rows</option><option>Mean imputation</option><option>Median imputation</option><option>Mode imputation</option><option>Forward-fill</option><option>Flag &amp; investigate</option></select></td></tr>
+                    </tbody>
+                </table>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Answers</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>#</th><th>Missingness</th><th>Strategy</th><th>Why</th></tr>
+                            <tr><td>1</td><td><strong>MCAR</strong></td><td><strong>Median imputation</strong> (or drop rows if very few)</td><td>Truly random — imputation introduces no bias. Median is safer than mean for skewed data.</td></tr>
+                            <tr><td>2</td><td><strong>MAR</strong></td><td><strong>Median imputation grouped by age band</strong></td><td>Missingness is explained by age, so impute using the median of the same age group, not the whole dataset.</td></tr>
+                            <tr><td>3</td><td><strong>MNAR</strong></td><td><strong>Flag &amp; investigate</strong></td><td>The missingness is caused by the value itself — imputing would systematically understate the true risk. Flag these records and investigate separately.</td></tr>
+                            <tr><td>4</td><td><strong>MAR / structural</strong></td><td><strong>Flag &amp; investigate</strong> (do NOT drop)</td><td><code>claim_amount</code> is a target variable — dropping removes the data you want to predict. These claims will settle later; handle them as a separate group.</td></tr>
+                            <tr><td>5</td><td><strong>Structural gap</strong></td><td><strong>Forward-fill</strong></td><td>Time-series gap — the missing month most likely resembles the previous month. Use <code>ffill</code>.</td></tr>
+                            <tr><td>6</td><td><strong>MCAR</strong></td><td><strong>Mode imputation</strong></td><td>Only 2% missing on a categorical — fill with the most common value.</td></tr>
+                        </table>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section class="content-section stability-core">
+            <h2>5. Data Type Conversion &amp; Standardization</h2>
+
+            <p>Insurance data regularly arrives with incorrect data types. Dates arrive as strings, numeric columns contain stray text characters, and categorical variables have inconsistent capitalization or naming conventions. Fixing these issues is essential before any analysis.</p>
+
+            <h3>5.1 Date Conversion</h3>
+
+            <p>Dates are the most commonly mis-typed column in insurance data. Always convert them explicitly:</p>
+
+            <pre><code class="language-python"># Convert date columns from string to datetime
+policies['start_date'] = pd.to_datetime(policies['start_date'])
+policies['end_date']   = pd.to_datetime(policies['end_date'])
+claims['claim_date']   = pd.to_datetime(claims['claim_date'])
+# NOTE: The dataset stores settlement delay as the numeric column 'days_to_settle',
+# not as a 'settlement_date' column — so there is no settlement date to convert.
+
+# Verify the conversion
+print(policies[['start_date', 'end_date']].dtypes)
+print(f"Date range: {policies['start_date'].min()} to {policies['start_date'].max()}")
+
+# Create derived date features
+claims['claim_year']    = claims['claim_date'].dt.year
+claims['claim_month']   = claims['claim_date'].dt.month
+claims['claim_quarter'] = claims['claim_date'].dt.quarter
+claims['day_of_week']   = claims['claim_date'].dt.dayofweek  # 0=Monday, 6=Sunday</code></pre>
+
+            <h3>5.2 Numeric Cleaning</h3>
+
+            <p>Numeric columns often contain non-numeric characters — currency symbols, commas, spaces, or the word "NA":</p>
+
+            <pre><code class="language-python"># Check if premium column is actually numeric
+print(f"Premium dtype: {policies['premium'].dtype}")
+print(f"Unique non-numeric values:\n{policies[pd.to_numeric(policies['premium'], errors='coerce').isna()]['premium'].unique()}")
+
+# Clean: remove currency symbols, commas, and convert to float
+# NOTE: Only needed if the column was imported as TEXT (object dtype).
+# In our generated dataset premium is already float, so we guard the
+# .str accessor with a dtype check to avoid an AttributeError.
+if policies['premium'].dtype == 'object':
+    policies['premium'] = policies['premium']\
+        .str.replace('₹', '')\
+        .str.replace(',', '')\
+        .str.strip()\
+        .astype(float)
+
+# For claim amounts — check for outliers first using .describe()
+print(claims['claim_amount'].describe())
+
+# Cap extreme outliers at the 99th percentile (optional, based on business context)
+cap = claims['claim_amount'].quantile(0.99)
+claims['claim_amount_capped'] = claims['claim_amount'].clip(upper=cap)</code></pre>
+
+            <h3>5.3 Categorical Standardization</h3>
+
+            <p>Inconsistent categorical values are a persistent problem — "Motor", "motor", "MOTOR", and "Motor Insurance" should all map to the same category:</p>
+
+            <pre><code class="language-python"># Check unique values before cleaning
+print("Before cleaning:", policies['policy_type'].unique())
+
+# Standardize to title case
+policies['policy_type'] = policies['policy_type'].str.strip().str.title()
+
+# Map variations to standard categories
+type_mapping = {
+    'Motor Own Damage': 'Motor',
+    'Motor Od': 'Motor',
+    'Motor': 'Motor',
+    'Health': 'Health',
+    'Health Insurance': 'Health',
+    'Property': 'Property',
+    'Property Insurance': 'Property',
+    'Fire': 'Property',
+    'Crop': 'Crop',
+    'Crop Insurance': 'Crop',
+    'Travel': 'Travel'
+}
+policies['policy_type'] = policies['policy_type'].map(type_mapping)
+
+print("After cleaning:", policies['policy_type'].unique())
+print(f"Value counts:\n{policies['policy_type'].value_counts()}")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> Create a reusable "data cleaning dictionary" — a Python dictionary that maps raw values to standard values — and save it as a JSON file. When new data arrives, apply the same mapping. This ensures consistency over time and across analysts. A good data cleaning dictionary is reusable project documentation, not just a script that runs once.
+                </div>
+            </div>
+
+            <!-- Exercise 5.1 — Spot the Messy Data -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128269; Exercise 5.1 — Spot the Messy Data</h4>
+                    <p>Each column below contains messy data. State (a) what is wrong, and (b) the exact Pandas step to fix it. Then answer the "predict" question at the end.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Column with sample values</th><th style="width: 30%;">What is wrong?</th><th style="width: 30%;">Fix (Pandas)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td><code>premium</code> = "₹12,500", "₹8,750", "10,000"</td>
+                            <td><textarea class="write-in" rows="2" placeholder="Problem..."></textarea></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Fix..."></textarea></td></tr>
+                        <tr><td>2</td><td><code>claim_date</code> = "2026-07-15" stored as an object (string)</td>
+                            <td><textarea class="write-in" rows="2" placeholder="Problem..."></textarea></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Fix..."></textarea></td></tr>
+                        <tr><td>3</td><td><code>policy_type</code> = "Motor", "motor", "MOTOR Insurance"</td>
+                            <td><textarea class="write-in" rows="2" placeholder="Problem..."></textarea></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Fix..."></textarea></td></tr>
+                        <tr><td>4</td><td><code>claim_amount</code> = 9999999 (one value, clearly an entry error, not a real claim)</td>
+                            <td><textarea class="write-in" rows="2" placeholder="Problem..."></textarea></td>
+                            <td><textarea class="write-in" rows="2" placeholder="Fix..."></textarea></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Predict:</strong> What does <code>policies['premium'].str.replace('₹','').str.replace(',','').astype(float)</code> produce for the value "₹12,500"?</p>
+                <textarea class="write-in write-in-tall" placeholder="Predicted output..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Answers</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>#</th><th>Problem</th><th>Fix</th></tr>
+                            <tr><td>1</td><td>Premium is stored as <strong>text</strong> with a currency symbol (₹), commas, and inconsistent formatting — so it cannot be used in calculations.</td><td><code>if policies['premium'].dtype == 'object': policies['premium'] = policies['premium'].str.replace('₹','').str.replace(',','').str.strip().astype(float)</code> — the dtype guard prevents an AttributeError if premium is already numeric.</td></tr>
+                            <tr><td>2</td><td>Dates stored as <strong>strings</strong> — you cannot sort by date or compute time differences.</td><td><code>policies['claim_date'] = pd.to_datetime(policies['claim_date'])</code></td></tr>
+                            <tr><td>3</td><td>Categorical values are <strong>inconsistent</strong> in case and wording — "Motor", "motor", "MOTOR Insurance" would be treated as three different categories.</td><td>Standardise: <code>policies['policy_type'] = policies['policy_type'].str.strip().str.title()</code> then map variations to a single standard (e.g., "MOTOR Insurance" → "Motor").</td></tr>
+                            <tr><td>4</td><td>A <strong>data-entry outlier</strong> (9999999) that is not a real claim — capping it with <code>.clip()</code> would keep a wrong value; it must be investigated first.</td><td>Flag it, verify against the source, and only then correct or exclude it — <em>never auto-cap a suspected data error</em>.</td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Predict answer:</strong> <code>policies['premium'].str.replace('₹','').str.replace(',','').astype(float)</code> turns "₹12,500" into the float <strong>12500.0</strong> — the ₹ and the comma are stripped, then the string "12500" is converted to a number. (Remember: this only runs if premium is actually text — in our generated dataset it is already float, so the dtype guard skips it.)</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section class="content-section stability-core">
+            <h2>6. Duplicate Detection &amp; Removal</h2>
+
+            <p>Duplicates in insurance data can arise from system errors (the same claim entered twice), data integration (overlapping tables from merged systems), or data entry mistakes. Removing them requires careful judgment — what looks like a duplicate may actually be legitimate distinct records.</p>
+
+            <h3>6.1 Identifying Duplicates</h3>
+
+            <pre><code class="language-python"># Check for exact duplicates across all columns
+exact_dups = claims.duplicated().sum()
+print(f"Exact duplicate rows: {exact_dups}")
+
+# Check for duplicates based on key columns (more common in insurance)
+# A claim_id should be unique — any duplicate is a data error
+dup_claim_ids = claims['claim_id'].duplicated().sum()
+print(f"Duplicate claim IDs: {dup_claim_ids}")
+
+# Show the actual duplicates (if any)
+if dup_claim_ids > 0:
+    dupe_mask = claims['claim_id'].duplicated(keep=False)
+    print(claims[dupe_mask].sort_values('claim_id').head(10))</code></pre>
+
+            <h3>6.2 Smart Deduplication</h3>
+
+            <p>Not all duplicates are identical — a customer may have two policies with the same policy type (legitimate — they bought a second vehicle) or the same claim entered twice (a duplicate that must be removed). The deduplication logic must reflect the business context.</p>
+
+            <pre><code class="language-python"># Remove exact duplicates (rare)
+claims_deduped = claims.drop_duplicates()
+print(f"Rows after exact dedup: {len(claims_deduped)}")
+
+# For claim_id duplicates: keep the first occurrence, drop the rest
+claims_deduped = claims.drop_duplicates(subset=['claim_id'], keep='first')
+
+# For policy_id duplicates: check if same customer has multiple policies of same type
+# These may be legitimate (two motor policies for two different cars)
+# Flag them for review rather than automatically removing
+policy_dup_check = policies.duplicated(subset=['customer_id', 'policy_type', 'start_date'], keep=False)
+policy_suspicious = policies[policy_dup_check]
+print(f"Policies with identical customer+type+start_date (possible duplicates): {len(policy_suspicious)}")
+
+# For these suspicious cases, keep the one with the higher 'premium' (more complete data?)
+policies = policies.sort_values('premium', ascending=False)\
+                   .drop_duplicates(subset=['customer_id', 'policy_type', 'start_date'], keep='first')</code></pre>
+
+            <div class="callout callout-note">
+                <div class="callout-icon">&#128221;</div>
+                <div class="callout-content">
+                    <strong>Note:</strong> In insurance, a "duplicate" policy where the same customer has the same policy type and same start date may indicate a data entry error — or it may mean the customer bought a second vehicle on the same day. Only domain knowledge (or a phone call to the customer) can definitively resolve this. When in doubt, flag rather than delete. Lost data cannot be recovered.
+                </div>
+            </div>
+
+            <!-- Exercise 6.1 — Duplicate or Legitimate? -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#129518; Exercise 6.1 — Duplicate or Legitimate?</h4>
+                    <p>For each scenario, decide whether the record is a <strong>True duplicate (remove)</strong> or a <strong>Legitimate distinct record (keep)</strong> — and state the reason in one line.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Scenario</th><th style="width: 160px;">Verdict</th><th style="width: 180px;">Reason</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>The same <code>claim_id</code> appears twice with identical data.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>True duplicate — remove</option><option>Legitimate — keep</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Reason..."></td></tr>
+                        <tr><td>2</td><td>A customer has two motor policies with the same <code>policy_type</code> but different <code>start_date</code>.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>True duplicate — remove</option><option>Legitimate — keep</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Reason..."></td></tr>
+                        <tr><td>3</td><td>The same <code>policy_id</code> appears twice with slightly different premiums.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>True duplicate — remove</option><option>Legitimate — keep</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Reason..."></td></tr>
+                        <tr><td>4</td><td>The same <code>customer_id</code> appears twice with different income values.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>True duplicate — remove</option><option>Legitimate — keep</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Reason..."></td></tr>
+                        <tr><td>5</td><td>Two different customers share the same <code>location</code> and <code>occupation</code> but different IDs.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>True duplicate — remove</option><option>Legitimate — keep</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="Reason..."></td></tr>
+                    </tbody>
+                </table>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Answers</summary>
+                    <div class="solution-content">
+                        <ol>
+                            <li><strong>True duplicate — remove.</strong> A <code>claim_id</code> should be unique. Identical data = system error (entered twice). Remove duplicates on <code>claim_id</code>.</li>
+                            <li><strong>Legitimate — keep.</strong> Same customer + same policy type but different start date = they bought a second car on a later date. These are two real policies.</li>
+                            <li><strong>True duplicate — remove.</strong> A <code>policy_id</code> should be unique; two rows with the same ID and different premiums = one is wrong. Keep the first (or reconcile with the source).</li>
+                            <li><strong>Data-quality issue — reconcile, don't blindly delete.</strong> Same person with conflicting income. Investigate which value is correct (newer? verified?) and update, rather than dropping a row that may be the only record.</li>
+                            <li><strong>Legitimate — keep.</strong> Same location and occupation is a coincidence. Different IDs = different people. Removing them would be wrong.</li>
+                        </ol>
+                        <p style="margin-top: var(--space-md);"><strong>Key rule:</strong> The decision depends on the <em>business key</em> — which columns should uniquely identify a record. If the business key is duplicated, it is a true duplicate. If the business key is different, the record is legitimate — even if other columns look similar.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section class="content-section stability-core">
+            <h2>7. Merging Insurance Tables</h2>
+
+            <p>The cleaned tables must be joined to create the analysis-ready dataset. In insurance analytics, most analysis requires data from multiple tables — calculating loss ratios by customer segment (needs Customer + Policy + Claims) or building an underwriting model (needs features from all three).</p>
+
+            <h3>7.1 The Merge Strategy</h3>
+
+            <p>We join the tables using Pandas' `merge()` function, which works like SQL JOINs. The standard workflow is:</p>
+
+            <pre><code class="language-python"># Step 1: Merge Customer → Policy (left join: keep all policies, add customer info)
+policy_customer = policies.merge(
+    customers,
+    on='customer_id',
+    how='left'  # Keep all policies even if customer data is missing
+)
+
+# Step 2: Merge Policy+Customer → Claims
+full_data = claims.merge(
+    policy_customer,
+    on=['policy_id', 'customer_id'],
+    how='left'  # Keep all claims
+)
+
+# Verify the merged result
+print(f"Merged dataset shape: {full_data.shape}")
+print(f"Columns: {full_data.columns.tolist()}")
+print(f"Missing values in merged dataset:\n{full_data.isnull().sum()}")
+
+# Optional: merge fraud indicators
+full_data = full_data.merge(
+    fraud_indicators,
+    on='claim_id',
+    how='left'
+)
+
+print(f"Final dataset shape: {full_data.shape}")</code></pre>
+
+            <h3>7.2 Verifying the Merge</h3>
+
+            <p>Always verify that the merge worked as expected:</p>
+
+            <pre><code class="language-python"># Check: did every claim get matched to a policy?
+claims_unmatched = full_data[full_data['premium'].isna()].shape[0]
+print(f"Claims without matching policy: {claims_unmatched}")
+
+# Check: did every policy get matched to a customer?
+policies_unmatched = policy_customer[policy_customer['age'].isna()]['policy_id'].nunique()
+print(f"Policies without matching customer: {policies_unmatched}")
+
+# Row count sanity check
+print(f"Original claims: {len(claims)}")
+print(f"Merged dataset:  {len(full_data)}")
+if len(full_data) > len(claims):
+    print("CAUTION: Merge created extra rows — check for duplicate keys!")
+elif len(full_data) < len(claims):
+    print("CAUTION: Merge dropped rows — check that all claim IDs exist in policies table!")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> Always use a <code>left</code> join when merging claims → policies (keep all claims, add policy data where available). Claims without matching policies are data quality issues that must be investigated, not silently dropped. An <code>inner</code> join would hide them, robbing you of the opportunity to fix the underlying data quality problem. Merge verification is not optional — always check row counts before and after.
+                </div>
+            </div>
+
+            <!-- Exercise 7.1 — Choose the Right Join and Predict the Row Count -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128279; Exercise 7.1 — Choose the Right Join and Predict the Row Count</h4>
+                    <p>The Claims table has <strong>20,000 rows</strong>. For each scenario, choose the join type and predict the resulting row count.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Goal</th><th style="width: 140px;">Join Type</th><th style="width: 160px;">Predicted Row Count</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Keep ALL claims, add policy details where available.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>left</option><option>inner</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="e.g. exactly 20,000"></td></tr>
+                        <tr><td>2</td><td>Keep only claims that have a matching policy.</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>left</option><option>inner</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="e.g. ≤ 20,000"></td></tr>
+                        <tr><td>3</td><td>A claim joins to a policy that appears TWICE in the Policy table (duplicate <code>policy_id</code>).</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>left</option><option>inner</option></select></td>
+                            <td><input class="write-in" type="text" placeholder="what happens?"></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Verification question:</strong> After a merge you get <strong>20,004 rows</strong> from 20,000 claims. What is the most likely cause, and what check confirms it?</p>
+                <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Answers</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>#</th><th>Join</th><th>Row count</th><th>Why</th></tr>
+                            <tr><td>1</td><td><strong>left</strong></td><td><strong>Exactly 20,000</strong></td><td>Left join keeps every row from the left table (claims); unmatched claims simply get NaN for policy columns. Row count never changes for the left table.</td></tr>
+                            <tr><td>2</td><td><strong>inner</strong></td><td><strong>≤ 20,000</strong></td><td>Inner join keeps only matches — any claim without a policy drops out.</td></tr>
+                            <tr><td>3</td><td><strong>left (or inner)</strong></td><td><strong>&gt; 20,000 (row explosion)</strong></td><td>A duplicate key in the Policy table causes a one-to-many match — each claim duplicates against both copies of the policy. This is why row counts must be verified: a "clean" left join should never add rows.</td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Verification answer:</strong> 20,004 &gt; 20,000 means a <strong>row explosion</strong> — one or more keys in the Policy (right) table are duplicated, so some claims matched to multiple policies. The check: count duplicate keys in the right table before merging — e.g., <code>policies['policy_id'].duplicated().sum()</code> — and dedupe first. Never merge before checking for duplicate keys in the join column.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 8 -->
+        <section class="content-section stability-core">
+            <h2>8. Data Quality Report</h2>
+
+            <p>The final step is to generate a data quality report — a structured summary of data quality issues in the cleaned dataset. This becomes documentation for anyone using the data for analysis or modeling.</p>
+
+            <h3>8.1 Building the Report</h3>
+
+            <pre><code class="language-python">def generate_data_quality_report(df, dataset_name):
+    """
+    Generate a comprehensive data quality report for a DataFrame.
+
+    Parameters:
+    -----------
+    df : pd.DataFrame — The dataset to report on
+    dataset_name : str — Name of the dataset for the report header
+
+    Returns:
+    --------
+    pd.DataFrame — A quality report with one row per column
+    """
+    report = pd.DataFrame({
+        'Column': df.columns,
+        'Data Type': df.dtypes.values,
+        'Non-Null Count': df.notna().sum().values,
+        'Null Count': df.isna().sum().values,
+        'Null %': (df.isna().mean() * 100).values,
+        'Unique Values': [df[col].nunique() for col in df.columns],
+        'Has Duplicates': [df[col].duplicated().any() for col in df.columns],
+    })
+
+    # Detect numeric columns for outlier check
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    report['Has Outliers (IQR)'] = '—'
+
+    for col in df.columns:
+        if col in numeric_cols:
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+            IQR = Q3 - Q1
+            outlier_count = ((df[col] < (Q1 - 1.5 * IQR)) | (df[col] > (Q3 + 1.5 * IQR))).sum()
+            report.loc[report['Column'] == col, 'Has Outliers (IQR)'] = \
+                'Yes (' + str(outlier_count) + ')' if outlier_count > 0 else 'No'
+
+    # Sort by null percentage descending
+    report = report.sort_values('Null %', ascending=False).reset_index(drop=True)
+
+    print(f"\n{'='*60}")
+    print(f"DATA QUALITY REPORT: {dataset_name}")
+    print(f"{'='*60}")
+    print(f"Shape: {df.shape[0]:,} rows × {df.shape[1]:,} columns")
+    print(f"Memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.1f} MB")
+    print(f"Columns with nulls: {(df.isna().sum() > 0).sum()} of {df.shape[1]}")
+    print(f"Duplicate rows: {df.duplicated().sum()}")
+    print(f"{'='*60}\n")
+
+    return report
+
+
+# Generate reports for each table
+for name, df in [
+    ('Customers', customers),
+    ('Policies', policies),
+    ('Claims', claims),
+    ('Merged Dataset', full_data)
+]:
+    report = generate_data_quality_report(df, name)
+    try:
+        display(report)   # Jupyter displays a formatted table
+    except NameError:
+        print(report)     # Fallback for running as a plain .py script
+    print("\n")</code></pre>
+
+            <h3>8.2 Saving the Cleaned Data</h3>
+
+            <p>Once the data is cleaned and merged, save it for use in subsequent sessions:</p>
+
+            <pre><code class="language-python"># Export the cleaned, merged dataset
+full_data.to_csv('data/insurance_cleaned.csv', index=False)
+print(f"Cleaned dataset saved: data/insurance_cleaned.csv ({len(full_data):,} rows)")
+
+# Also save individual cleaned tables
+customers.to_csv('data/customers_cleaned.csv', index=False)
+policies.to_csv('data/policies_cleaned.csv', index=False)
+claims.to_csv('data/claims_cleaned.csv', index=False)
+
+# Save the quality report for reference
+quality_report = generate_data_quality_report(full_data, 'Merged Dataset')
+quality_report.to_csv('data/data_quality_report.csv', index=False)
+print("Data quality report saved: data/data_quality_report.csv")</code></pre>
+
+            <div class="callout callout-tip">
+                <div class="callout-icon">&#128161;</div>
+                <div class="callout-content">
+                    <strong>Pro Tip:</strong> A data quality report should be generated and reviewed <em>before</em> any analysis begins. A rule of thumb used by experienced insurance data scientists: for every dataset, run the quality report, fix any issues where null % exceeds 10% or where outliers are suspicious, document what was done, and only then proceed to analysis. This single discipline prevents more errors than any amount of careful modeling later.
+                </div>
+            </div>
+
+            <!-- Exercise 8.1 — Interpret the Report -->
+            <div class="hands-on-project">
+                <div class="project-brief">
+                    <h4 style="margin-top: 0; color: var(--accent);">&#128202; Exercise 8.1 — Interpret and Prioritise the Report</h4>
+                    <p>This is a sample data quality report for a merged claims dataset. Your job: identify the issues, rank them by priority, and decide what to fix first.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Column</th><th>Null %</th><th>Duplicates</th><th>Outliers</th><th style="width: 170px;">Your Priority</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>claim_amount</code></td><td>12%</td><td>0</td><td>Yes (entry errors)</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>CRITICAL — fix first</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></td></tr>
+                        <tr><td><code>income</code></td><td>22%</td><td>0</td><td>No</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>CRITICAL — fix first</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></td></tr>
+                        <tr><td><code>policy_id</code></td><td>0%</td><td>2%</td><td>No</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>CRITICAL — fix first</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></td></tr>
+                        <tr><td><code>policy_type</code></td><td>0%</td><td>0</td><td>8% inconsistent categories</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>CRITICAL — fix first</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></td></tr>
+                        <tr><td><code>credit_score</code></td><td>0.5%</td><td>0</td><td>No</td>
+                            <td><select class="write-in"><option value="">— choose —</option><option>CRITICAL — fix first</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: var(--space-md);"><strong>Question:</strong> Which issue do you fix FIRST, and why? Write your answer in one or two lines.</p>
+                <textarea class="write-in write-in-tall" placeholder="Your answer..."></textarea>
+                <details class="solution-toggle" style="margin-top: var(--space-md);">
+                    <summary>Check Your Priorities</summary>
+                    <div class="solution-content">
+                        <table>
+                            <tr><th>Column</th><th>Priority</th><th>Why</th></tr>
+                            <tr><td><code>claim_amount</code></td><td><strong>CRITICAL — fix first</strong></td><td>12% null on a <em>target variable</em>. Never drop — investigate why it's missing (unsettled claims?) and handle as a separate group. This is the biggest risk to any downstream model.</td></tr>
+                            <tr><td><code>policy_id</code></td><td><strong>HIGH</strong></td><td>2% duplicates. Fix <strong>before merging</strong> — duplicate keys cause row explosion and wrong aggregates. Dedupe now to save hours later.</td></tr>
+                            <tr><td><code>income</code></td><td><strong>HIGH</strong></td><td>22% null is above the 10% rule-of-thumb. Impute with grouped median (by occupation/age) — but it is not a target variable, so it is slightly lower priority than claim_amount.</td></tr>
+                            <tr><td><code>policy_type</code></td><td><strong>MEDIUM</strong></td><td>8% inconsistent categories distort any grouping. Standardise with the cleaning dictionary — quick and safe.</td></tr>
+                            <tr><td><code>credit_score</code></td><td><strong>LOW</strong></td><td>0.5% null — impute with median/mode and move on.</td></tr>
+                        </table>
+                        <p style="margin-top: var(--space-md);"><strong>Rule of thumb:</strong> Fix (1) target-variable issues first, (2) duplicate keys before merging, (3) anything above 10% null, then (4) cosmetic standardisation. The order matters — a wrong fix early can corrupt everything downstream.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Hands-On Project -->
+        <section class="hands-on-project">
+            <h2>Hands-On Project: Clean and Prepare the Insurance Dataset</h2>
+            <div class="project-brief">
+                <p>You have received 3 CSV files from an insurer's data warehouse — Customer, Policy, and Claims tables. Your task is to load, explore, clean, merge, and generate a quality report. This is the most practically useful session in the course — insurance data scientists spend 60–80% of their time on exactly this work.</p>
+            </div>
+            <div class="project-steps">
+                <h3>Steps</h3>
+                <ol>
+                    <li><strong>Load the three CSV files</strong> (Customer, Policy, Claims) into Pandas DataFrames. Use `pd.read_csv()`. Print the shape and first 3 rows of each table.</li>
+                    <li><strong>Explore and identify issues:</strong> For each table, run:
+                        <ul>
+                            <li>`.info()` — check data types and non-null counts</li>
+                            <li>`.describe()` — check numeric distributions</li>
+                            <li>`.isnull().sum()` — identify missing values</li>
+                            <li>`.duplicated().sum()` — identify duplicates</li>
+                            <li>`.value_counts()` on each categorical column — check for inconsistent entries</li>
+                        </ul>
+                    </li>
+                    <li><strong>Clean the Customers table:</strong>
+                        <ul>
+                            <li>Impute missing income values using the median grouped by occupation</li>
+                            <li>Impute missing gender using mode</li>
+                            <li>Drop any rows where customer_id is missing (unfixable)</li>
+                            <li>Standardize location names to title case</li>
+                        </ul>
+                    </li>
+                    <li><strong>Clean the Policies table:</strong>
+                        <ul>
+                            <li>Convert start_date and end_date to datetime</li>
+                            <li>Remove any ₹ or , characters from premium and convert to float</li>
+                            <li>Remove duplicate policy IDs keeping the first occurrence</li>
+                        </ul>
+                    </li>
+                    <li><strong>Clean the Claims table:</strong>
+                        <ul>
+                            <li>Convert date columns to datetime</li>
+                            <li>Check claim_amount for outliers (values above the 99th percentile) and cap them</li>
+                            <li>Handle any missing fraud_flag values (fill with 0 = not fraud)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Merge all tables</strong> into a single DataFrame and verify the merge (check row counts).</li>
+                    <li><strong>Generate and print a data quality report</strong> for the final merged dataset.</li>
+                    <li><strong>Save the cleaned merged dataset</strong> as `insurance_cleaned.csv`.</li>
+                </ol>
+            </div>
+            <details class="solution-toggle">
+                <summary>View Solution / Walkthrough</summary>
+                <div class="solution-content">
+                    <h4>Complete Solution Code</h4>
+
+                    <p>This solution brings together all the code from sections 3–8 into a single pipeline. Run each cell in order in your Jupyter Notebook. <a href="https://raw.githubusercontent.com/afzalur7/insurtech-course-dataset/master/data_analysis.py" target="_blank" rel="noopener">The complete runnable script is also on GitHub</a> — download it if you prefer to run it as one file.</p>
+
+                    <pre><code class="language-python"># ============================================
+# STEP 1: Load Data
+# ============================================
+import pandas as pd
+import numpy as np
+
+pd.set_option('display.max_columns', None)
+DATA_PATH = 'data/'
+
+customers = pd.read_csv(DATA_PATH + 'customers.csv')
+policies  = pd.read_csv(DATA_PATH + 'policies.csv')
+claims    = pd.read_csv(DATA_PATH + 'claims.csv')
+
+print("Files loaded:")
+print(f"  Customers: {customers.shape}")
+print(f"  Policies:  {policies.shape}")
+print(f"  Claims:    {claims.shape}")
+
+
+# ============================================
+# STEP 2: Explore & Identify Issues
+# ============================================
+for name, df in [('Customers', customers), ('Policies', policies), ('Claims', claims)]:
+    print(f"\n{'='*40}")
+    print(f"  {name} Table — Info")
+    print(f"{'='*40}")
+    print(df.info())
+    print(f"\nMissing values:\n{df.isnull().sum()}")
+    print(f"\nDuplicate rows: {df.duplicated().sum()}")
+
+
+# ============================================
+# STEP 3: Clean Customers
+# ============================================
+print("\n\n=== CLEANING CUSTOMERS ===")
+
+# Drop rows with missing customer_id
+before = len(customers)
+customers = customers.dropna(subset=['customer_id'])
+print(f"Dropped {before - len(customers)} rows with missing customer_id")
+
+# Impute income: group median by occupation
+customers['income'] = customers.groupby('occupation')['income']\
+    .transform(lambda x: x.fillna(x.median()))
+# If any income still missing (occupations where ALL incomes are NaN), use global median
+customers['income'].fillna(customers['income'].median(), inplace=True)
+
+# Impute gender: mode
+customers['gender'].fillna(customers['gender'].mode()[0], inplace=True)
+
+# Standardize location
+customers['location'] = customers['location'].str.strip().str.title()
+
+print(f"Customers cleaned: {len(customers)} rows, {customers.isnull().sum().sum()} remaining nulls")
+
+
+# ============================================
+# STEP 4: Clean Policies
+# ============================================
+print("\n\n=== CLEANING POLICIES ===")
+
+# Convert dates
+policies['start_date'] = pd.to_datetime(policies['start_date'])
+policies['end_date']   = pd.to_datetime(policies['end_date'])
+
+# Clean premium (only if imported as text — our generated premium is already float)
+if policies['premium'].dtype == 'object':
+    policies['premium'] = policies['premium']\
+        .str.replace('[₹,]', '', regex=True)\
+        .str.strip()\
+        .astype(float)
+
+# Remove duplicate policy IDs
+before = len(policies)
+policies = policies.drop_duplicates(subset=['policy_id'], keep='first')
+print(f"Removed {before - len(policies)} duplicate policy IDs")
+
+print(f"Policies cleaned: {len(policies)} rows, {policies.isnull().sum().sum()} remaining nulls")
+
+
+# ============================================
+# STEP 5: Clean Claims
+# ============================================
+print("\n\n=== CLEANING CLAIMS ===")
+
+# Convert dates (settlement delay is stored as numeric 'days_to_settle',
+# not as a 'settlement_date' column)
+claims['claim_date']       = pd.to_datetime(claims['claim_date'])
+
+# Check claim_amount outliers
+print(f"Claim amount before capping:")
+print(claims['claim_amount'].describe())
+
+cap = claims['claim_amount'].quantile(0.99)
+claims['claim_amount'] = claims['claim_amount'].clip(upper=cap)
+print(f"\nCapped outliers at 99th percentile: {cap:.2f}")
+
+# Handle missing fraud_flag
+claims['fraud_flag'] = claims['fraud_flag'].fillna(0).astype(int)
+
+print(f"Claims cleaned: {len(claims)} rows, {claims.isnull().sum().sum()} remaining nulls")
+
+
+# ============================================
+# STEP 6: Merge Tables
+# ============================================
+print("\n\n=== MERGING TABLES ===")
+
+# Merge customers → policies
+policy_customer = policies.merge(customers, on='customer_id', how='left')
+print(f"Policies + Customers merged: {len(policy_customer)} rows")
+
+# Merge policy_customer → claims
+full_data = claims.merge(policy_customer, on=['policy_id', 'customer_id'], how='left')
+print(f"Full dataset merged: {len(full_data)} rows")
+
+# Verify merge
+claims_no_premium = full_data[full_data['premium'].isna()]
+if len(claims_no_premium) > 0:
+    print(f"WARNING: {len(claims_no_premium)} claims have no matching policy")
+    print(claims_no_premium[['claim_id', 'policy_id']].head())
+
+# Check for row explosion
+if len(full_data) > len(claims):
+    print("WARNING: Merge created extra rows — check for duplicate keys in policies!")
+elif len(full_data) == len(claims):
+    print("Row count verified: merge is clean.")
+
+
+# ============================================
+# STEP 7: Data Quality Report
+# ============================================
+print("\n\n=== DATA QUALITY REPORT ===")
+
+report = pd.DataFrame({
+    'Column': full_data.columns,
+    'Dtype': full_data.dtypes.values,
+    'Nulls': full_data.isnull().sum().values,
+    'Null %': (full_data.isnull().mean() * 100).round(2).values,
+    'Unique': [full_data[c].nunique() for c in full_data.columns]
+})
+print(report.sort_values('Null %', ascending=False).to_string(index=False))
+
+
+# ============================================
+# STEP 8: Save Cleaned Data
+# ============================================
+full_data.to_csv(DATA_PATH + 'insurance_cleaned.csv', index=False)
+print(f"\n\nSaved: data/insurance_cleaned.csv ({len(full_data):,} rows)")</code></pre>
+
+                    <h4>Expected Output Summary</h4>
+                    <p>After running the solution, you should see:</p>
+                    <ul>
+                        <li><strong>Customers:</strong> ~5,000 rows, 0 remaining nulls after imputation</li>
+                        <li><strong>Policies:</strong> ~10,000 rows, dates converted, premium as float, no duplicate policy IDs</li>
+                        <li><strong>Claims:</strong> ~20,000 rows, dates converted, outliers capped at 99th percentile, no missing fraud flags</li>
+                        <li><strong>Merged:</strong> ~20,000 rows (one row per claim, same as original claims table — confirming a clean merge)</li>
+                        <li><strong>Nulls in merged:</strong> Any remaining nulls are likely in columns from the policies table that don't exist for certain claims — investigate if this exceeds 1% of rows</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <!-- 3-2-1 Reflection -->
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-2xl);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+                <div style="font-size: 2rem; flex-shrink: 0; line-height: 1;">&#9997;</div>
+                <div style="flex: 1;">
+                    <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-md);">3-2-1 Reflection — Before You Move On</h2>
+                    <p style="color: var(--text-light); margin-bottom: var(--space-lg);">Data cleaning is 60–80% of insurance analytics. Consolidate what you've learned — write it from memory, don't scroll back.</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--primary-light); margin-bottom: var(--space-md);">3 Things I Learned Today</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="3. ______________________________________"></textarea></div>
+                        </div>
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg);">
+                            <h3 style="font-size: var(--font-size-base); color: var(--accent); margin-bottom: var(--space-md);">2 Pandas Commands I Can Now Use From Memory</h3>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                            <div style="margin-bottom: var(--space-sm);"><textarea class="write-in" rows="2" placeholder="2. ______________________________________"></textarea></div>
+                        </div>
+                    </div>
+                    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-lg); margin-top: var(--space-md);">
+                        <h3 style="font-size: var(--font-size-base); color: var(--warning); margin-bottom: var(--space-md);">1 Question I Still Have About Data Cleaning</h3>
+                        <div><textarea class="write-in" rows="2" placeholder="1. ______________________________________"></textarea></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="key-takeaways">
+            <h2>Key Takeaways</h2>
+            <div class="takeaways-grid">
+                <div class="takeaway-card">
+                    <div class="takeaway-number">1</div>
+                    <p>Insurance data comes from five categories — customer, policy, claims, external, and unstructured — each with different quality characteristics and cleaning requirements. The data is structurally messy because it originates from disconnected legacy systems.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">2</div>
+                    <p>Missing value handling is not a mechanical step — it requires judgment about the type of missingness (MCAR, MAR, MNAR) and the role of the column in downstream analysis. Never drop missing target variables (claim_amount, fraud_flag) without deliberate consideration.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">3</div>
+                    <p>Data cleaning in insurance requires converting dates from strings, stripping currency symbols from numbers, standardizing categorical values, and removing duplicates — but always with business context informing what is a true duplicate vs. a legitimate distinct record.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">4</div>
+                    <p>A left join (keep all claims, add policy data) is the correct merge strategy for insurance analytics. Always verify merge row counts — extra rows mean duplicate keys, fewer rows mean unmatched records were silently dropped.</p>
+                </div>
+                <div class="takeaway-card">
+                    <div class="takeaway-number">5</div>
+                    <p>A data quality report should be generated before any analysis — documenting null percentages, duplicates, outliers, and data types. This single discipline prevents more errors than any amount of careful modeling later.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- End-of-Session Quiz -->
+        <section class="chapter-quiz" data-quiz-id="s05-quiz">
+            <h2>Test Your Understanding</h2>
+            <div class="quiz-container">
+
+                <div class="quiz-question" data-question="1">
+                    <p class="question-text">1. An insurance dataset has missing values in the 'income' column. Analysis shows that older policyholders are less likely to report their income, but the missingness is not related to income itself after controlling for age. This type of missingness is classified as:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> a) MCAR — Missing Completely at Random</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> b) MAR — Missing at Random</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> c) MNAR — Missing Not at Random</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="d"> d) Non-ignorable missingness</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="2">
+                    <p class="question-text">2. After merging the Claims table (20,000 rows) with the Policies table using a left join on policy_id, the merged dataset has 20,004 rows. What is the most likely explanation?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> a) The merge created 4 phantom rows due to a software bug</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> b) Some policy_id values appear multiple times in the Policies table (duplicate policy_id rows), causing a one-to-many match</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> c) 4 claims did not have matching policies and were duplicated to preserve row count</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="d"> d) Pandas automatically added 4 index rows when the merge completed</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="3">
+                    <p class="question-text">3. A claims dataset has 1,500 rows with a missing fraud_flag. What is the recommended approach?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> a) Delete all 1,500 rows — missing fraud data is unusable</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> b) Fill with 0 (assuming no fraud as the safest default for flagging), and clearly document this decision</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> c) Use a machine learning model to predict the missing fraud flags</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="d"> d) Randomly assign 0 or 1 based on the known fraud rate in the rest of the data</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="4">
+                    <p class="question-text">4. Which of the following is a correct Pandas idiom for imputing missing income values using the median income of customers in the same occupation group?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> a) customers['income'].fillna(customers['income'].median(), inplace=True)</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> b) customers['income'] = customers.groupby('occupation')['income'].transform(lambda x: x.fillna(x.median()))</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> c) customers['income'].fillna(method='ffill', inplace=True)</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="d"> d) customers['income'] = customers['occupation'].apply(lambda occ: customers[customers['occupation']==occ]['income'].median())</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+                <div class="quiz-question" data-question="5">
+                    <p class="question-text">5. Why is inspecting .dtypes immediately after loading insurance data considered a critical first step in data cleaning?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> a) Because it tells you the file encoding of the source CSV</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> b) Because numeric columns are often loaded as objects (strings) due to stray currency symbols or commas, and date columns are loaded as strings — detecting this early prevents downstream errors</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> c) Because .dtypes shows you the number of missing values in each column</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="d"> d) Because it calculates the mean and standard deviation of numeric columns</label>
+                    </div>
+                    <div class="quiz-feedback" style="display:none;"></div>
+                </div>
+
+            </div>
+            <button class="quiz-submit-btn" onclick="scoreQuiz('s05-quiz', ['b','b','b','b','b'])">
+                Check Answers
+            </button>
+            <div class="quiz-score" id="s05-quiz-score" style="display:none;"></div>
+        </section>
+
+        <nav class="chapter-nav-bottom">
+            <a href="session-04.html" class="nav-link">&larr; Previous: Digital Transformation in Insurance</a>
+            <a href="session-06.html" class="nav-link next">Next: Data Visualization for Insurance &rarr;</a>
+        </nav>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script>
+        /* Inline data for data-driven tables.
+           Used first so tables render when opened directly from disk (file://),
+           where browsers block fetch() to local files. Mirrors data/course-structure.json. */
+        window.DATA_TABLES = window.DATA_TABLES || {};
+        window.DATA_TABLES["course-structure"] = {
+            "datasets": [
+                {"table": "Customer", "records": 5000, "description": "Demographics, location, occupation, credit score"},
+                {"table": "Policy", "records": 10000, "description": "Policy type, premium, sum assured, tenure, product details"},
+                {"table": "Claims", "records": 20000, "description": "Claim amount, type, status, settlement date, fraud flag"},
+                {"table": "Fraud Indicators", "records": 5000, "description": "Suspicious patterns, historical flags, audit trail"},
+                {"table": "Cyber Incident", "records": 2000, "description": "Breach type, severity, loss amount, industry"},
+                {"table": "Weather / Climate", "records": 3000, "description": "Rainfall, temperature, cyclone data for parametric modeling"}
+            ]
+        };
+    </script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/quiz-engine.js"></script>
+    <script src="../../js/volatile-checker.js"></script>
+</body>
+</html>
